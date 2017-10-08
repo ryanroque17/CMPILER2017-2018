@@ -5,9 +5,9 @@ editor.getSession().setMode('ace/mode/my-mode');
 var antlr4 = require('antlr4/index');
 var JavaLexer = require('../generated-parser/javaLexer');
 var JavaParser = require('../generated-parser/javaParser');
-
+var consoleBox = document.getElementById("console");
 document.getElementById("parse").addEventListener("click", function(){
-	console.log("test");
+	consoleBox.innerHTML = "";
     var input = editor.getValue().toString();
     var chars = new antlr4.InputStream(input);
     var lexer = new JavaLexer.javaLexer(chars);
@@ -42,7 +42,9 @@ document.getElementById("parse").addEventListener("click", function(){
 
     var test = tokens.getTokens(0, tokens.getNumberOfOnChannelTokens());
     console.log(test);
+
+   
     for(var i=0; i<tokens.getNumberOfOnChannelTokens() - 1; i++) {
-    	console.log((inputSplitted.slice(test[i].start, test[i].stop + 1)).join("") + " is of type " + test[i].type + ' = ' + rules[test[i].type]);
+    	consoleBox.innerHTML += (inputSplitted.slice(test[i].start, test[i].stop + 1)).join("") + " is of type " + rules[test[i].type] +"<br>";
     }
 });
