@@ -18,6 +18,7 @@ ace.define(
     var createTokenTypeMap = require('ace/ext/antlr4/token-type-map').createTokenTypeMap;
     var tokenTypeToNameMap = createTokenTypeMap(tokenTypeMapping);
     var CymbolLexer = antlr4_require('./parser/CymbolLexer').CymbolLexer;
+    // var CymbolLexer = antlr4_require('./generated-parser/javaLexer').javaLexer;
     var Antlr4Tokenizer = require('ace/ext/antlr4/tokenizer').Antlr4Tokenizer;
 
     var MyMode = function() {
