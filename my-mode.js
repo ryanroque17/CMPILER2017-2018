@@ -14,10 +14,10 @@ ace.define(
   function(require, exports, module) {
     var oop = require("ace/lib/oop");
     var TextMode = require("ace/mode/text").Mode;
-    var tokenTypeMapping = antlr4_require('./scripts/cymbol-token-type-mapping');
+    var tokenTypeMapping = antlr4_require('./scripts/java-token-type-mapping');
     var createTokenTypeMap = require('ace/ext/antlr4/token-type-map').createTokenTypeMap;
     var tokenTypeToNameMap = createTokenTypeMap(tokenTypeMapping);
-    var CymbolLexer = antlr4_require('./parser/CymbolLexer').CymbolLexer;
+    var javaLexer = antlr4_require('./generated-parser/javaLexer').javaLexer;
     var Antlr4Tokenizer = require('ace/ext/antlr4/tokenizer').Antlr4Tokenizer;
 
     var MyMode = function() {
@@ -30,7 +30,7 @@ ace.define(
 
       this.getTokenizer = function() {
         if (!this.$tokenizer) {
-          this.$tokenizer = new Antlr4Tokenizer(CymbolLexer, tokenTypeToNameMap);
+          this.$tokenizer = new Antlr4Tokenizer(javaLexer, tokenTypeToNameMap);
         }
         return this.$tokenizer;
       };

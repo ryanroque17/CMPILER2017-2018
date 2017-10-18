@@ -5,6 +5,7 @@ editor.getSession().setMode('ace/mode/my-mode');
 var antlr4 = require('antlr4/index');
 var JavaLexer = require('../generated-parser/javaLexer');
 var JavaParser = require('../generated-parser/javaParser');
+var JavaListener = require('../generated-parser/javaListener');
 var consoleBox = document.getElementById("console");
 
 var updateConsole = function(input, tokens, symbolicNames) {
@@ -15,7 +16,7 @@ var updateConsole = function(input, tokens, symbolicNames) {
     }
 };
 
-document.getElementById("parse").addEventListener("click", function(){
+document.getElementById("parse").addEventListener("click", function() {
 	consoleBox.innerHTML = "";
     var input = editor.getValue().toString();
     var chars = new antlr4.InputStream(input);
@@ -27,4 +28,8 @@ document.getElementById("parse").addEventListener("click", function(){
 
     // Interpreter
     updateConsole(input, tokens, parser.symbolicNames);
+
+    // Parser (edit javaListener.js)
+    var extractor = new JavaListener.javaListener();
+    antlr4.tree.ParseTreeWalker.DEFAULT.walk(extractor, tree);
 });

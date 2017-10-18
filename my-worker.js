@@ -25,12 +25,12 @@ ace.define('ace/worker/my-worker',["require","exports","module","ace/lib/oop","a
   window.require = require = ace_require;
 
   // load antlr4 and myLanguage
-  var antlr4, CymbolLexer, CymbolParser;
+  var antlr4, javaLexer, javaParser;
   try {
     window.require = antlr4_require;
     antlr4 = antlr4_require('../antlr4/index');
-    CymbolLexer = antlr4_require('../parser/CymbolLexer').CymbolLexer;
-    CymbolParser = antlr4_require('../parser/CymbolParser').CymbolParser;
+    javaLexer = antlr4_require('../generated-parser/javaLexer').javaLexer;
+    javaParser = antlr4_require('../generated-parser/javaParser').javaParser;
   } finally {
     window.require = ace_require;
   }
@@ -47,7 +47,7 @@ ace.define('ace/worker/my-worker',["require","exports","module","ace/lib/oop","a
 
   AnnotatingErrorListener.prototype.syntaxError = function(recognizer, offendingSymbol, line, column, msg, e) {
     this.annotations.push({
-      row: line - 1,
+      row: line - 2,
       column: column,
       text: msg,
       type: "error"
@@ -56,14 +56,14 @@ ace.define('ace/worker/my-worker',["require","exports","module","ace/lib/oop","a
 
   function validate(input) {
     var stream = new antlr4.InputStream(input);
-    var lexer = new CymbolLexer(stream);
+    var lexer = new javaLexer(stream);
     var tokens = new antlr4.CommonTokenStream(lexer);
-    var parser = new CymbolParser(tokens);
+    var parser = new javaParser(tokens);
     var annotations = [];
     var listener = new AnnotatingErrorListener(annotations);
     parser.removeErrorListeners();
     parser.addErrorListener(listener);
-    parser.file();
+    parser.compilationUnit();
     return annotations;
   }
 

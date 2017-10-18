@@ -1,6 +1,6 @@
 module.exports = {
   literals: {
-    'keyword.control': ['if', 'then', 'else', 'return', 'for'],
+    'keyword.control': ['if', 'then', 'else', 'return'],
     'keyword.operator': ['=', '-', '!', '*', '+', '=='],
     'paren.lparen': ['(', '{', '['],
     'paren.rparen': [')', '}', ']'],

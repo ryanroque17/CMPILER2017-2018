@@ -2,16 +2,18 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Cymbol editor created with ANTLR4 and ACE</title>
+  <title>RoGa Parser</title>
   <link rel="stylesheet" href="/styles/index.css">
   <link rel="stylesheet" href="/styles/bootstrap.min.css">
-
-
   <script src="/scripts/require.js"></script>
+  
+  <!-- ANTLR Editor -->
   <script type="application/javascript">
     var antlr4 = require('antlr4/index');
     var antlr4_require = require;
   </script>
+
+  <!-- ACE Editor -->
   <script src="ace_components/ace-builds/src-noconflict/ace.js"></script>
   <script>
     ace.define('antlr4/index', function (require, exports, module) {
@@ -21,11 +23,9 @@
   <script src="/scripts/ace-config.js"></script>
   <script src="ace_components/antlr4-ace-ext/src/token-type-map.js"></script>
   <script src="ace_components/antlr4-ace-ext/src/tokenizer.js"></script>
- 
 </head>
 <body>
-  <div class="container">
-
+<div class="container">
   <div class="row">
     <div class="col-lg-6">
       <div id="editor" style="left:-110px; height:400px; width:100%">class Test{
@@ -36,16 +36,14 @@
     </div>
     <div class="col-lg-6">
       <div class="pre-scrollable" id="console" style="background-color:black; color:white; height:400px; width:100%; font-size:12px">
-
       </div>
       <div>
         <button id="parse" style="">Parse</button>
       </div>
     </div>
   </div>   
-  
-    <script src="/scripts/index.js"></script>
  </div>
 
+ <script src="/scripts/index.js"></script>
 </body>
 </html>
