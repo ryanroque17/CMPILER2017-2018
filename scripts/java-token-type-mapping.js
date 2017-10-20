@@ -5,12 +5,12 @@ module.exports = {
     'paren.lparen': ['(', '{', '['],
     'paren.rparen': [')', '}', ']'],
     'punctuation.operator': [',', ';', '.'],
-    'storage.type': ['float', 'int', 'void'],
-    'constant.language': ['true', 'false']
+    'storage.type': ['', 'int', 'void'],
+    'constant.language': ['true', 'false'],
   },
   symbols: {
-    'identifier': 'ID',
-    'constant.numeric': 'INT',
-    'comment': 'SL_COMMENT'
+  	'comment': ['COMMENT', 'LINE_COMMENT'],
+    'constant.numeric': ['SHORT', 'INT', 'FLOAT', 'DOUBLE'],
+    'constant.character': ['CHAR']
   }
 };
