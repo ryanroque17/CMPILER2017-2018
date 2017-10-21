@@ -299,7 +299,10 @@ DefaultErrorStrategy.prototype.reportNoViableAlternative = function(recognizer, 
     } else {
         input = "<unknown input>";
     }
-    var msg = "no viable alternative at input " + this.escapeWSAndQuote(input);
+/*    var msg = "Unrecognized token " + this.escapeWSAndQuote(input);
+*/    
+    var msg = "Unrecognized token " + this.escapeWSAndQuote(input) +". Delete this token";
+
     recognizer.notifyErrorListeners(msg, e.offendingToken, e);
 };
 
@@ -358,8 +361,16 @@ DefaultErrorStrategy.prototype.reportUnwantedToken = function(recognizer) {
     var t = recognizer.getCurrentToken();
     var tokenName = this.getTokenErrorDisplay(t);
     var expecting = this.getExpectedTokens(recognizer);
-    var msg = "extraneous input " + tokenName + " expecting " +
-        expecting.toString(recognizer.literalNames, recognizer.symbolicNames);
+    var msg = "";
+    /*if(tokenName == "')'"){
+        msg = "Unwanted token ')'. Delete this token";
+    }
+    else if(tokenName == "'}'"){
+        msg = "Unwanted token '}'. Delete this token";
+    }*/
+    msg = "Unwanted token " + tokenName + ". Delete this token";
+   /* msg = "extraneous input " + tokenName + " expecting " +
+        expecting.toString(recognizer.literalNames, recognizer.symbolicNames);*/
     recognizer.notifyErrorListeners(msg, t, null);
 };
 // This method is called to report a syntax error which requires the
@@ -385,8 +396,9 @@ DefaultErrorStrategy.prototype.reportMissingToken = function(recognizer) {
     this.beginErrorCondition(recognizer);
     var t = recognizer.getCurrentToken();
     var expecting = this.getExpectedTokens(recognizer);
-    var msg = "missing " + expecting.toString(recognizer.literalNames, recognizer.symbolicNames) +
-          " at " + this.getTokenErrorDisplay(t);
+    /*var msg = "missing " + expecting.toString(recognizer.literalNames, recognizer.symbolicNames) +
+          " at " + this.getTokenErrorDisplay(t);*/
+    var msg = "Missing token " + expecting.toString(recognizer.literalNames, recognizer.symbolicNames);
     recognizer.notifyErrorListeners(msg, t, null);
 };
 

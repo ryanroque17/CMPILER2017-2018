@@ -10,7 +10,7 @@ ErrorListenerExtended = function() {
 
 ErrorListenerExtended.prototype.syntaxError = function(recognizer, offendingSymbol, line, column, msg, e) {
     console.error(msg + " at line " + line);
-    consoleBox.innerHTML += msg + " at line " + line;
+    consoleBox.innerHTML += "Error at line " + (parseInt(line)-1) + " : " + msg + " <br>" ;
 };
 
 exports.ErrorListenerExtended = ErrorListenerExtended;
