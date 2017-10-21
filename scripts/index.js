@@ -12,9 +12,9 @@ var consoleBox = document.getElementById("console");
 var updateConsole = function(input, tokens, symbolicNames) {
     var inputSplitted = input.split("");
     var test = tokens.getTokens(0, tokens.getNumberOfOnChannelTokens());
-    for(var i=0; i<tokens.getNumberOfOnChannelTokens() - 1; i++) {
+    /*for(var i=0; i<tokens.getNumberOfOnChannelTokens() - 1; i++) {
         consoleBox.innerHTML += (inputSplitted.slice(test[i].start, test[i].stop + 1)).join("") + " is of type " + symbolicNames[test[i].type] +"<br>";
-    }
+    }*/
 };
 
 document.getElementById("parse").addEventListener("click", function() {

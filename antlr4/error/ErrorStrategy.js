@@ -781,3 +781,4 @@ BailErrorStrategy.prototype.sync = function(recognizer) {
 
 exports.BailErrorStrategy = BailErrorStrategy;
 exports.DefaultErrorStrategy = DefaultErrorStrategy;
+exports.ErrorStrategy = ErrorStrategy;
