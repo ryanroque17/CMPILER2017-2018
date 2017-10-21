@@ -523,6 +523,9 @@ DefaultErrorStrategy.prototype.singleTokenInsertion = function(recognizer) {
 DefaultErrorStrategy.prototype.singleTokenDeletion = function(recognizer) {
     var nextTokenType = recognizer.getTokenStream().LA(2);
     var expecting = this.getExpectedTokens(recognizer);
+    console.log("expecting" + expecting);
+    console.log("nexttokentype" + nextTokenType);
+
     if (expecting.contains(nextTokenType)) {
         this.reportUnwantedToken(recognizer);
         // print("recoverFromMismatchedToken deleting " \
