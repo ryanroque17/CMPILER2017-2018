@@ -7,7 +7,7 @@ var JavaLexer = require('../generated-parser/javaLexer');
 var JavaParser = require('../generated-parser/javaParser');
 var JavaListenerExtended = require('scripts/JavaListenerExtended').JavaListenerExtended;
 var ErrorListenerExtended = require('scripts/ErrorListenerExtended').ErrorListenerExtended;
-var consoleBox = document.getElementById("console");
+var consoleBox = document.getElementById("consoleBox");
 
 var updateConsole = function(input, tokens, symbolicNames) {
     var inputSplitted = input.split("");
