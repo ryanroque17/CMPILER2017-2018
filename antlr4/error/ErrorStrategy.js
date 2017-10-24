@@ -330,7 +330,7 @@ DefaultErrorStrategy.prototype.reportInputMismatch = function(recognizer, e) {
 
     var expectedTokens = e.getExpectedTokens().toString(recognizer.literalNames, recognizer.symbolicNames);
     console.log("expecting inputmismatch: " + expectedTokens);
-    if(expectedTokens.includes("'[', ';', ',', '='")){
+    if(expectedTokens.includes("'[', ';', ',', '='") && (beforeTokenType == 27 || beforeTokenType == 20 || beforeTokenType == 8 || beforeTokenType == 14)){
         var msg = "An expected '=' should be after the identifer";
     }else if(beforeTokenType == 36 && (tokenType == 27 || tokenType == 20 || tokenType == 8 || tokenType == 14)) {
         var msg = "Cannot return a data type. Change to variable or constant.";
