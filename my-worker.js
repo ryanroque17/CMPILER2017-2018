@@ -47,7 +47,7 @@ ace.define('ace/worker/my-worker',["require","exports","module","ace/lib/oop","a
 
   AnnotatingErrorListener.prototype.syntaxError = function(recognizer, offendingSymbol, line, column, msg, e) {
     this.annotations.push({
-      row: line - 2,
+      row: line - 1,
       column: column,
       text: msg,
       type: "error"

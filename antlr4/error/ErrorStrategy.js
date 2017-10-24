@@ -301,6 +301,10 @@ DefaultErrorStrategy.prototype.reportNoViableAlternative = function(recognizer, 
     }
 /*    var msg = "Unrecognized token " + this.escapeWSAndQuote(input);
 */    
+    if(this.escapeWSAndQuote(input) == "'int='" || this.escapeWSAndQuote(input) == "'float='" || this.escapeWSAndQuote(input) == "'double='" || 
+    this.escapeWSAndQuote(input) == "'char='" || this.escapeWSAndQuote(input) == "'string='" )
+        var msg = "The left hand side of an assignment must be a variable. Insert an identifer.";
+    else
     var msg = "Unrecognized token " + this.escapeWSAndQuote(input) +". Delete this token";
 
     recognizer.notifyErrorListeners(msg, e.offendingToken, e);
@@ -362,13 +366,22 @@ DefaultErrorStrategy.prototype.reportUnwantedToken = function(recognizer) {
     var tokenName = this.getTokenErrorDisplay(t);
     var expecting = this.getExpectedTokens(recognizer);
     var msg = "";
-    /*if(tokenName == "')'"){
-        msg = "Unwanted token ')'. Delete this token";
+    var tokenType = recognizer.getTokenStream().LA(-1);
+    var nextTokenType = recognizer.getTokenStream().LA(1);
+    
+    console.log("tokenType" + tokenType);
+    console.log("nexttokentype" + nextTokenType);
+    console.log(recognizer.getExpectedTokens().toString(recognizer.literalNames, recognizer.symbolicNames));
+
+    if(tokenName == "')'"){
+        msg = "Unwanted token ')'. Uneven ')'. Delete this token.";
     }
     else if(tokenName == "'}'"){
-        msg = "Unwanted token '}'. Delete this token";
-    }*/
-    msg = "Unwanted token " + tokenName + ". Delete this token";
+        msg = "Unwanted token '}'. Uneven '}'. Delete this token.";
+    }else if((tokenType == 79 || tokenType == 80) && nextTokenType == 100)
+        msg = "Wrong assignment operator. It should only contain {'=', '+', '-', '/', '%'}."
+    else
+        msg = "Unwanted token " + tokenName + ". Delete this token.";
    /* msg = "extraneous input " + tokenName + " expecting " +
         expecting.toString(recognizer.literalNames, recognizer.symbolicNames);*/
     recognizer.notifyErrorListeners(msg, t, null);
@@ -521,12 +534,14 @@ DefaultErrorStrategy.prototype.singleTokenInsertion = function(recognizer) {
 // {@code null}
 //
 DefaultErrorStrategy.prototype.singleTokenDeletion = function(recognizer) {
-    var nextTokenType = recognizer.getTokenStream().LA(2);
+    var nextTokenType = recognizer.getTokenStream().LA(-1);
     var expecting = this.getExpectedTokens(recognizer);
     console.log("expecting" + expecting);
     console.log("nexttokentype" + nextTokenType);
+    console.log(recognizer.getExpectedTokens().toString(recognizer.literalNames, recognizer.symbolicNames));
 
     if (expecting.contains(nextTokenType)) {
+
         this.reportUnwantedToken(recognizer);
         // print("recoverFromMismatchedToken deleting " \
         // + str(recognizer.getTokenStream().LT(1)) \
@@ -536,6 +551,7 @@ DefaultErrorStrategy.prototype.singleTokenDeletion = function(recognizer) {
         // we want to return the token we're actually matching
         var matchedSymbol = recognizer.getCurrentToken();
         this.reportMatch(recognizer); // we know current token is correct
+
         return matchedSymbol;
     } else {
         return null;
