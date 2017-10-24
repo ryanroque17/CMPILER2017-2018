@@ -304,7 +304,15 @@ DefaultErrorStrategy.prototype.reportNoViableAlternative = function(recognizer, 
     }
 /*    var msg = "Unrecognized token " + this.escapeWSAndQuote(input);
 */    
-    console.log(tokenType);
+
+    var beforeTokenType = recognizer.getTokenStream().LA(-2);
+    var tokenType = recognizer.getTokenStream().LA(-1);
+    var nextTokenType = recognizer.getTokenStream().LA(1);
+
+    console.log("beforeTokenType: " + beforeTokenType + ". Symbol: " + recognizer.literalNames[beforeTokenType]);
+    console.log("tokenType: " + tokenType + ". Symbol: " + recognizer.literalNames[tokenType]);
+    console.log("nexttokentype: " + nextTokenType + ". Symbol: " + recognizer.literalNames[nextTokenType]);
+
     if(this.escapeWSAndQuote(input) == "'int='" || this.escapeWSAndQuote(input) == "'float='" || this.escapeWSAndQuote(input) == "'double='" || 
     this.escapeWSAndQuote(input) == "'char='" || this.escapeWSAndQuote(input) == "'string='" ) {
         var msg = "The left hand side of an assignment must be a variable. Insert an identifer.";
@@ -314,6 +322,10 @@ DefaultErrorStrategy.prototype.reportNoViableAlternative = function(recognizer, 
     } else if(tokenType == 63) {
         var test = input.split("}")[0];
         var msg = "Unrecognized token before '}'. Delete the token '" + test + "'." ;
+    } 
+    else if(beforeTokenType == 21 && (nextTokenType == 27 || nextTokenType == 20 || nextTokenType == 8 || nextTokenType == 14 || nextTokenType == 60) ) {
+        var test = input.split("}")[0];
+        var msg = "Missing '=' in for loop variable declaration.";
     } else 
     var msg = "Unrecognized token " + this.escapeWSAndQuote(input) +". Delete this token.";
 
@@ -418,7 +430,10 @@ DefaultErrorStrategy.prototype.reportUnwantedToken = function(recognizer) {
         msg = "Unwanted token '}'. Delete this token.";
     }else if((tokenType == 79 || tokenType == 80) && (nextTokenType == 100 || nextTokenType == 51 || nextTokenType == 52)) {
         msg = "Wrong operator " + beforeCurrentToken + ". It should only be {'=', '+', '-', '/', '*', '%'}."
-    }else if(tokenType == 81 && nextTokenType == 58) {
+    } else if((tokenType == 81 || tokenType == 82) && nextTokenType == 58 && beforeTokenType == 100) {
+        msg = "Missing '" + recognizer.literalNames[tokenType] + "' on for loop expression.";
+    }
+    else if(tokenType == 81 && nextTokenType == 58) {
         msg = "Extraneous '+'. Delete this token.";
     }
     else {
