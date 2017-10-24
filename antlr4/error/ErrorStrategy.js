@@ -336,7 +336,10 @@ DefaultErrorStrategy.prototype.reportInputMismatch = function(recognizer, e) {
         var msg = "Cannot return a data type. Change to variable or constant.";
     } else if(tokenType == 58 && nextTokenType == 58) {
         var msg = "Extraneous ')'. Delete this token.";
-    }else {
+    } else if((tokenType > 50 && tokenType < 57)  && (nextTokenType == 27 || nextTokenType == 20 || nextTokenType == 8 || nextTokenType == 14 || nextTokenType == 60)) {
+        console.log(e.offendingToken);
+        var msg = "Missing ';'. Add the token.";
+    } else {
         var msg = "Mismatched input " + this.getTokenErrorDisplay(e.offendingToken) +
           " expecting " + e.getExpectedTokens().toString(recognizer.literalNames);
       }
