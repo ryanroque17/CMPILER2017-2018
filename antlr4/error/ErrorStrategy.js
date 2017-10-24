@@ -337,8 +337,8 @@ DefaultErrorStrategy.prototype.reportInputMismatch = function(recognizer, e) {
     } else if(tokenType == 58 && nextTokenType == 58) {
         var msg = "Extraneous ')'. Delete this token.";
     }else {
-        var msg = "mismatched input " + this.getTokenErrorDisplay(e.offendingToken) +
-          " expecting " + e.getExpectedTokens().toString(recognizer.literalNames, recognizer.symbolicNames);
+        var msg = "Mismatched input " + this.getTokenErrorDisplay(e.offendingToken) +
+          " expecting " + e.getExpectedTokens().toString(recognizer.literalNames);
       }
     recognizer.notifyErrorListeners(msg, e.offendingToken, e);
 };
@@ -381,32 +381,35 @@ DefaultErrorStrategy.prototype.reportUnwantedToken = function(recognizer) {
     }
     this.beginErrorCondition(recognizer);
     var t = recognizer.getCurrentToken();
-    var tbefore = recognizer.getBeforeCurrentToken();
-
     var tokenName = this.getTokenErrorDisplay(t);
+    var tbefore = recognizer.getBeforeCurrentToken();
     var beforeCurrentToken = this.getTokenErrorDisplay(tbefore);
     var expecting = this.getExpectedTokens(recognizer);
     var msg = "";
+
+    var beforeTokenType = recognizer.getTokenStream().LA(-2);
     var tokenType = recognizer.getTokenStream().LA(-1);
     var nextTokenType = recognizer.getTokenStream().LA(1);
 
-
+    console.log("beforeTokenType: " + beforeTokenType + ". Symbol: " + recognizer.literalNames[beforeTokenType]);
     console.log("tokenType: " + tokenType + ". Symbol: " + recognizer.literalNames[tokenType]);
     console.log("nexttokentype: " + nextTokenType + ". Symbol: " + recognizer.literalNames[nextTokenType]);
     console.log(recognizer.getExpectedTokens().toString(recognizer.literalNames, recognizer.symbolicNames));
 
-    if(tokenName == "')'"){
-        msg = "Unwanted token ')'. Uneven ')'. Delete this token.";
+    if(tokenType == 58){
+        msg = "Unwanted token ')'. Delete this token.";
     }
-    else if(tokenName == "'}'"){
-        msg = "Unwanted token '}'. Uneven '}'. Delete this token.";
+    else if(tokenType == 60){
+        msg = "Unwanted token '}'. Delete this token.";
     }else if((tokenType == 79 || tokenType == 80) && (nextTokenType == 100 || nextTokenType == 51 || nextTokenType == 52)) {
         msg = "Wrong operator " + beforeCurrentToken + ". It should only be {'=', '+', '-', '/', '*', '%'}."
-    }/* else if((tokenType == 79 && nextTokenType == 51)) {
+    }else if(tokenType == 81 && nextTokenType == 58) {
         msg = "Extraneous '+'. Delete this token.";
-    }*/
-    else
-        msg = "Unwanted token " + tokenName + ". Delete this token.";
+    }
+    else {
+        console.log('Token type' + tokenType);
+        msg = "Unwanted token " + recognizer.literalNames[tokenType] + ". Delete this token.";
+    }
    /* msg = "extraneous input " + tokenName + " expecting " +
         expecting.toString(recognizer.literalNames, recognizer.symbolicNames);*/
     recognizer.notifyErrorListeners(msg, t, null);
