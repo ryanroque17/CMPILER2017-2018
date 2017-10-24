@@ -427,15 +427,15 @@ DefaultErrorStrategy.prototype.reportUnwantedToken = function(recognizer) {
         msg = "Unwanted token after '}'. Delete this token.";
     } else if(tokenType == 60 && nextTokenType == -1){
         msg = "Missing '}'. ";
-    }
-    else if(tokenType == 60){
+    } else if(tokenType == 60){
         msg = "Unwanted token '}'. Delete this token.";
-    }else if((tokenType == 79 || tokenType == 80) && (nextTokenType == 100 || nextTokenType == 51 || nextTokenType == 52)) {
+    } else if((tokenType == 79 || tokenType == 80) && (nextTokenType == 100 || nextTokenType == 51 || nextTokenType == 52)) {
         msg = "Wrong operator " + beforeCurrentToken + ". It should only be {'=', '+', '-', '/', '*', '%'}."
-    } 
-    else if(tokenType == 81 && nextTokenType == 58) {
+    } else if((tokenType == 81 || tokenType == 82) && nextTokenType == 58 && beforeTokenType == 100) {
+        msg = "Missing '" + recognizer.literalNames[tokenType] + "' token.";
+    }else if(tokenType == 81 && nextTokenType == 58) {
         msg = "Extraneous '+'. Delete this token.";
-    }
+    } 
     else {
         console.log('Token type' + tokenType);
         msg = "Unwanted token " + recognizer.literalNames[tokenType] + ". Delete this token.";
