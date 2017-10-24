@@ -320,14 +320,24 @@ DefaultErrorStrategy.prototype.reportNoViableAlternative = function(recognizer, 
 // @param e the recognition exception
 //
 DefaultErrorStrategy.prototype.reportInputMismatch = function(recognizer, e) {
+    var beforeTokenType = recognizer.getTokenStream().LA(-2);
+    var tokenType = recognizer.getTokenStream().LA(-1);
+    var nextTokenType = recognizer.getTokenStream().LA(1);
+
+    console.log("beforeTokenType: " + beforeTokenType + ". Symbol: " + recognizer.literalNames[beforeTokenType]);
+    console.log("tokenType: " + tokenType + ". Symbol: " + recognizer.literalNames[tokenType]);
+    console.log("nexttokentype: " + nextTokenType + ". Symbol: " + recognizer.literalNames[nextTokenType]);
+
     var expectedTokens = e.getExpectedTokens().toString(recognizer.literalNames, recognizer.symbolicNames);
     console.log("expecting inputmismatch: " + expectedTokens);
     if(expectedTokens.includes("'[', ';', ',', '='")){
-        console.log("HI");
         var msg = "An expected '=' should be after the identifer";
-    }else
-    var msg = "mismatched input " + this.getTokenErrorDisplay(e.offendingToken) +
+    }else if(beforeTokenType == 36 && (tokenType == 27 || tokenType == 20 || tokenType == 8 || tokenType == 14)) {
+        var msg = "Cannot return a data type. Change to variable or constant.";
+    } else {
+        var msg = "mismatched input " + this.getTokenErrorDisplay(e.offendingToken) +
           " expecting " + e.getExpectedTokens().toString(recognizer.literalNames, recognizer.symbolicNames);
+      }
     recognizer.notifyErrorListeners(msg, e.offendingToken, e);
 };
 
@@ -378,8 +388,9 @@ DefaultErrorStrategy.prototype.reportUnwantedToken = function(recognizer) {
     var tokenType = recognizer.getTokenStream().LA(-1);
     var nextTokenType = recognizer.getTokenStream().LA(1);
 
-    console.log("tokenType" + tokenType);
-    console.log("nexttokentype" + nextTokenType);
+
+    console.log("tokenType: " + tokenType + ". Symbol: " + recognizer.literalNames[tokenType]);
+    console.log("nexttokentype: " + nextTokenType + ". Symbol: " + recognizer.literalNames[nextTokenType]);
     console.log(recognizer.getExpectedTokens().toString(recognizer.literalNames, recognizer.symbolicNames));
 
     if(tokenName == "')'"){
@@ -387,8 +398,11 @@ DefaultErrorStrategy.prototype.reportUnwantedToken = function(recognizer) {
     }
     else if(tokenName == "'}'"){
         msg = "Unwanted token '}'. Uneven '}'. Delete this token.";
-    }else if((tokenType == 79 || tokenType == 80) && nextTokenType == 100)
+    }else if((tokenType == 79 || tokenType == 80) && nextTokenType == 100) {
         msg = "Wrong assignment operator " + beforeCurrentToken + ". It should only contain {'=', '+', '-', '/', '%'}."
+    } else if((tokenType == 79 && nextTokenType == 51)) {
+        msg = "Extraneous '+'. Delete this token.";
+    }
     else
         msg = "Unwanted token " + tokenName + ". Delete this token.";
    /* msg = "extraneous input " + tokenName + " expecting " +
