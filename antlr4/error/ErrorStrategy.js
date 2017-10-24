@@ -320,6 +320,12 @@ DefaultErrorStrategy.prototype.reportNoViableAlternative = function(recognizer, 
 // @param e the recognition exception
 //
 DefaultErrorStrategy.prototype.reportInputMismatch = function(recognizer, e) {
+    var expectedTokens = e.getExpectedTokens().toString(recognizer.literalNames, recognizer.symbolicNames);
+    console.log("expecting inputmismatch: " + expectedTokens);
+    if(expectedTokens.includes("'[', ';', ',', '='")){
+        console.log("HI");
+        var msg = "An expected '=' should be after the identifer";
+    }else
     var msg = "mismatched input " + this.getTokenErrorDisplay(e.offendingToken) +
           " expecting " + e.getExpectedTokens().toString(recognizer.literalNames, recognizer.symbolicNames);
     recognizer.notifyErrorListeners(msg, e.offendingToken, e);
@@ -363,12 +369,15 @@ DefaultErrorStrategy.prototype.reportUnwantedToken = function(recognizer) {
     }
     this.beginErrorCondition(recognizer);
     var t = recognizer.getCurrentToken();
+    var tbefore = recognizer.getBeforeCurrentToken();
+
     var tokenName = this.getTokenErrorDisplay(t);
+    var beforeCurrentToken = this.getTokenErrorDisplay(tbefore);
     var expecting = this.getExpectedTokens(recognizer);
     var msg = "";
     var tokenType = recognizer.getTokenStream().LA(-1);
     var nextTokenType = recognizer.getTokenStream().LA(1);
-    
+
     console.log("tokenType" + tokenType);
     console.log("nexttokentype" + nextTokenType);
     console.log(recognizer.getExpectedTokens().toString(recognizer.literalNames, recognizer.symbolicNames));
@@ -379,7 +388,7 @@ DefaultErrorStrategy.prototype.reportUnwantedToken = function(recognizer) {
     else if(tokenName == "'}'"){
         msg = "Unwanted token '}'. Uneven '}'. Delete this token.";
     }else if((tokenType == 79 || tokenType == 80) && nextTokenType == 100)
-        msg = "Wrong assignment operator. It should only contain {'=', '+', '-', '/', '%'}."
+        msg = "Wrong assignment operator " + beforeCurrentToken + ". It should only contain {'=', '+', '-', '/', '%'}."
     else
         msg = "Unwanted token " + tokenName + ". Delete this token.";
    /* msg = "extraneous input " + tokenName + " expecting " +
@@ -507,10 +516,19 @@ DefaultErrorStrategy.prototype.singleTokenInsertion = function(recognizer) {
     var currentState = atn.states[recognizer.state];
     var next = currentState.transitions[0].target;
     var expectingAtLL2 = atn.nextTokens(next, recognizer._ctx);
+    var expecting = this.getExpectedTokens(recognizer);
+    console.log("expecting sti" + expecting);
+    console.log("expecting atall2" + expectingAtLL2);
+
+    console.log("Single token insertion" + currentSymbolType);
+
     if (expectingAtLL2.contains(currentSymbolType) ){
         this.reportMissingToken(recognizer);
         return true;
-    } else {
+    } else if(expecting == 63){
+        this.reportMissingToken(recognizer);
+        return true;
+    }else{
         return false;
     }
 };

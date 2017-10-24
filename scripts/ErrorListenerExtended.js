@@ -15,7 +15,7 @@ ErrorListenerExtended.prototype.syntaxError = function(recognizer, offendingSymb
     if(offSymbol == null) {
     	offSymbol = "N/A"
     }
-    var errorHtml = "<tr><td>Error<td>" + parseInt(line) + "</td><td>" + offSymbol + "</td><td>" + msg + "</td></tr>";
+    var errorHtml = "<tr><td>Syntax Error<td>" + parseInt(line) + "</td><td>" + offSymbol + "</td><td>" + msg + "</td></tr>";
 
     consoleBox.innerHTML += errorHtml;
 

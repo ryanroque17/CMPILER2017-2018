@@ -361,6 +361,10 @@ Parser.prototype.getCurrentToken = function() {
 	return this._input.LT(1);
 };
 
+Parser.prototype.getBeforeCurrentToken = function() {
+	return this._input.LT(-1);
+};
+
 Parser.prototype.notifyErrorListeners = function(msg, offendingToken, err) {
 	offendingToken = offendingToken || null;
 	err = err || null;
