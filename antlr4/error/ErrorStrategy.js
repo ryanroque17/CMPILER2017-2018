@@ -334,7 +334,9 @@ DefaultErrorStrategy.prototype.reportInputMismatch = function(recognizer, e) {
         var msg = "An expected '=' should be after the identifer";
     }else if(beforeTokenType == 36 && (tokenType == 27 || tokenType == 20 || tokenType == 8 || tokenType == 14)) {
         var msg = "Cannot return a data type. Change to variable or constant.";
-    } else {
+    } else if(tokenType == 58 && nextTokenType == 58) {
+        var msg = "Extraneous ')'. Delete this token.";
+    }else {
         var msg = "mismatched input " + this.getTokenErrorDisplay(e.offendingToken) +
           " expecting " + e.getExpectedTokens().toString(recognizer.literalNames, recognizer.symbolicNames);
       }
