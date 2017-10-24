@@ -398,11 +398,11 @@ DefaultErrorStrategy.prototype.reportUnwantedToken = function(recognizer) {
     }
     else if(tokenName == "'}'"){
         msg = "Unwanted token '}'. Uneven '}'. Delete this token.";
-    }else if((tokenType == 79 || tokenType == 80) && nextTokenType == 100) {
-        msg = "Wrong assignment operator " + beforeCurrentToken + ". It should only contain {'=', '+', '-', '/', '%'}."
-    } else if((tokenType == 79 && nextTokenType == 51)) {
+    }else if((tokenType == 79 || tokenType == 80) && (nextTokenType == 100 || nextTokenType == 51 || nextTokenType == 52)) {
+        msg = "Wrong operator " + beforeCurrentToken + ". It should only be {'=', '+', '-', '/', '*', '%'}."
+    }/* else if((tokenType == 79 && nextTokenType == 51)) {
         msg = "Extraneous '+'. Delete this token.";
-    }
+    }*/
     else
         msg = "Unwanted token " + tokenName + ". Delete this token.";
    /* msg = "extraneous input " + tokenName + " expecting " +
