@@ -290,6 +290,9 @@ DefaultErrorStrategy.prototype.sync = function(recognizer) {
 DefaultErrorStrategy.prototype.reportNoViableAlternative = function(recognizer, e) {
     var tokens = recognizer.getTokenStream();
     var input;
+
+    var tokenType = recognizer.getTokenStream().LA(-1);
+
     if(tokens !== null) {
         if (e.startToken.type===Token.EOF) {
             input = "<EOF>";
@@ -301,11 +304,18 @@ DefaultErrorStrategy.prototype.reportNoViableAlternative = function(recognizer, 
     }
 /*    var msg = "Unrecognized token " + this.escapeWSAndQuote(input);
 */    
+    console.log(tokenType);
     if(this.escapeWSAndQuote(input) == "'int='" || this.escapeWSAndQuote(input) == "'float='" || this.escapeWSAndQuote(input) == "'double='" || 
-    this.escapeWSAndQuote(input) == "'char='" || this.escapeWSAndQuote(input) == "'string='" )
+    this.escapeWSAndQuote(input) == "'char='" || this.escapeWSAndQuote(input) == "'string='" ) {
         var msg = "The left hand side of an assignment must be a variable. Insert an identifer.";
-    else
-    var msg = "Unrecognized token " + this.escapeWSAndQuote(input) +". Delete this token";
+    } else if(tokenType == 60) {
+        var test = input.split("}")[0];
+        var msg = "Unrecognized token before '}'. Delete the token '" + test + "'." ;
+    } else if(tokenType == 63) {
+        var test = input.split("}")[0];
+        var msg = "Unrecognized token before '}'. Delete the token '" + test + "'." ;
+    } else 
+    var msg = "Unrecognized token " + this.escapeWSAndQuote(input) +". Delete this token.";
 
     recognizer.notifyErrorListeners(msg, e.offendingToken, e);
 };
@@ -401,6 +411,8 @@ DefaultErrorStrategy.prototype.reportUnwantedToken = function(recognizer) {
 
     if(tokenType == 58){
         msg = "Unwanted token ')'. Delete this token.";
+    } else if(tokenType == 60 && nextTokenType == 100){
+        msg = "Unwanted token after '}'. Delete this token.";
     }
     else if(tokenType == 60){
         msg = "Unwanted token '}'. Delete this token.";
