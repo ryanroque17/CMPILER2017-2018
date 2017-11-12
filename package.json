@@ -11,6 +11,8 @@
   "dependencies": {
     "bootstrap": "^4.0.0-alpha.6",
     "browser-sync": "^2.18.13",
-    "express": "^4.16.1"
+    "express": "^4.16.1",
+    "symbol-table": "file:symbol-table",
+    "symboltable": "0.0.2"
   }
 }

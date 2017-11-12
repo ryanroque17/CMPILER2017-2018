@@ -16,6 +16,8 @@ app.use('/parser/', express.static(__dirname + '/parser/'));
 app.use('/views/', express.static(__dirname + '/views/'));
 app.use('/styles/', express.static(__dirname + '/styles/'));
 app.use('/scripts/', express.static(__dirname + '/scripts/'));
+app.use('/node_modules/', express.static(__dirname + '/node_modules/'));
+
 
 
 //bs.init({
@@ -26,3 +28,4 @@ app.use('/scripts/', express.static(__dirname + '/scripts/'));
 app.listen(3000, function(){
 	console.log("Server started on port 3000");
 })
+

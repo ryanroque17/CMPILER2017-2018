@@ -10,7 +10,7 @@ ErrorListenerExtended = function() {
 
 ErrorListenerExtended.prototype.syntaxError = function(recognizer, offendingSymbol, line, column, msg, e) {
     console.error(msg + " at line " + line);
-
+    
     var offSymbol = recognizer.literalNames[offendingSymbol.type];
     if(offSymbol == null) {
     	offSymbol = "N/A"
@@ -18,7 +18,7 @@ ErrorListenerExtended.prototype.syntaxError = function(recognizer, offendingSymb
     var errorHtml = "<tr><td>Syntax Error<td>" + parseInt(line) + "</td><td>" + offSymbol + "</td><td>" + msg + "</td></tr>";
 
     consoleBox.innerHTML += errorHtml;
-
+    
 };
 
 exports.ErrorListenerExtended = ErrorListenerExtended;
