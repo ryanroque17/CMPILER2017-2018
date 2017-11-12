@@ -25,12 +25,12 @@ ace.define('ace/worker/my-worker',["require","exports","module","ace/lib/oop","a
   window.require = require = ace_require;
 
   // load antlr4 and myLanguage
-  var antlr4, javaLexer, javaParser;
+  var antlr4, QwertyLexer, QwertyParser;
   try {
     window.require = antlr4_require;
     antlr4 = antlr4_require('../antlr4/index');
-    javaLexer = antlr4_require('../generated-parser/javaLexer').javaLexer;
-    javaParser = antlr4_require('../generated-parser/javaParser').javaParser;
+    QwertyLexer = antlr4_require('../generated-parser/QwertyLexer').QwertyLexer;
+    QwertyParser = antlr4_require('../generated-parser/QwertyParser').QwertyParser;
   } finally {
     window.require = ace_require;
   }
@@ -56,14 +56,14 @@ ace.define('ace/worker/my-worker',["require","exports","module","ace/lib/oop","a
 
   function validate(input) {
     var stream = new antlr4.InputStream(input);
-    var lexer = new javaLexer(stream);
+    var lexer = new QwertyLexer(stream);
     var tokens = new antlr4.CommonTokenStream(lexer);
-    var parser = new javaParser(tokens);
+    var parser = new QwertyParser(tokens);
     var annotations = [];
     var listener = new AnnotatingErrorListener(annotations);
     parser.removeErrorListeners();
     parser.addErrorListener(listener);
-    parser.compilationUnit();
+    parser.program();
     return annotations;
   }
 

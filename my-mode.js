@@ -17,7 +17,7 @@ ace.define(
     var tokenTypeMapping = antlr4_require('./scripts/java-token-type-mapping');
     var createTokenTypeMap = require('ace/ext/antlr4/token-type-map').createTokenTypeMap;
     var tokenTypeToNameMap = createTokenTypeMap(tokenTypeMapping);
-    var javaLexer = antlr4_require('./generated-parser/javaLexer').javaLexer;
+    var QwertyLexer = antlr4_require('./generated-parser/QwertyLexer').QwertyLexer;
     var Antlr4Tokenizer = require('ace/ext/antlr4/tokenizer').Antlr4Tokenizer;
 
     var MyMode = function() {
@@ -30,7 +30,7 @@ ace.define(
 
       this.getTokenizer = function() {
         if (!this.$tokenizer) {
-          this.$tokenizer = new Antlr4Tokenizer(javaLexer, tokenTypeToNameMap);
+          this.$tokenizer = new Antlr4Tokenizer(QwertyLexer, tokenTypeToNameMap);
         }
         return this.$tokenizer;
       };
