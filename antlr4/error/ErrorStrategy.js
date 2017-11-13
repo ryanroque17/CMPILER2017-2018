@@ -40,7 +40,7 @@ var Interval = require('./../IntervalSet').Interval;
 var IntervalSet = require('./../IntervalSet').IntervalSet;
 
 function ErrorStrategy() {
-	
+    
 }
 
 ErrorStrategy.prototype.reset = function(recognizer){
@@ -67,7 +67,7 @@ ErrorStrategy.prototype.reportError = function(recognizer){
 // error reporting and recovery in ANTLR parsers.
 //
 function DefaultErrorStrategy() {
-	ErrorStrategy.call(this);
+    ErrorStrategy.call(this);
     // Indicates whether the error strategy is currently "recovering from an
     // error". This is used to suppress reporting multiple error messages while
     // attempting to recover from a detected syntax error.
@@ -179,11 +179,11 @@ DefaultErrorStrategy.prototype.reportError = function(recognizer, e) {
 DefaultErrorStrategy.prototype.recover = function(recognizer, e) {
     if (this.lastErrorIndex===recognizer.getInputStream().index &&
         this.lastErrorStates !== null && this.lastErrorStates.indexOf(recognizer.state)>=0) {
-		// uh oh, another error at same token index and previously-visited
-		// state in ATN; must be a case where LT(1) is in the recovery
-		// token set so nothing got consumed. Consume a single token
-		// at least to prevent an infinite loop; this is a failsafe.
-		recognizer.consume();
+        // uh oh, another error at same token index and previously-visited
+        // state in ATN; must be a case where LT(1) is in the recovery
+        // token set so nothing got consumed. Consume a single token
+        // at least to prevent an infinite loop; this is a failsafe.
+        recognizer.consume();
     }
     this.lastErrorIndex = recognizer._input.index;
     if (this.lastErrorStates === null) {
@@ -290,9 +290,6 @@ DefaultErrorStrategy.prototype.sync = function(recognizer) {
 DefaultErrorStrategy.prototype.reportNoViableAlternative = function(recognizer, e) {
     var tokens = recognizer.getTokenStream();
     var input;
-
-    var tokenType = recognizer.getTokenStream().LA(-1);
-
     if(tokens !== null) {
         if (e.startToken.type===Token.EOF) {
             input = "<EOF>";
@@ -302,33 +299,7 @@ DefaultErrorStrategy.prototype.reportNoViableAlternative = function(recognizer, 
     } else {
         input = "<unknown input>";
     }
-/*    var msg = "Unrecognized token " + this.escapeWSAndQuote(input);
-*/    
-
-    var beforeTokenType = recognizer.getTokenStream().LA(-2);
-    var tokenType = recognizer.getTokenStream().LA(-1);
-    var nextTokenType = recognizer.getTokenStream().LA(1);
-
-    console.log("beforeTokenType: " + beforeTokenType + ". Symbol: " + recognizer.literalNames[beforeTokenType]);
-    console.log("tokenType: " + tokenType + ". Symbol: " + recognizer.literalNames[tokenType]);
-    console.log("nexttokentype: " + nextTokenType + ". Symbol: " + recognizer.literalNames[nextTokenType]);
-
-    if(this.escapeWSAndQuote(input) == "'int='" || this.escapeWSAndQuote(input) == "'float='" || this.escapeWSAndQuote(input) == "'double='" || 
-    this.escapeWSAndQuote(input) == "'char='" || this.escapeWSAndQuote(input) == "'string='" ) {
-        var msg = "The left hand side of an assignment must be a variable. Insert an identifer.";
-    } else if(tokenType == 60) {
-        var test = input.split("}")[0];
-        var msg = "Unrecognized token before '}'. Delete the token '" + test + "'." ;
-    } else if(tokenType == 63) {
-        var test = input.split("}")[0];
-        var msg = "Unrecognized token before '}'. Delete the token '" + test + "'." ;
-    } 
-    else if(beforeTokenType == 21 && (nextTokenType == 27 || nextTokenType == 20 || nextTokenType == 8 || nextTokenType == 14 || nextTokenType == 60) ) {
-        var test = input.split("}")[0];
-        var msg = "Missing '=' in for loop variable declaration.";
-    } else 
-    var msg = "Unrecognized token " + this.escapeWSAndQuote(input) +". Delete this token.";
-
+    var msg = "no viable alternative at input " + this.escapeWSAndQuote(input);
     recognizer.notifyErrorListeners(msg, e.offendingToken, e);
 };
 
@@ -342,29 +313,8 @@ DefaultErrorStrategy.prototype.reportNoViableAlternative = function(recognizer, 
 // @param e the recognition exception
 //
 DefaultErrorStrategy.prototype.reportInputMismatch = function(recognizer, e) {
-    var beforeTokenType = recognizer.getTokenStream().LA(-2);
-    var tokenType = recognizer.getTokenStream().LA(-1);
-    var nextTokenType = recognizer.getTokenStream().LA(1);
-
-    console.log("beforeTokenType: " + beforeTokenType + ". Symbol: " + recognizer.literalNames[beforeTokenType]);
-    console.log("tokenType: " + tokenType + ". Symbol: " + recognizer.literalNames[tokenType]);
-    console.log("nexttokentype: " + nextTokenType + ". Symbol: " + recognizer.literalNames[nextTokenType]);
-
-    var expectedTokens = e.getExpectedTokens().toString(recognizer.literalNames, recognizer.symbolicNames);
-    console.log("expecting inputmismatch: " + expectedTokens);
-    if(expectedTokens.includes("'[', ';', ',', '='") && (beforeTokenType == 27 || beforeTokenType == 20 || beforeTokenType == 8 || beforeTokenType == 14)){
-        var msg = "An expected '=' should be after the identifer";
-    }else if(beforeTokenType == 36 && (tokenType == 27 || tokenType == 20 || tokenType == 8 || tokenType == 14)) {
-        var msg = "Cannot return a data type. Change to variable or constant.";
-    } else if(tokenType == 58 && nextTokenType == 58) {
-        var msg = "Extraneous ')'. Delete this token.";
-    } else if((tokenType > 50 && tokenType < 57)  && (nextTokenType == 27 || nextTokenType == 20 || nextTokenType == 8 || nextTokenType == 14 || nextTokenType == 60)) {
-        console.log(e.offendingToken);
-        var msg = "Missing ';'. Add the token.";
-    } else {
-        var msg = "Mismatched input " + this.getTokenErrorDisplay(e.offendingToken) +
-          " expecting " + e.getExpectedTokens().toString(recognizer.literalNames);
-      }
+    var msg = "mismatched input " + this.getTokenErrorDisplay(e.offendingToken) +
+          " expecting " + e.getExpectedTokens().toString(recognizer.literalNames, recognizer.symbolicNames);
     recognizer.notifyErrorListeners(msg, e.offendingToken, e);
 };
 
@@ -407,41 +357,9 @@ DefaultErrorStrategy.prototype.reportUnwantedToken = function(recognizer) {
     this.beginErrorCondition(recognizer);
     var t = recognizer.getCurrentToken();
     var tokenName = this.getTokenErrorDisplay(t);
-    var tbefore = recognizer.getBeforeCurrentToken();
-    var beforeCurrentToken = this.getTokenErrorDisplay(tbefore);
     var expecting = this.getExpectedTokens(recognizer);
-    var msg = "";
-
-    var beforeTokenType = recognizer.getTokenStream().LA(-2);
-    var tokenType = recognizer.getTokenStream().LA(-1);
-    var nextTokenType = recognizer.getTokenStream().LA(1);
-
-    console.log("beforeTokenType: " + beforeTokenType + ". Symbol: " + recognizer.literalNames[beforeTokenType]);
-    console.log("tokenType: " + tokenType + ". Symbol: " + recognizer.literalNames[tokenType]);
-    console.log("nexttokentype: " + nextTokenType + ". Symbol: " + recognizer.literalNames[nextTokenType]);
-    console.log(recognizer.getExpectedTokens().toString(recognizer.literalNames, recognizer.symbolicNames));
-
-    if(tokenType == 58){
-        msg = "Unwanted token ')'. Delete this token.";
-    } else if(tokenType == 60 && nextTokenType == 100){
-        msg = "Unwanted token after '}'. Delete this token.";
-    } else if(tokenType == 60 && nextTokenType == -1){
-        msg = "Missing '}'. ";
-    } else if(tokenType == 60){
-        msg = "Unwanted token '}'. Delete this token.";
-    } else if((tokenType == 79 || tokenType == 80) && (nextTokenType == 100 || nextTokenType == 51 || nextTokenType == 52)) {
-        msg = "Wrong operator " + beforeCurrentToken + ". It should only be {'=', '+', '-', '/', '*', '%'}."
-    } else if((tokenType == 81 || tokenType == 82) && nextTokenType == 58 && beforeTokenType == 100) {
-        msg = "Missing '" + recognizer.literalNames[tokenType] + "' token.";
-    }else if(tokenType == 81 && nextTokenType == 58) {
-        msg = "Extraneous '+'. Delete this token.";
-    } 
-    else {
-        console.log('Token type' + tokenType);
-        msg = "Unwanted token " + recognizer.literalNames[tokenType] + ". Delete this token.";
-    }
-   /* msg = "extraneous input " + tokenName + " expecting " +
-        expecting.toString(recognizer.literalNames, recognizer.symbolicNames);*/
+    var msg = "extraneous input " + tokenName + " expecting " +
+        expecting.toString(recognizer.literalNames, recognizer.symbolicNames);
     recognizer.notifyErrorListeners(msg, t, null);
 };
 // This method is called to report a syntax error which requires the
@@ -467,9 +385,8 @@ DefaultErrorStrategy.prototype.reportMissingToken = function(recognizer) {
     this.beginErrorCondition(recognizer);
     var t = recognizer.getCurrentToken();
     var expecting = this.getExpectedTokens(recognizer);
-    /*var msg = "missing " + expecting.toString(recognizer.literalNames, recognizer.symbolicNames) +
-          " at " + this.getTokenErrorDisplay(t);*/
-    var msg = "Missing token " + expecting.toString(recognizer.literalNames, recognizer.symbolicNames);
+    var msg = "missing " + expecting.toString(recognizer.literalNames, recognizer.symbolicNames) +
+          " at " + this.getTokenErrorDisplay(t);
     recognizer.notifyErrorListeners(msg, t, null);
 };
 
@@ -565,19 +482,10 @@ DefaultErrorStrategy.prototype.singleTokenInsertion = function(recognizer) {
     var currentState = atn.states[recognizer.state];
     var next = currentState.transitions[0].target;
     var expectingAtLL2 = atn.nextTokens(next, recognizer._ctx);
-    var expecting = this.getExpectedTokens(recognizer);
-    console.log("expecting sti" + expecting);
-    console.log("expecting atall2" + expectingAtLL2);
-
-    console.log("Single token insertion" + currentSymbolType);
-
     if (expectingAtLL2.contains(currentSymbolType) ){
         this.reportMissingToken(recognizer);
         return true;
-    } else if(expecting == 63){
-        this.reportMissingToken(recognizer);
-        return true;
-    }else{
+    } else {
         return false;
     }
 };
@@ -601,14 +509,9 @@ DefaultErrorStrategy.prototype.singleTokenInsertion = function(recognizer) {
 // {@code null}
 //
 DefaultErrorStrategy.prototype.singleTokenDeletion = function(recognizer) {
-    var nextTokenType = recognizer.getTokenStream().LA(-1);
+    var nextTokenType = recognizer.getTokenStream().LA(2);
     var expecting = this.getExpectedTokens(recognizer);
-    console.log("expecting" + expecting);
-    console.log("nexttokentype" + nextTokenType);
-    console.log(recognizer.getExpectedTokens().toString(recognizer.literalNames, recognizer.symbolicNames));
-
     if (expecting.contains(nextTokenType)) {
-
         this.reportUnwantedToken(recognizer);
         // print("recoverFromMismatchedToken deleting " \
         // + str(recognizer.getTokenStream().LT(1)) \
@@ -618,7 +521,6 @@ DefaultErrorStrategy.prototype.singleTokenDeletion = function(recognizer) {
         // we want to return the token we're actually matching
         var matchedSymbol = recognizer.getCurrentToken();
         this.reportMatch(recognizer); // we know current token is correct
-
         return matchedSymbol;
     } else {
         return null;
@@ -844,8 +746,8 @@ DefaultErrorStrategy.prototype.consumeUntil = function(recognizer, set) {
 // @see Parser//setErrorHandler(ANTLRErrorStrategy)
 //
 function BailErrorStrategy() {
-	DefaultErrorStrategy.call(this);
-	return this;
+    DefaultErrorStrategy.call(this);
+    return this;
 }
 
 BailErrorStrategy.prototype = Object.create(DefaultErrorStrategy.prototype);
@@ -879,4 +781,3 @@ BailErrorStrategy.prototype.sync = function(recognizer) {
 
 exports.BailErrorStrategy = BailErrorStrategy;
 exports.DefaultErrorStrategy = DefaultErrorStrategy;
-exports.ErrorStrategy = ErrorStrategy;

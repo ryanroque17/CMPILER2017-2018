@@ -7,7 +7,7 @@ var QwertyLexer = require('../generated-parser/QwertyLexer');
 var QwertyParser = require('../generated-parser/QwertyParser');
 
 // Parsing
-var QwertyListenerExtended = require('/scripts/QwertyListenerExtended').QwertyListenerExtended;
+var AssignmentListener = require('/scripts/AssignmentListener').AssignmentListener;
 // Syntax Analyzer
 var ErrorListenerExtended = require('/scripts/ErrorListenerExtended').ErrorListenerExtended;
 
@@ -33,10 +33,6 @@ document.getElementById("parse").addEventListener("click", function() {
 	parser.buildParseTrees = true;
     var tree = parser.program();
 
-    // // Parser (edit JavaListenerExtended.js)
-    var QwertyExtended = new QwertyListenerExtended();
-    antlr4.tree.ParseTreeWalker.DEFAULT.walk(QwertyExtended, tree);
-
     // For errors
     // var errorListener = new ErrorListenerExtended();
     // parser.removeErrorListeners();
@@ -56,33 +52,37 @@ document.getElementById("parse").addEventListener("click", function() {
     // Lexical
     updateConsole(input, tokens, symbolNames);
 
-    sTable = [];
-    stackNumber = 0;
-    for(var i=0; i<tokens.getNumberOfOnChannelTokens()-1; i++){
-    	type = symbolNames[tokenType[i].type];
-    	identifier = inputSplitted.slice(tokenType[i].start, tokenType[i].stop + 1).join("");
+    // // Parser (edit JavaListenerExtended.js)
+    var assignmentListener = new AssignmentListener();
+    antlr4.tree.ParseTreeWalker.DEFAULT.walk(assignmentListener, tree);
 
-		if(type == "VARIABLE_IDENTIFIER"){
-            console.log("identifier: " + identifier);
-            console.log("identifierBEFORE: " + identifierBefore);
-            if(identifierBefore == "int") {
-                s.set(identifier, i); 
-            } else {
-                if(s.has(identifier)) {
+  //   sTable = [];
+  //   stackNumber = 0;
+  //   for(var i=0; i<tokens.getNumberOfOnChannelTokens()-1; i++){
+  //   	type = symbolNames[tokenType[i].type];
+  //   	identifier = inputSplitted.slice(tokenType[i].start, tokenType[i].stop + 1).join("");
 
-                } else {
-                    console.log("!!! ERRROR !!!");
-                }
-            }
-        }else if(type == "OPEN_BRACE"){
-			sTable[stackNumber] = s.push();
-            stackNumber++; 
-			numOfScopes;
-		}else if(type == "CLOSE_BRACE"){
-            stackNumber--;
-            sTable[stackNumber] = s.pop();
-		}
+		// if(type == "VARIABLE_IDENTIFIER"){
+  //           console.log("identifier: " + identifier);
+  //           console.log("identifierBEFORE: " + identifierBefore);
+  //           if(identifierBefore == "int") {
+  //               s.set(identifier, i); 
+  //           } else {
+  //               if(s.has(identifier)) {
 
-        identifierBefore = inputSplitted.slice(tokenType[i].start, tokenType[i].stop + 1).join("");
-    }
+  //               } else {
+  //                   console.log("!!! ERRROR !!!");
+  //               }
+  //           }
+  //       }else if(type == "OPEN_BRACE"){
+		// 	sTable[stackNumber] = s.push();
+  //           stackNumber++; 
+		// 	numOfScopes;
+		// }else if(type == "CLOSE_BRACE"){
+  //           stackNumber--;
+  //           sTable[stackNumber] = s.pop();
+		// }
+
+  //       identifierBefore = inputSplitted.slice(tokenType[i].start, tokenType[i].stop + 1).join("");
+  //   }
 });
