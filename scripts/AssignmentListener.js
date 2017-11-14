@@ -4,6 +4,8 @@ var QwertyParser = require('../generated-parser/QwertyParser');
 var QwertyListener = require('../generated-parser/QwertyListener').QwertyListener;
 var SymbolTable = require("/node_modules/symbol-table/stack");
 var s = SymbolTable();
+var QwertyValue = require('/scripts/QwertyValue');
+
 AssignmentListener = function(res) {
 	this.Res = res;
     QwertyListener.call(this);
@@ -31,15 +33,22 @@ AssignmentListener.prototype.enterVar_decl = function(ctx) {
 	var typeName = ctx.data_type().start.text;
 	// variable name
 	var varName = ctx.var_identifier_list().start.text;
+	
 	// variable value
-	var varValue = ctx.var_identifier_list().getChild(1).getChild(1).getText();
+	if(ctx.getChild(1).getChildCount() == 1){ // ex. int i;
+		var varValue = new QwertyValue(typeName, "null");
+	}
+	else{	// ex. int i = 1;
+		//console.log("aa " +ctx.var_identifier_list().getChild(1).getChild(1).getText());
+		var varValue = new QwertyValue(typeName, ctx.var_identifier_list().getChild(1).getChild(1).getText());
+	}
 	
 	if(s.has(varName)) {
 		console.log("variable " + varName + " already in stack");
 	} else {		
 		s.set(varName, varValue);
 
-		console.log("value of " +varName+ ":" + s.get(varName));
+		console.log("value and data type of " +varName+ ":" + s.get(varName).getValue() + " & " + s.get(varName).getDataType());
 	}
 };
 
@@ -66,23 +75,23 @@ QwertyListener.prototype.enterAssignment_statement = function(ctx) {
 		if(ctx.getChild(1).getText() == "="){
 			varValue = ctx.getChild(2).getText();
 		}else if(ctx.getChild(1).getText() == "++"){
-			varValue = s.get(varName) + "+1";
+			varValue = s.get(varName).getValue() + "+1";
 		}else if(ctx.getChild(1).getText() == "--"){
-			varValue = s.get(varName) + "-1";
+			varValue = s.get(varName).getValue() + "-1";
 		}else if(ctx.getChild(1).getText() == "+="){
-			varValue = s.get(varName) + "+" + ctx.getChild(2).getText();
+			varValue = s.get(varName).getValue() + "+" + ctx.getChild(2).getText();
 		}else if(ctx.getChild(1).getText() == "-="){
-			varValue = s.get(varName) + "-" + ctx.getChild(2).getText();
+			varValue = s.get(varName).getValue() + "-" + ctx.getChild(2).getText();
 		}else if(ctx.getChild(1).getText() == "*="){
-			varValue = s.get(varName) + "*" + ctx.getChild(2).getText();
+			varValue = s.get(varName).getValue() + "*" + ctx.getChild(2).getText();
 		}else if(ctx.getChild(1).getText() == "/="){
-			varValue = s.get(varName) + "/" + ctx.getChild(2).getText();
+			varValue = s.get(varName).getValue() + "/" + ctx.getChild(2).getText();
 		}else if(ctx.getChild(1).getText() == "%="){
-			varValue = s.get(varName) + "%" + ctx.getChild(2).getText();
+			varValue = s.get(varName).getValue() + "%" + ctx.getChild(2).getText();
 		}
-		s.set(varName, varValue);
+		s.get(varName).setValue(varValue);
 
-		console.log("value of " +varName+ ":" + s.get(varName));
+		console.log("value and data type of " +varName+ ":" + s.get(varName).getValue() + " & " + s.get(varName).getDataType());
 		if(height != varHeight){
 			for(var i=0; i<heightDiff ;i++){
 				s.push();
