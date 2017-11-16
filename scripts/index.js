@@ -8,6 +8,7 @@ var QwertyParser = require('../generated-parser/QwertyParser');
 
 // Parsing
 var AssignmentListener = require('/scripts/AssignmentListener').AssignmentListener;
+var TypeChecker = require('/scripts/TypeChecker').TypeChecker;
 // Syntax Analyzer
 var ErrorListenerExtended = require('/scripts/ErrorListenerExtended').ErrorListenerExtended;
 
@@ -50,11 +51,14 @@ document.getElementById("parse").addEventListener("click", function() {
     var numOfScopes = 0;
 
     // Lexical
-    updateConsole(input, tokens, symbolNames);
+    // updateConsole(input, tokens, symbolNames);
 
     // // Parser (edit JavaListenerExtended.js)
     var assignmentListener = new AssignmentListener();
     antlr4.tree.ParseTreeWalker.DEFAULT.walk(assignmentListener, tree);
+
+    var typeChecker = new TypeChecker();
+    typeChecker.visit(tree);
 
   //   sTable = [];
   //   stackNumber = 0;

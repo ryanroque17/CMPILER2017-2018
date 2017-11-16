@@ -5,6 +5,7 @@ var QwertyListener = require('../generated-parser/QwertyListener').QwertyListene
 var SymbolTable = require("/node_modules/symbol-table/stack");
 var s = SymbolTable();
 var QwertyValue = require('/scripts/QwertyValue');
+var consoleBox = document.getElementById("consoleBox");
 
 
 function checkIfHasIdentifier(input){
@@ -26,9 +27,9 @@ function checkIfHasIdentifier(input){
 
     	type = symbolNames[test[i].type];
     	//input = input.replace(token, token.concat(""));
-    	//console.log(input);
+    	////console.log(input);
     	if(type.includes("VARIABLE_IDENTIFIER")){
-    		//console.log("token: " + token);
+    		////console.log("token: " + token);
     		if(s.has(token)){
     			input = input.replace(token, s.get(token).getValue());
     			if(typeof s.get(token).getValue() == "number"){
@@ -38,7 +39,7 @@ function checkIfHasIdentifier(input){
     		}else{
     	    	tokenList.push(token);
 
-    			console.log("ERROR!! Undeclared variable " + token);
+    			//console.log("ERROR!! Undeclared variable " + token);
     		}
     	}
     	
@@ -46,9 +47,9 @@ function checkIfHasIdentifier(input){
     		hasIntegerLiteral = true;
     	}
     }  
-    //console.log(tokenList.length + ' = ' + (tokens.getNumberOfOnChannelTokens() - 1));
-    //console.log("yard " + yard(input, tokenList));
-   // console.log("rpn " + rpn(yard(input, tokenList)));
+    ////console.log(tokenList.length + ' = ' + (tokens.getNumberOfOnChannelTokens() - 1));
+    ////console.log("yard " + yard(input, tokenList));
+   //// console.log("rpn " + rpn(yard(input, tokenList)));
     if(hasIntegerLiteral)
     	return rpn(yard(input, tokenList));
     else
@@ -137,10 +138,10 @@ AssignmentListener.prototype.enterVar_decl = function(ctx) {
 	}
 	
 	if(s.has(varName)) {
-		console.log("variable " + varName + " already in stack");
+		//console.log("variable " + varName + " already in stack");
 	} else {		
 		s.set(varName, varValue);
-		console.log("value and data type of " +varName+ ":" + s.get(varName).getValue() + " & " + typeof s.get(varName).getValue());
+		//console.log("value and data type of " +varName+ ":" + s.get(varName).getValue() + " & " + typeof s.get(varName).getValue());
 	}
 };
 
@@ -153,7 +154,7 @@ QwertyListener.prototype.enterAssignment_statement = function(ctx) {
 	var height;
 	var varHeight;
 	if(!s.has(varName)) {
-		console.log("variable " + varName + " NOT in stack!");
+		//console.log("variable " + varName + " NOT in stack!");
 	}else{
 		height = s.height();
 		varHeight = s.getItsHeight(varName);
@@ -164,7 +165,7 @@ QwertyListener.prototype.enterAssignment_statement = function(ctx) {
 				s.pop();
 			}
 		}
-		//console.log(ctx.getChild(ctx.getChildCount()-1).getRuleIndex() +" aaaa");
+		////console.log(ctx.getChild(ctx.getChildCount()-1).getRuleIndex() +" aaaa");
 		if(ctx.getChild(1).getText() == "="){
 			varValue = ctx.getChild(2).getText();
 		}else if(ctx.getChild(1).getText() == "++"){
@@ -172,7 +173,7 @@ QwertyListener.prototype.enterAssignment_statement = function(ctx) {
 		}else if(ctx.getChild(1).getText() == "--"){
 			varValue = s.get(varName).getValue() + "-1";
 		}else if(ctx.getChild(1).getText() == "+="){
-			console.log(ctx.getChild(2));
+			//console.log(ctx.getChild(2));
 			varValue = s.get(varName).getValue() + "+" + ctx.getChild(2).getText();
 		}else if(ctx.getChild(1).getText() == "-="){
 			varValue = s.get(varName).getValue() + "-" + ctx.getChild(2).getText();
@@ -186,7 +187,7 @@ QwertyListener.prototype.enterAssignment_statement = function(ctx) {
 		varValue = checkIfHasIdentifier(varValue);
 		s.get(varName).setValue(varValue);
 
-		console.log("value and data type of " +varName+ ":" + s.get(varName).getValue() + " & " + typeof s.get(varName).getValue());
+		//console.log("value and data type of " +varName+ ":" + s.get(varName).getValue() + " & " + typeof s.get(varName).getValue());
 		if(height != varHeight){
 			for(var i=0; i<heightDiff ;i++){
 				s.push();
@@ -208,6 +209,9 @@ QwertyListener.prototype.enterAssignment_factor = function(ctx) {
 // Enter a parse tree produced by QwertyParser#if_statement.
 AssignmentListener.prototype.enterIf_statement = function(ctx) {
 	s.push();
+	var statement = ctx.children[1].children[1].getText();
+	console.log(statement);
+
 };
 
 // Exit a parse tree produced by QwertyParser#if_statement.
@@ -250,4 +254,16 @@ AssignmentListener.prototype.exitFor_statement = function(ctx) {
 //Exit a parse tree produced by QwertyParser#program.
 AssignmentListener.prototype.exitProgram = function(ctx) {
 	s.pop();
+};
+
+// Enter a parse tree produced by QwertyParser#scan_statement.
+AssignmentListener.prototype.enterScan_statement = function(ctx) {
+};
+
+// Enter a parse tree produced by QwertyParser#print_statement.
+AssignmentListener.prototype.enterPrint_statement = function(ctx) {
+	var statement = checkIfHasIdentifier(ctx.expression().getText());
+	var split = statement.split("+").join("").split('"').join("");
+	consoleBox.innerHTML += split + "<br>";
+	
 };
