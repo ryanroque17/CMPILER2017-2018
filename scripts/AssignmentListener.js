@@ -207,14 +207,30 @@ QwertyListener.prototype.enterAssignment_factor = function(ctx) {
 };
 
 function evaluateBoolean(input) {
-	var arr = input.split("==");
+	var hasAnd = false;
+	var arr;
+
+	if(input.split("").includes("&")) {
+	  arr = input.split("&&");
+	  hasAnd = true;
+	} else {
+		arr = [input];
+	}
+	  
 	console.log(arr);
 
-	if(s.get(arr[0]).getValue() == arr[1]) {
-		return true;
+	for(var i=0; i<arr.length; i++) {
+	  var exp = arr[i].split("==");
+	  console.log(exp[0]);
+	  if(s.get(exp[0]).getValue() == exp[1]) {
+	    
+	  } else {
+	    if(hasAnd)
+	      return false;
+	  }
 	}
-	
-	return false;
+
+	return true;
 };
 
 // Enter a parse tree produced by QwertyParser#if_statement.
