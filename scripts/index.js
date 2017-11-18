@@ -55,10 +55,10 @@ document.getElementById("parse").addEventListener("click", function() {
 
     // // Parser (edit JavaListenerExtended.js)
     var assignmentListener = new AssignmentListener();
-    antlr4.tree.ParseTreeWalker.DEFAULT.walk(assignmentListener, tree);
+    var test = antlr4.tree.ParseTreeWalker.DEFAULT.walk(assignmentListener, tree);
 
-    var typeChecker = new TypeChecker();
-    typeChecker.visit(tree);
+    // var typeChecker = new TypeChecker();
+    // typeChecker.visit(tree);
 
   //   sTable = [];
   //   stackNumber = 0;

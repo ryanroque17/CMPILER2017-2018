@@ -4,8 +4,100 @@ var QwertyParser = require('../generated-parser/QwertyParser');
 var QwertyValue = require('/scripts/QwertyValue');
 var QwertyVisitor = require('../generated-parser/QwertyVisitor').QwertyVisitor;
 var SymbolTable = require("/node_modules/symbol-table/stack");
-var s = SymbolTable();
+var s = new SymbolTable();
+var QwertyValue = require('/scripts/QwertyValue');
 var consoleBox = document.getElementById("consoleBox");
+
+function checkIfHasIdentifier(input){
+	
+	var chars = new antlr4.InputStream(input);
+    var lexer = new QwertyLexer.QwertyLexer(chars);
+    var tokens  = new antlr4.CommonTokenStream(lexer);
+    var parser = new QwertyParser.QwertyParser(tokens);
+    var symbolNames = parser.symbolicNames;
+    var inputSplitted = input.split("");
+    var test = tokens.getTokens(0, tokens.getNumberOfOnChannelTokens());
+    var token;
+    var type;
+    var hasIntegerLiteral = false;
+    var tokenList = [];
+    for(var i=0; i<tokens.getNumberOfOnChannelTokens() - 1; i++) {
+    	token = inputSplitted.slice(test[i].start, test[i].stop + 1).join("");
+    	tokenList.push(token);
+
+    	type = symbolNames[test[i].type];
+    	//input = input.replace(token, token.concat(""));
+    	////console.log(input);
+    	if(type.includes("VARIABLE_IDENTIFIER")){
+    		////console.log("token: " + token);
+    		if(s.has(token)){
+    			input = input.replace(token, s.get(token).getValue());
+    			if(typeof s.get(token).getValue() == "number"){
+    	    		hasIntegerLiteral = true;
+    	    	}
+    	    	tokenList.push(s.get(token).getValue());
+    		}else{
+    	    	tokenList.push(token);
+
+    			//console.log("ERROR!! Undeclared variable " + token);
+    		}
+    	}
+    	if(type.includes("INTEGER_LITERAL")){
+    		hasIntegerLiteral = true;
+    	}
+    }  
+
+    ////console.log(tokenList.length + ' = ' + (tokens.getNumberOfOnChannelTokens() - 1));
+    ////console.log("yard " + yard(input, tokenList));
+   //// console.log("rpn " + rpn(yard(input, tokenList)));
+    if(hasIntegerLiteral) 
+    	return rpn(yard(input, tokenList)); 
+    else
+    	return input;	
+}
+let yard = (infix, tokenList) => {
+	  let ops = {'+': 1, '-': 1, '*': 2, '/': 2};
+	  let peek = (a) => a[a.length - 1];
+	  let stack = [];
+	  let output = [];
+	  let token;
+	  for(var i=0; i<tokenList.length; i++){
+		  token = tokenList[i];
+		  if (!isNaN(parseFloat(token))) {
+	        output.push(token);
+	      }
+
+	      if (token in ops) {
+	        while (peek(stack) in ops && ops[token] <= ops[peek(stack)])
+	          output.push(stack.pop());
+	        stack.push(token);
+	      }
+
+	      if (token == '(') {
+	        stack.push(token);
+	      }
+
+	      if (token == ')') {
+	        while (peek(stack) != '(')
+	          output.push(stack.pop());
+	        stack.pop();
+	      }
+	  }
+	  let result = output.concat(stack.reverse()).join(' ')
+	  
+	  return result;
+};
+let rpn = (ts, s = []) => {
+	if(ts.length == 1){
+		ts = ts.concat(" 0 +");
+	}
+
+	ts.split(' ').forEach(t =>
+
+	  s.push(t == +t ? t : eval(s.splice(-2,1)[0] + t + s.pop())));
+	 
+	  return s[0];
+	}
 
 TypeChecker = function(res) {
 	this.Res = res;
@@ -42,25 +134,32 @@ TypeChecker.prototype.visitVardecl_list = function(ctx) {
 // Visit a parse tree produced by QwertyParser#var_decl.
 TypeChecker.prototype.visitVar_decl = function(ctx) { 
 	this.visit(ctx.children); 
-	// console.log(ctx.var_identifier_list().getText());
-	// var dataType = ctx.data_type().getText();
-	// var assign = ctx.var_identifier_list().var_assignment_statement().assignment_factor().getText();
-	// // console.log(ctx.var_identifier_list().var_assignment_statement().assignment_factor().expression());
-	// if(dataType == "int") {
-	// 	if(!isNaN(parseInt(assign))) {
-	// 		console.log("integer possible!");
-	// 	} else {
-	// 		console.log("error! cannot assign string to integer for variable");
-	// 	}
-	// } else if (dataType == "char") {
-
-	// }
+	// int, string, etc
+	var typeName = ctx.data_type().start.text;
+	// variable name
+	var varName = ctx.var_identifier_list().start.text;
+	
+	// variable value
+	if(ctx.getChild(1).getChildCount() == 1){ // ex. int i;
+		var varValue = new QwertyValue(typeName, "null");
+	}
+	else{	// ex. int i = 1;		
+		var input = checkIfHasIdentifier(ctx.var_identifier_list().getChild(1).getChild(1).getText());		
+		var varValue = new QwertyValue(typeName, input);
+	}
+	
+	if(s.has(varName)) {
+		//console.log("variable " + varName + " already in stack");
+	} else {		
+		s.set(varName, varValue);
+		//console.log("value and data type of " +varName+ ":" + s.get(varName).getValue() + " & " + typeof s.get(varName).getValue());
+	}
 };
 
 
 // Visit a parse tree produced by QwertyParser#var_identifier_list.
 TypeChecker.prototype.visitVar_identifier_list = function(ctx) { 
-	this.visit(ctx.children); 
+	this.visit(ctx.children);
 };
 
 
@@ -195,6 +294,53 @@ TypeChecker.prototype.visitVar_assignment_statement = function(ctx) {
 // Visit a parse tree produced by QwertyParser#assignment_statement.
 TypeChecker.prototype.visitAssignment_statement = function(ctx) { 
 	this.visit(ctx.children); 
+
+	var varName = ctx.getChild(0).getText();
+	var varValue;
+	var heightDiff;
+	var height;
+	var varHeight;
+	if(!s.has(varName)) {
+		//console.log("variable " + varName + " NOT in stack!");
+	}else{
+		height = s.height();
+		varHeight = s.getItsHeight(varName);
+		
+		if(height != varHeight){
+			heightDiff = height - varHeight;
+			for(var i=0; i<heightDiff ;i++){
+				s.pop();
+			}
+		}
+		////console.log(ctx.getChild(ctx.getChildCount()-1).getRuleIndex() +" aaaa");
+		if(ctx.getChild(1).getText() == "="){
+			varValue = ctx.getChild(2).getText();
+		}else if(ctx.getChild(1).getText() == "++"){
+			varValue = s.get(varName).getValue() + "+1";
+		}else if(ctx.getChild(1).getText() == "--"){
+			varValue = s.get(varName).getValue() + "-1";
+		}else if(ctx.getChild(1).getText() == "+="){
+			//console.log(ctx.getChild(2));
+			varValue = s.get(varName).getValue() + "+" + ctx.getChild(2).getText();
+		}else if(ctx.getChild(1).getText() == "-="){
+			varValue = s.get(varName).getValue() + "-" + ctx.getChild(2).getText();
+		}else if(ctx.getChild(1).getText() == "*="){
+			varValue = s.get(varName).getValue() + "*" + ctx.getChild(2).getText();
+		}else if(ctx.getChild(1).getText() == "/="){
+			varValue = s.get(varName).getValue() + "/" + ctx.getChild(2).getText();
+		}else if(ctx.getChild(1).getText() == "%="){
+			varValue = s.get(varName).getValue() + "%" + ctx.getChild(2).getText();
+		}
+		varValue = checkIfHasIdentifier(varValue);
+		s.get(varName).setValue(varValue);
+
+		//console.log("value and data type of " +varName+ ":" + s.get(varName).getValue() + " & " + typeof s.get(varName).getValue());
+		if(height != varHeight){
+			for(var i=0; i<heightDiff ;i++){
+				s.push();
+			}
+		}
+	}
 };
 
 
@@ -234,10 +380,28 @@ TypeChecker.prototype.visitConditional_factor = function(ctx) {
 	this.visit(ctx.children);
 };
 
+function evaluateBoolean(input) {
+	var arr = input.split("==");
+	console.log(arr);
+
+	if(s.get(arr[0]).getValue() == arr[1]) {
+		return true;
+	}
+	
+	return false;
+}
 
 // Visit a parse tree produced by QwertyParser#if_statement.
 TypeChecker.prototype.visitIf_statement = function(ctx) { 
-	this.visit(ctx.children); 
+	s.push();
+
+	var eval = ctx.conditional_block()[0].conditional_factor().getText();
+	console.log(ctx);
+	if(evaluateBoolean(eval)) {
+		this.visit(ctx.children);
+	}
+
+	s.pop();
 };
 
 
@@ -279,14 +443,13 @@ TypeChecker.prototype.visitReturn_statement = function(ctx) {
 
 // Visit a parse tree produced by QwertyParser#scan_statement.
 TypeChecker.prototype.visitScan_statement = function(ctx) { 
-	this.visit(ctx.children); 
+	this.visit(ctx.children);
 };
 
 
 // Visit a parse tree produced by QwertyParser#print_statement.
 TypeChecker.prototype.visitPrint_statement = function(ctx) { 
-	this.visit(ctx.children); 
-	// console.log(ctx);
-	var print = this.visit(ctx.expression().string_expression());
-	
+	this.visit(ctx.children);
+	var statement = checkIfHasIdentifier(ctx.expression().getText());
+	console.log(statement);
 };
