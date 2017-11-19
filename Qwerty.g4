@@ -174,7 +174,7 @@ if_statement
 
 conditional_block			
 	: OPEN_PAR conditional_factor CLOSE_PAR
-	  OPEN_BRACE (statement)* CLOSE_BRACE
+	  code_block
 	;
 code_block					
 	: OPEN_BRACE (statement)* CLOSE_BRACE;

@@ -8,19 +8,49 @@ var QwertyValue = require('/scripts/QwertyValue');
 var consoleBox = document.getElementById("consoleBox");
 
 
-function checkIfHasIdentifier(input){
-	
+
+function getIdentifiers(input){
+	var tokenList = [];
 	var chars = new antlr4.InputStream(input);
-    var lexer = new QwertyLexer.QwertyLexer(chars);
-    var tokens  = new antlr4.CommonTokenStream(lexer);
-    var parser = new QwertyParser.QwertyParser(tokens);
-    var symbolNames = parser.symbolicNames;
-    var inputSplitted = input.split("");
-    var test = tokens.getTokens(0, tokens.getNumberOfOnChannelTokens());
-    var token;
-    var type;
-    var hasIntegerLiteral = false;
-    var tokenList = [];
+	var lexer = new QwertyLexer.QwertyLexer(chars);
+	var tokens  = new antlr4.CommonTokenStream(lexer);
+	var parser = new QwertyParser.QwertyParser(tokens);
+	var symbolNames = parser.symbolicNames;
+	var inputSplitted = input.split("");
+	var test = tokens.getTokens(0, tokens.getNumberOfOnChannelTokens());
+	var token;
+	var type;
+
+	for(var i=0; i<tokens.getNumberOfOnChannelTokens() - 1; i++) {
+    	token = inputSplitted.slice(test[i].start, test[i].stop + 1).join("");
+
+    	type = symbolNames[test[i].type];
+
+    	if(type.includes("VARIABLE_IDENTIFIER")){
+    		if(s.has(token)){
+    	    	tokenList.push(token);
+    		}else{
+    			console.log("ERROR!! Undeclared variable " + token);
+    		}
+    	}    	
+    }  
+	return tokenList;
+}
+
+function checkIfHasIdentifier(input){
+	var chars = new antlr4.InputStream(input);
+	var lexer = new QwertyLexer.QwertyLexer(chars);
+	var tokens  = new antlr4.CommonTokenStream(lexer);
+	var parser = new QwertyParser.QwertyParser(tokens);
+	var symbolNames = parser.symbolicNames;
+	var inputSplitted = input.split("");
+	var test = tokens.getTokens(0, tokens.getNumberOfOnChannelTokens());
+	var token;
+	var type;
+
+	var hasIntegerLiteral = false;
+
+	var tokenList = [];
 
     for(var i=0; i<tokens.getNumberOfOnChannelTokens() - 1; i++) {
     	token = inputSplitted.slice(test[i].start, test[i].stop + 1).join("");
@@ -145,7 +175,7 @@ AssignmentListener.prototype.enterVar_decl = function(ctx) {
 };
 
 // Enter a parse tree produced by QwertyParser#assignment_statement.
-QwertyListener.prototype.enterAssignment_statement = function(ctx) {
+AssignmentListener.prototype.enterAssignment_statement = function(ctx) {
 	
 	var varName = ctx.getChild(0).getText();
 	var varValue;
@@ -184,6 +214,7 @@ QwertyListener.prototype.enterAssignment_statement = function(ctx) {
 			varValue = s.get(varName).getValue() + "%" + ctx.getChild(2).getText();
 		}
 		varValue = checkIfHasIdentifier(varValue);
+		
 		s.get(varName).setValue(varValue);
 
 		//console.log("value and data type of " +varName+ ":" + s.get(varName).getValue() + " & " + typeof s.get(varName).getValue());
@@ -195,15 +226,13 @@ QwertyListener.prototype.enterAssignment_statement = function(ctx) {
 	}
 };
 
-//Enter a parse tree produced by QwertyParser#var_assignment_statement
-QwertyListener.prototype.enterVar_assignment_statement = function(ctx) {
+//Enter a parse tree produced by QwertyParser#funccall_statement.
+AssignmentListener.prototype.enterFunccall_statement = function(ctx) {
+	console.log(ctx);
+	console.log(ctx.getText());
 
 };
 
-
-//Enter a parse tree produced by QwertyParser#assignment_statement.
-QwertyListener.prototype.enterAssignment_factor = function(ctx) {
-};
 
 function evaluateBoolean(input) {
 	var hasAnd = false;
@@ -305,6 +334,25 @@ AssignmentListener.prototype.exitIf_statement = function(ctx) {
 // Enter a parse tree produced by QwertyParser#while_statement.
 AssignmentListener.prototype.enterWhile_statement = function(ctx) {
 	s.push();
+	console.log("while");
+	
+	var codeBlock = ctx.getChild(ctx.getChildCount() - 1);
+	var expression = ctx.getChild(1).getChild(1).getText();
+	console.log(expression);
+	
+	var identifiers = getIdentifiers(expression);
+	var identifiersInit = "";
+	for(var i=0; i<identifiers.length;i++){
+		identifiersInit = identifiersInit.concat("var " + identifiers[i] + "=" + s.get(identifiers[i]).getValue() + "; ");
+	}
+	console.log(codeBlock.getText());
+	console.log(identifiersInit);
+	var whileStmt = identifiersInit.concat("while("+expression+"){ctx.addChild(codeBlock); }");
+	console.log(whileStmt);
+
+	eval(whileStmt);
+	//eval("var i=0; while(i<2){console.log('hey'); i++;}");
+
 };
 
 // Exit a parse tree produced by QwertyParser#while_statement.
@@ -316,6 +364,26 @@ AssignmentListener.prototype.exitWhile_statement = function(ctx) {
 // Enter a parse tree produced by QwertyParser#do_while_statement.
 AssignmentListener.prototype.enterDo_while_statement = function(ctx) {
 	s.push();
+	console.log("dowhile");
+	
+	var codeBlock = ctx.code_block();
+	var expression = ctx.conditional_factor().getText();
+	console.log(expression);
+	
+	var identifiers = getIdentifiers(expression);
+	var identifiersInit = "";
+	for(var i=0; i<identifiers.length;i++){
+		identifiersInit = identifiersInit.concat("var " + identifiers[i] + "=" + s.get(identifiers[i]).getValue() + "; ");
+	}
+	console.log(codeBlock.getText());
+	console.log(identifiersInit);
+	var doWhileStmt = identifiersInit.concat("do{ctx.addChild(codeBlock); }while("+expression+");");
+	console.log(doWhileStmt);
+	
+	eval(doWhileStmt);
+
+	//eval("var i=0; do{console.log('hey'); i++;} while(i<2);");
+
 };
 
 // Exit a parse tree produced by QwertyParser#do_while_statement.
@@ -331,7 +399,7 @@ AssignmentListener.prototype.enterFor_statement = function(ctx) {
 	var codeBlock = ctx.getChild(ctx.getChildCount() - 1);
 
 	// i = 0;
-	var init = ctx.var_decl().var_identifier_list().getText();
+	var init = ctx.var_decl().var_identifier_list().getText()	;
 	var expFirst = checkIfHasIdentifier(ctx.var_decl().getText());		
 	var typeName = ctx.var_decl().data_type().getText();
 	var varName = ctx.var_decl().var_identifier_list().getText().split("=")[0];
@@ -346,7 +414,7 @@ AssignmentListener.prototype.enterFor_statement = function(ctx) {
 	var incrementDecrement = exprThird.split(varName)[1];
 
 	var forCon = "for(var " + init + ";" + exprSecond + ";" + exprThird + ") { ctx.addChild(assignBlock); ctx.addChild(codeBlock); }";
-
+	console.log(forCon);
 	eval(forCon);
 };
 
