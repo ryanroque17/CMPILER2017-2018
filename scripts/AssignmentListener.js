@@ -21,6 +21,7 @@ function checkIfHasIdentifier(input){
     var type;
     var hasIntegerLiteral = false;
     var tokenList = [];
+
     for(var i=0; i<tokens.getNumberOfOnChannelTokens() - 1; i++) {
     	token = inputSplitted.slice(test[i].start, test[i].stop + 1).join("");
     	tokenList.push(token);
@@ -37,9 +38,7 @@ function checkIfHasIdentifier(input){
     	    	}
     	    	tokenList.push(s.get(token).getValue());
     		}else{
-    	    	tokenList.push(token);
-
-    			//console.log("ERROR!! Undeclared variable " + token);
+    			console.log("ERROR!! Undeclared variable " + token);
     		}
     	}
     	if(type.includes("INTEGER_LITERAL")){
@@ -52,7 +51,7 @@ function checkIfHasIdentifier(input){
    //// console.log("rpn " + rpn(yard(input, tokenList)));
     if(hasIntegerLiteral) 
     	return rpn(yard(input, tokenList)); 
-    else
+    else 
     	return input;	
 }
 let yard = (infix, tokenList) => {
@@ -271,10 +270,31 @@ function evaluateBoolean(input) {
 // Enter a parse tree produced by QwertyParser#if_statement.
 AssignmentListener.prototype.enterIf_statement = function(ctx) {
 	s.push();
-	var eval = ctx.conditional_block()[0].conditional_factor().getText();
-	console.log(evaluateBoolean(eval));
-	if(evaluateBoolean(eval) == false)
-		ctx.removeLastChild();
+	
+	var noOfIf = ctx.getChildCount();
+	var condition; 
+	var hasTrue = false;
+	for(var i=0; i<noOfIf; i++){
+		var count = ctx.getChild(i).getChildCount();
+		if(hasTrue){
+			for(var j=0; j<count;j++){
+				ctx.getChild(i).removeLastChild();
+			}
+		}else{		
+			if(ctx.getChild(i).constructor.name.includes("Conditional_blockContext")){
+				condition = ctx.getChild(i).getChild(1).getText();
+	
+				if(evaluateBoolean(condition) == false){
+					for(var j=0; j<count;j++){
+						ctx.getChild(i).removeLastChild();
+					}
+				}else{
+					hasTrue = true;
+				}
+			}	
+		}
+		
+	}
 };
 
 // Exit a parse tree produced by QwertyParser#if_statement.
@@ -359,6 +379,5 @@ AssignmentListener.prototype.exitScan_statement = function(ctx) {
 // Enter a parse tree produced by QwertyParser#print_statement.
 AssignmentListener.prototype.enterPrint_statement = function(ctx) {
 	var statement = checkIfHasIdentifier(ctx.expression().getText());
-	console.log(statement);
-	
+	console.log(statement);	
 };

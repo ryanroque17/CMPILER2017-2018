@@ -21,9 +21,11 @@ function checkIfHasIdentifier(input){
     var type;
     var hasIntegerLiteral = false;
     var tokenList = [];
+    console.log("b4 for");
     for(var i=0; i<tokens.getNumberOfOnChannelTokens() - 1; i++) {
     	token = inputSplitted.slice(test[i].start, test[i].stop + 1).join("");
     	tokenList.push(token);
+        console.log("in for");
 
     	type = symbolNames[test[i].type];
     	//input = input.replace(token, token.concat(""));
@@ -37,9 +39,9 @@ function checkIfHasIdentifier(input){
     	    	}
     	    	tokenList.push(s.get(token).getValue());
     		}else{
-    	    	tokenList.push(token);
+    		    console.log("in else");
 
-    			//console.log("ERROR!! Undeclared variable " + token);
+    			console.log("ERROR!! Undeclared variable " + token);
     		}
     	}
     	if(type.includes("INTEGER_LITERAL")){
@@ -450,6 +452,7 @@ TypeChecker.prototype.visitScan_statement = function(ctx) {
 // Visit a parse tree produced by QwertyParser#print_statement.
 TypeChecker.prototype.visitPrint_statement = function(ctx) { 
 	this.visit(ctx.children);
+	console.log(ctx.expression().getText() + " h");
 	var statement = checkIfHasIdentifier(ctx.expression().getText());
 	console.log(statement);
 };
