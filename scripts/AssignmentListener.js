@@ -217,17 +217,52 @@ function evaluateBoolean(input) {
 		arr = [input];
 	}
 	  
-	console.log(arr);
-
 	for(var i=0; i<arr.length; i++) {
-	  var exp = arr[i].split("==");
-	  console.log(exp[0]);
-	  if(s.get(exp[0]).getValue() == exp[1]) {
+		var poe = arr[i];
+		if(poe.split("").includes("=")) {
+			if(poe.split("").includes("<")) {
+				// <=
+				var exp = arr[i].split("<=");
+				if(s.get(exp[0]).getValue() <= exp[1]) {
 	    
-	  } else {
-	    if(hasAnd)
-	      return false;
-	  }
+				} else {
+				    return false;
+				}
+			} else if(poe.split("").includes(">")) {
+				// >=
+				var exp = arr[i].split(">=");
+				if(s.get(exp[0]).getValue() >= exp[1]) {
+	    
+				} else {
+				    return false;
+				}
+			} else {
+				var exp = arr[i].split("==");
+			    if(s.get(exp[0]).getValue() == exp[1]) {
+			     
+			    } else {
+			        return false;
+			    }
+			}	
+		} else if(poe.split("").includes("<")) {
+			// <
+			var exp = arr[i].split("<");
+			console.log(s.get(exp[0]).getValue() + " AND " + exp[1]);
+		    if(s.get(exp[0]).getValue() < (parseInt(exp[1])) - 1) {
+		     
+		    } else {
+		        return false;
+		    }
+		} else if(poe.split("").includes(">")) {
+			// >
+			var exp = arr[i].split(">");
+			console.log(s.get(exp[0]).getValue() + " AND " + exp[1]);
+		    if(s.get(exp[0]).getValue() > (parseInt(exp[1])) + 1) {
+		     
+		    } else {
+		        return false;
+		    }
+		}
 	}
 
 	return true;
@@ -237,7 +272,7 @@ function evaluateBoolean(input) {
 AssignmentListener.prototype.enterIf_statement = function(ctx) {
 	s.push();
 	var eval = ctx.conditional_block()[0].conditional_factor().getText();
-
+	console.log(evaluateBoolean(eval));
 	if(evaluateBoolean(eval) == false)
 		ctx.removeLastChild();
 };
@@ -272,6 +307,27 @@ AssignmentListener.prototype.exitDo_while_statement = function(ctx) {
 // Enter a parse tree produced by QwertyParser#for_statement.
 AssignmentListener.prototype.enterFor_statement = function(ctx) {
 	s.push();
+	var assignBlock = ctx.getChild(6);
+	var codeBlock = ctx.getChild(ctx.getChildCount() - 1);
+
+	// i = 0;
+	var init = ctx.var_decl().var_identifier_list().getText();
+	var expFirst = checkIfHasIdentifier(ctx.var_decl().getText());		
+	var typeName = ctx.var_decl().data_type().getText();
+	var varName = ctx.var_decl().var_identifier_list().getText().split("=")[0];
+	var varValue = new QwertyValue(typeName, expFirst);
+	s.set(varName, varValue);
+
+	// i<10;
+	var exprSecond = ctx.bool_expression().getText();
+
+	// i++;
+	var exprThird = ctx.assignment_statement().getText();
+	var incrementDecrement = exprThird.split(varName)[1];
+
+	var forCon = "for(var " + init + ";" + exprSecond + ";" + exprThird + ") { ctx.addChild(assignBlock); ctx.addChild(codeBlock); }";
+
+	eval(forCon);
 };
 
 // Exit a parse tree produced by QwertyParser#for_statement.
@@ -281,6 +337,7 @@ AssignmentListener.prototype.exitFor_statement = function(ctx) {
 
 //Exit a parse tree produced by QwertyParser#program.
 AssignmentListener.prototype.exitProgram = function(ctx) {
+
 	s.pop();
 };
 
@@ -288,7 +345,7 @@ AssignmentListener.prototype.exitProgram = function(ctx) {
 AssignmentListener.prototype.enterScan_statement = function(ctx) {
 	console.log(ctx);
 	var variable = ctx.VARIABLE_IDENTIFIER().getText();
-		consoleBox.innerHTML += "<input type='text' id='" + variable + "' value='Patrick Gan'>";
+	consoleBox.innerHTML += "<input type='text' id='" + variable + "' value='Patrick Gan'>";
 };
 
 // Exit a parse tree produced by QwertyParser#scan_statement.
