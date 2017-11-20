@@ -125,7 +125,7 @@ relational_ope
 	;
 logical_ope					
 	: AND
-	| OR_OPE
+	| OR
 	;
 							
 							
