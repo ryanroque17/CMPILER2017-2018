@@ -176,6 +176,38 @@ AssignmentListener.prototype.enterProgram = function(ctx) {
 AssignmentListener.prototype.exitProgram = function(ctx) {
 };
 
+function isValidAssignment(dataType, input) {
+	// Set the input as its value if ever it is a variable
+	var isVariable = false;;
+	if(typeof(s.get(input)) == "object") {
+		input = s.get(exp[0]).getValue();
+		isVariable = true;
+	}
+	if(isVariable) {
+		if(dataType == "string" && input.getDataType() != "string") {
+			return false;
+		}
+		if(dataType =="int" && input.getDataType() != "int") {
+			return false;
+		}
+	} else {
+		if(dataType == "string") {
+			if(typeof(input) == "number") {
+				return false;
+			} else {
+				if(!(input.split("").includes('"') || input.split("").includes("'"))) {
+					return false;
+				}
+			}
+		} 
+		if(dataType == "int" && typeof(input) == "string") {
+			return false;
+		}
+	}
+
+	return true;
+}
+
 // Enter a parse tree produced by QwertyParser#var_decl.
 AssignmentListener.prototype.enterVar_decl = function(ctx) {
 	// int, string, etc
@@ -190,6 +222,9 @@ AssignmentListener.prototype.enterVar_decl = function(ctx) {
 	else{	// ex. int i = 1;		
 		var input = checkIfHasIdentifier(ctx.var_identifier_list().getChild(1).getChild(1).getText());		
 		var varValue = new QwertyValue(typeName, input);
+		if(!isValidAssignment(typeName, input)) {
+			console.log("Type Checking Error for variable " + varName);
+		}
 	}
 	
 	if(s.has(varName)) {
@@ -220,52 +255,57 @@ AssignmentListener.prototype.enterConst_statement = function(ctx) {
 
 // Enter a parse tree produced by QwertyParser#assignment_statement.
 AssignmentListener.prototype.enterAssignment_statement = function(ctx) {
+	var input = ctx.assignment_factor().getText();
 	var varName = ctx.getChild(0).getText();
 	var varValue;
 	var heightDiff;
 	var height;
 	var varHeight;
 	if(!s.has(varName)) {
-		//console.log("variable " + varName + " NOT in stack!");
+		console.log("variable " + varName + " NOT in stack!");
 	}else{
-		if(s.get(varName).getDataType() == "constant") {
-			console.log("ERROR! Cannot re-assign constant");
+		if(!isValidAssignment(s.get(varName).getDataType(), input)) {
+			console.log("Type Checking Error for variable " + varName);
 		} else {
-			height = s.height();
-			varHeight = s.getItsHeight(varName);
-			
-			if(height != varHeight){
-				heightDiff = height - varHeight;
-				for(var i=0; i<heightDiff ;i++){
-					s.pop();
+			if(s.get(varName).getDataType() == "constant") {
+				console.log("ERROR! Cannot re-assign constant");
+			} else {
+				height = s.height();
+				varHeight = s.getItsHeight(varName);
+				
+				if(height != varHeight){
+					heightDiff = height - varHeight;
+					for(var i=0; i<heightDiff ;i++){
+						s.pop();
+					}
 				}
-			}
-			////console.log(ctx.getChild(ctx.getChildCount()-1).getRuleIndex() +" aaaa");
-			if(ctx.getChild(1).getText() == "="){
-				varValue = ctx.getChild(2).getText();
-			}else if(ctx.getChild(1).getText() == "++"){
-				varValue = s.get(varName).getValue() + "+1";
-			}else if(ctx.getChild(1).getText() == "--"){
-				varValue = s.get(varName).getValue() + "-1";
-			}else if(ctx.getChild(1).getText() == "+="){
-				varValue = s.get(varName).getValue() + "+" + ctx.getChild(2).getText();
-			}else if(ctx.getChild(1).getText() == "-="){
-				varValue = s.get(varName).getValue() + "-" + ctx.getChild(2).getText();
-			}else if(ctx.getChild(1).getText() == "*="){
-				varValue = s.get(varName).getValue() + "*" + ctx.getChild(2).getText();
-			}else if(ctx.getChild(1).getText() == "/="){
-				varValue = s.get(varName).getValue() + "/" + ctx.getChild(2).getText();
-			}else if(ctx.getChild(1).getText() == "%="){
-				varValue = s.get(varName).getValue() + "%" + ctx.getChild(2).getText();
-			}
+				////console.log(ctx.getChild(ctx.getChildCount()-1).getRuleIndex() +" aaaa");
+				if(ctx.getChild(1).getText() == "="){
+					varValue = ctx.getChild(2).getText();
+				}else if(ctx.getChild(1).getText() == "++"){
+					varValue = s.get(varName).getValue() + "+1";
+				}else if(ctx.getChild(1).getText() == "--"){
+					varValue = s.get(varName).getValue() + "-1";
+				}else if(ctx.getChild(1).getText() == "+="){
+					varValue = s.get(varName).getValue() + "+" + ctx.getChild(2).getText();
+				}else if(ctx.getChild(1).getText() == "-="){
+					varValue = s.get(varName).getValue() + "-" + ctx.getChild(2).getText();
+				}else if(ctx.getChild(1).getText() == "*="){
+					varValue = s.get(varName).getValue() + "*" + ctx.getChild(2).getText();
+				}else if(ctx.getChild(1).getText() == "/="){
+					varValue = s.get(varName).getValue() + "/" + ctx.getChild(2).getText();
+				}else if(ctx.getChild(1).getText() == "%="){
+					varValue = s.get(varName).getValue() + "%" + ctx.getChild(2).getText();
+				}
 
-			// varValue = checkIfHasIdentifier(varValue);
-			s.get(varName).setValue(varValue);
+				// varValue = checkIfHasIdentifier(varValue);
+				s.get(varName).setValue(varValue);
 
-			//console.log("value and data type of " +varName+ ":" + s.get(varName).getValue() + " & " + typeof s.get(varName).getValue());
-			if(height != varHeight){
-				for(var i=0; i<heightDiff ;i++){
-					s.push();
+				//console.log("value and data type of " +varName+ ":" + s.get(varName).getValue() + " & " + typeof s.get(varName).getValue());
+				if(height != varHeight){
+					for(var i=0; i<heightDiff ;i++){
+						s.push();
+					}
 				}
 			}
 		}
