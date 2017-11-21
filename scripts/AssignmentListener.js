@@ -76,10 +76,11 @@ function checkIfHasIdentifier(input){
     }  
 
     ////console.log(tokenList.length + ' = ' + (tokens.getNumberOfOnChannelTokens() - 1));
-    //console.log("yard " + yard(input, tokenList));
-   //// console.log("rpn " + rpn(yard(input, tokenList)));
-    if(hasIntegerLiteral) 
+    // console.log("yard " + yard(input, tokenList));
+    if(hasIntegerLiteral) {
+    	console.log("rpn " + rpn(yard(input, tokenList)));
     	return rpn(yard(input, tokenList)); 
+    }
     else 
     	return input;	
 }
@@ -180,14 +181,18 @@ function isValidAssignment(dataType, input) {
 	// Set the input as its value if ever it is a variable
 	var isVariable = false;;
 	if(typeof(s.get(input)) == "object") {
-		input = s.get(exp[0]).getValue();
+		input = s.get(input);
 		isVariable = true;
 	}
+
 	if(isVariable) {
 		if(dataType == "string" && input.getDataType() != "string") {
 			return false;
 		}
 		if(dataType =="int" && input.getDataType() != "int") {
+			return false;
+		}
+		if(dataType == "float" && input.getDataType() != "float") {
 			return false;
 		}
 	} else {
@@ -201,6 +206,9 @@ function isValidAssignment(dataType, input) {
 			}
 		} 
 		if(dataType == "int" && typeof(input) == "string") {
+			return false;
+		}
+		if(dataType == "float" && !input.split("").includes('.')) {
 			return false;
 		}
 	}
@@ -255,7 +263,7 @@ AssignmentListener.prototype.enterConst_statement = function(ctx) {
 
 // Enter a parse tree produced by QwertyParser#assignment_statement.
 AssignmentListener.prototype.enterAssignment_statement = function(ctx) {
-	var input = ctx.assignment_factor().getText();
+	// var input = ctx.assignment_factor().getText();
 	var varName = ctx.getChild(0).getText();
 	var varValue;
 	var heightDiff;
@@ -264,9 +272,9 @@ AssignmentListener.prototype.enterAssignment_statement = function(ctx) {
 	if(!s.has(varName)) {
 		console.log("variable " + varName + " NOT in stack!");
 	}else{
-		if(!isValidAssignment(s.get(varName).getDataType(), input)) {
-			console.log("Type Checking Error for variable " + varName);
-		} else {
+		// if(!isValidAssignment(s.get(varName).getDataType(), input)) {
+		// 	console.log("Type Checking Error for variable " + varName);
+		// } else {
 			if(s.get(varName).getDataType() == "constant") {
 				console.log("ERROR! Cannot re-assign constant");
 			} else {
@@ -297,7 +305,6 @@ AssignmentListener.prototype.enterAssignment_statement = function(ctx) {
 				}else if(ctx.getChild(1).getText() == "%="){
 					varValue = s.get(varName).getValue() + "%" + ctx.getChild(2).getText();
 				}
-
 				// varValue = checkIfHasIdentifier(varValue);
 				s.get(varName).setValue(varValue);
 
@@ -307,7 +314,7 @@ AssignmentListener.prototype.enterAssignment_statement = function(ctx) {
 						s.push();
 					}
 				}
-			}
+			// }
 		}
 	}
 };
@@ -595,5 +602,7 @@ AssignmentListener.prototype.exitScan_statement = function(ctx) {
 // Enter a parse tree produced by QwertyParser#print_statement.
 AssignmentListener.prototype.enterPrint_statement = function(ctx) {
 	var statement = checkIfHasIdentifier(ctx.expression().getText());
-	console.log(statement);	
+	var split = statement.split("+").join("").split('"').join("");
+	console.log(split);
+	consoleBox.innerHTML += split + "<br>";
 };
