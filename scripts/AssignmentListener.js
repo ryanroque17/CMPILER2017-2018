@@ -6,7 +6,7 @@ var SymbolTable = require("/node_modules/symbol-table/stack");
 var s = SymbolTable()
 var QwertyValue = require('/scripts/QwertyValue');
 var consoleBox = document.getElementById("consoleBox");
-
+var lastPrint;
 
 function wait(ms){
 	   var start = new Date().getTime();
@@ -301,7 +301,13 @@ function evaluateBoolean(input) {
 				}
 			} else {
 				var exp = arr[i].split("==");
-			    if(s.get(exp[0]).getValue() == exp[1]) {
+				if(typeof(s.get(exp[0])) == "object") {
+					exp[0] = s.get(exp[0]).getValue();
+				}
+				if(typeof(s.get(exp[1])) == "object") {
+					exp[1] = s.get(exp[1]).getValue();
+				}
+			    if(exp[0] == exp[1]) {
 			     
 			    } else {
 			        return false;
@@ -334,7 +340,6 @@ function evaluateBoolean(input) {
 // Enter a parse tree produced by QwertyParser#if_statement.
 AssignmentListener.prototype.enterIf_statement = function(ctx) {
 	s.push();
-	
 	var noOfIf = ctx.getChildCount();
 	var condition; 
 	var hasTrue = false;
@@ -452,12 +457,11 @@ AssignmentListener.prototype.enterFor_statement = function(ctx) {
 	var codeBlock = ctx.getChild(ctx.getChildCount() - 1);
 	console.log(assignBlock.getText());
 	// i = 0;
-	var init = ctx.var_decl().var_identifier_list().getText()	;
+	var init = ctx.var_decl().var_identifier_list().getText();
 	var expFirst = checkIfHasIdentifier(ctx.var_decl().getText());		
 	var typeName = ctx.var_decl().data_type().getText();
 	var varName = ctx.var_decl().var_identifier_list().getText().split("=")[0];
 	var varValue = new QwertyValue(typeName, expFirst);
-	s.set(varName, varValue);
 
 	// i<10;
 	var exprSecond = ctx.bool_expression().getText();
@@ -466,10 +470,9 @@ AssignmentListener.prototype.enterFor_statement = function(ctx) {
 	var exprThird = ctx.assignment_statement().getText();
 	var incrementDecrement = exprThird.split(varName)[1];
 
-	var forCon = "for(var " + init + ";" + exprSecond + ";" + exprThird + ") { ctx.addChild(assignBlock); ctx.addChild(codeBlock); }";
+	var forCon = "for(var " + init + ";" + exprSecond + "-1;" + exprThird + ") { ctx.addChild(assignBlock); ctx.addChild(codeBlock); }";
 	eval(forCon);
 	console.log(forCon);
-
 };
 
 // Exit a parse tree produced by QwertyParser#for_statement.
@@ -479,22 +482,17 @@ AssignmentListener.prototype.exitFor_statement = function(ctx) {
 
 //Exit a parse tree produced by QwertyParser#program.
 AssignmentListener.prototype.exitProgram = function(ctx) {
-
 	s.pop();
 };
 
 // Enter a parse tree produced by QwertyParser#scan_statement.
 AssignmentListener.prototype.enterScan_statement = function(ctx) {
-	console.log(ctx);
 	var variable = ctx.VARIABLE_IDENTIFIER().getText();
 	/*consoleBox.innerHTML += "<input type='text' id='" + variable + "' value='Patrick Gan'>";
 	wait(7)*/
 	var input = prompt("");
-	
-	inputVal = checkIfHasIdentifier(input);
-	
+	inputVal = input;
 	s.get(variable).setValue(inputVal);
-	
 };
 
 // Exit a parse tree produced by QwertyParser#scan_statement.
