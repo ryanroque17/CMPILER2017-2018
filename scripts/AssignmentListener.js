@@ -178,7 +178,6 @@ AssignmentListener.prototype.exitProgram = function(ctx) {
 
 // Enter a parse tree produced by QwertyParser#var_decl.
 AssignmentListener.prototype.enterVar_decl = function(ctx) {
-	console.log(ctx);
 	// int, string, etc
 	var typeName = ctx.data_type().start.text;
 	// variable name
@@ -207,7 +206,7 @@ AssignmentListener.prototype.enterConst_statement = function(ctx) {
 	// variable name
 	var typeName = "constant";
 	var varName = ctx.VARIABLE_IDENTIFIER().getText();
-	var value = ctx.var_assignment_statement().getText();
+	var value = ctx.var_assignment_statement().getText().split('=')[1];
 			
 	var varValue = new QwertyValue(typeName, value);
 	
@@ -221,7 +220,6 @@ AssignmentListener.prototype.enterConst_statement = function(ctx) {
 
 // Enter a parse tree produced by QwertyParser#assignment_statement.
 AssignmentListener.prototype.enterAssignment_statement = function(ctx) {
-	console.log(ctx);
 	var varName = ctx.getChild(0).getText();
 	var varValue;
 	var heightDiff;
@@ -250,7 +248,6 @@ AssignmentListener.prototype.enterAssignment_statement = function(ctx) {
 			}else if(ctx.getChild(1).getText() == "--"){
 				varValue = s.get(varName).getValue() + "-1";
 			}else if(ctx.getChild(1).getText() == "+="){
-				//console.log(ctx.getChild(2));
 				varValue = s.get(varName).getValue() + "+" + ctx.getChild(2).getText();
 			}else if(ctx.getChild(1).getText() == "-="){
 				varValue = s.get(varName).getValue() + "-" + ctx.getChild(2).getText();
@@ -261,8 +258,8 @@ AssignmentListener.prototype.enterAssignment_statement = function(ctx) {
 			}else if(ctx.getChild(1).getText() == "%="){
 				varValue = s.get(varName).getValue() + "%" + ctx.getChild(2).getText();
 			}
-			varValue = checkIfHasIdentifier(varValue);
-			
+
+			// varValue = checkIfHasIdentifier(varValue);
 			s.get(varName).setValue(varValue);
 
 			//console.log("value and data type of " +varName+ ":" + s.get(varName).getValue() + " & " + typeof s.get(varName).getValue());
@@ -325,7 +322,21 @@ function evaluateBoolean(input) {
 				} else {
 				    return false;
 				}
-			} else {
+			} else if(poe.split("").includes("!")) {
+				// >=
+				var exp = arr[i].split("!=");
+				if(typeof(s.get(exp[0])) == "object") {
+					exp[0] = s.get(exp[0]).getValue();
+				}
+				if(typeof(s.get(exp[1])) == "object") {
+					exp[1] = s.get(exp[1]).getValue();
+				}
+				if(s.get(exp[0]).getValue() != exp[1]) {
+	    
+				} else {
+				    return false;
+				}
+			}else {
 				var exp = arr[i].split("==");
 				if(typeof(s.get(exp[0])) == "object") {
 					exp[0] = s.get(exp[0]).getValue();

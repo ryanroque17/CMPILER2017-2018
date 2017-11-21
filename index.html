@@ -32,13 +32,22 @@
   <!-- Ace Editor -->
   <div class="row">
           <div id="editor">void main() {
-    constant notfound = 404;
-    constant badrequest = 400;
-    constant requesttimeout = 408;
     
-    notfound = badrequest; //error #1
-    badrequest = 100; //error #2
-    badrequest++; //error #3
+    int i;
+    int total = 0;
+    scan(i);
+    print(i);
+    
+    total = total + i;
+    
+    while(i != -1) {
+        scan(i);
+        print(i);
+        total = total + i;
+    }
+    
+    print(total);
+
 }
 </div>
   </div>
