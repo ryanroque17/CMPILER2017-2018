@@ -212,8 +212,14 @@ function isValidAssignment(dataType, input) {
 		if(dataType == "int" && typeof(input) == "string") {
 			return false;
 		}
-		if(dataType == "float" && !input.split("").includes('.')) {
-			return false;
+		if(dataType == "float") {
+			if(typeof(input) == "number") {
+				return false;
+			} else {
+				if(!(input.split("").includes('.'))) {
+					return false;
+				}
+			}
 		}
 	}
 
@@ -235,12 +241,15 @@ AssignmentListener.prototype.enterVar_decl = function(ctx) {
 		var input = checkIfHasIdentifier(ctx.var_identifier_list().getChild(1).getChild(1).getText());		
 		var varValue = new QwertyValue(typeName, input);
 		if(!isValidAssignment(typeName, input)) {
-			console.log("Type Checking Error for variable " + varName);
+			var errorHtml = "<tr><td>Type Check Error<td></td><td>" + varName + "</td><td>Change var type or change value.</td></tr>";
+				consoleBox.innerHTML += errorHtml;
 		}
 	}
 	
 	if(s.has(varName)) {
 		console.log("variable " + varName + " already in stack");
+		var errorHtml = "<tr><td>Variable Already In Stack<td></td><td>" + varName + "</td><td>Change variable name.</td></tr>";
+		consoleBox.innerHTML += errorHtml;
 	} else {		
 		s.set(varName, varValue);
 		//console.log("value and data type of " +varName+ ":" + s.get(varName).getValue() + " & " + typeof s.get(varName).getValue());
@@ -259,6 +268,8 @@ AssignmentListener.prototype.enterConst_statement = function(ctx) {
 	
 	if(s.has(varName)) {
 		console.log("variable " + varName + " already in stack");
+		var errorHtml = "<tr><td>Variable Already In Stack<td></td><td>" + varName + "</td><td>Change variable name.</td></tr>";
+		consoleBox.innerHTML += errorHtml;
 	} else {		
 		s.set(varName, varValue);
 		//console.log("value and data type of " +varName+ ":" + s.get(varName).getValue() + " & " + typeof s.get(varName).getValue());
@@ -276,49 +287,53 @@ AssignmentListener.prototype.enterAssignment_statement = function(ctx) {
 	if(!s.has(varName)) {
 		console.log("variable " + varName + " NOT in stack!");
 	}else{
-		// if(!isValidAssignment(s.get(varName).getDataType(), input)) {
-		// 	console.log("Type Checking Error for variable " + varName);
-		// } else {
-			if(s.get(varName).getDataType() == "constant") {
-				console.log("ERROR! Cannot re-assign constant");
+		if(s.get(varName).getDataType() == "constant") {
+			console.log("ERROR! Cannot re-assign constant");
+			var errorHtml = "<tr><td>Cannot change constant value<td></td><td>" + varName + "</td><td>Change constant to data type.</td></tr>";
+			consoleBox.innerHTML += errorHtml;
+		} else {
+			height = s.height();
+			varHeight = s.getItsHeight(varName);
+			
+			if(height != varHeight){
+				heightDiff = height - varHeight;
+				for(var i=0; i<heightDiff ;i++){
+					s.pop();
+				}
+			}
+			////console.log(ctx.getChild(ctx.getChildCount()-1).getRuleIndex() +" aaaa");
+			if(ctx.getChild(1).getText() == "="){
+				varValue = ctx.getChild(2).getText();
+			}else if(ctx.getChild(1).getText() == "++"){
+				varValue = s.get(varName).getValue() + "+1";
+			}else if(ctx.getChild(1).getText() == "--"){
+				varValue = s.get(varName).getValue() + "-1";
+			}else if(ctx.getChild(1).getText() == "+="){
+				varValue = s.get(varName).getValue() + "+" + ctx.getChild(2).getText();
+			}else if(ctx.getChild(1).getText() == "-="){
+				varValue = s.get(varName).getValue() + "-" + ctx.getChild(2).getText();
+			}else if(ctx.getChild(1).getText() == "*="){
+				varValue = s.get(varName).getValue() + "*" + ctx.getChild(2).getText();
+			}else if(ctx.getChild(1).getText() == "/="){
+				varValue = s.get(varName).getValue() + "/" + ctx.getChild(2).getText();
+			}else if(ctx.getChild(1).getText() == "%="){
+				varValue = s.get(varName).getValue() + "%" + ctx.getChild(2).getText();
+			}
+			varValue = checkIfHasIdentifier(varValue);
+			if(!isValidAssignment(s.get(varName).getDataType(), varValue)) {
+				console.log("Type Checking Error for variable " + varName);
+				var errorHtml = "<tr><td>Type Check Error<td></td><td>" + varName + "</td><td>Change var type or change value.</td></tr>";
+				consoleBox.innerHTML += errorHtml;
 			} else {
-				height = s.height();
-				varHeight = s.getItsHeight(varName);
-				
-				if(height != varHeight){
-					heightDiff = height - varHeight;
-					for(var i=0; i<heightDiff ;i++){
-						s.pop();
-					}
-				}
-				////console.log(ctx.getChild(ctx.getChildCount()-1).getRuleIndex() +" aaaa");
-				if(ctx.getChild(1).getText() == "="){
-					varValue = ctx.getChild(2).getText();
-				}else if(ctx.getChild(1).getText() == "++"){
-					varValue = s.get(varName).getValue() + "+1";
-				}else if(ctx.getChild(1).getText() == "--"){
-					varValue = s.get(varName).getValue() + "-1";
-				}else if(ctx.getChild(1).getText() == "+="){
-					varValue = s.get(varName).getValue() + "+" + ctx.getChild(2).getText();
-				}else if(ctx.getChild(1).getText() == "-="){
-					varValue = s.get(varName).getValue() + "-" + ctx.getChild(2).getText();
-				}else if(ctx.getChild(1).getText() == "*="){
-					varValue = s.get(varName).getValue() + "*" + ctx.getChild(2).getText();
-				}else if(ctx.getChild(1).getText() == "/="){
-					varValue = s.get(varName).getValue() + "/" + ctx.getChild(2).getText();
-				}else if(ctx.getChild(1).getText() == "%="){
-					varValue = s.get(varName).getValue() + "%" + ctx.getChild(2).getText();
-				}
-				varValue = checkIfHasIdentifier(varValue);
 				s.get(varName).setValue(varValue);
+			}
 
-				//console.log("value and data type of " +varName+ ":" + s.get(varName).getValue() + " & " + typeof s.get(varName).getValue());
-				if(height != varHeight){
-					for(var i=0; i<heightDiff ;i++){
-						s.push();
-					}
+			//console.log("value and data type of " +varName+ ":" + s.get(varName).getValue() + " & " + typeof s.get(varName).getValue());
+			if(height != varHeight){
+				for(var i=0; i<heightDiff ;i++){
+					s.push();
 				}
-			// }
+			}
 		}
 	}
 };
@@ -622,7 +637,8 @@ AssignmentListener.prototype.enterPrint_statement = function(ctx) {
 	//console.log(ctx);
 	var statement = checkIfPrintHasIdentifier(ctx.expression().getText());
 	console.log(statement);
-	//var split = statement.split("+").join("").split('"').join("");
-	//console.log(split);
-	//consoleBox.innerHTML += split + "<br>";
+	var split = statement.split("+").join("").split('"').join("");
+	console.log(split);
+	var errorHtml = "<tr><td>(NOT ERROR) Print<td></td><td></td><td>" + split + "</td></tr>";
+	consoleBox.innerHTML += errorHtml;
 };
