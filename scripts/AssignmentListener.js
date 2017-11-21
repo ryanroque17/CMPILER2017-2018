@@ -72,13 +72,17 @@ function checkIfHasIdentifier(input){
 
     	if(type.includes("INTEGER_LITERAL")){
     		hasIntegerLiteral = true;
+    	}else if(type.includes("STRING_LITERAL")){
+    		token = token.split('"').join("");
+    		
+    	//	console.log(token);
     	}
     }  
 
     ////console.log(tokenList.length + ' = ' + (tokens.getNumberOfOnChannelTokens() - 1));
     // console.log("yard " + yard(input, tokenList));
     if(hasIntegerLiteral) {
-    	console.log("rpn " + rpn(yard(input, tokenList)));
+    	//console.log("rpn " + rpn(yard(input, tokenList)));
     	return rpn(yard(input, tokenList)); 
     }
     else 
@@ -305,7 +309,7 @@ AssignmentListener.prototype.enterAssignment_statement = function(ctx) {
 				}else if(ctx.getChild(1).getText() == "%="){
 					varValue = s.get(varName).getValue() + "%" + ctx.getChild(2).getText();
 				}
-				// varValue = checkIfHasIdentifier(varValue);
+				varValue = checkIfHasIdentifier(varValue);
 				s.get(varName).setValue(varValue);
 
 				//console.log("value and data type of " +varName+ ":" + s.get(varName).getValue() + " & " + typeof s.get(varName).getValue());
@@ -469,7 +473,7 @@ AssignmentListener.prototype.exitIf_statement = function(ctx) {
 
 //Enter a parse tree produced by QwertyParser#code_block.
 AssignmentListener.prototype.enterCode_block = function(ctx) {
-	console.log("CODE BLOC");
+	//console.log("CODE BLOC");
 };
 
 // Enter a parse tree produced by QwertyParser#while_statement.
@@ -599,10 +603,26 @@ AssignmentListener.prototype.exitScan_statement = function(ctx) {
 	s.get(variable).setValue(input);*/
 };
 
+function checkIfPrintHasIdentifier(input){
+	var printArgs = input.split("+");
+	var expression;
+	var printStmt = "";
+	for(var i=0; i<printArgs.length; i++){
+		
+		expression = checkIfHasIdentifier(printArgs[i]);
+		printStmt = printStmt.concat(expression);
+	}
+	//console.log("WWW" + printStmt);
+	printStmt = printStmt.split('"').join("");
+	
+	return printStmt;
+}
 // Enter a parse tree produced by QwertyParser#print_statement.
 AssignmentListener.prototype.enterPrint_statement = function(ctx) {
-	var statement = checkIfHasIdentifier(ctx.expression().getText());
-	var split = statement.split("+").join("").split('"').join("");
-	console.log(split);
-	consoleBox.innerHTML += split + "<br>";
+	//console.log(ctx);
+	var statement = checkIfPrintHasIdentifier(ctx.expression().getText());
+	console.log(statement);
+	//var split = statement.split("+").join("").split('"').join("");
+	//console.log(split);
+	//consoleBox.innerHTML += split + "<br>";
 };
