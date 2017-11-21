@@ -32,40 +32,13 @@
   <!-- Ace Editor -->
   <div class="row">
           <div id="editor">void main() {
-  int jungle = 1;
-  int dragon = 2;
-  int juice = 3;
-  int bubble = 4;
-  int farm = 5;
-  int lost = 6;
-  
-  int number = 0;
-  scan(number);
-  
-  if(jungle == number) {
-    print("Jungle Cubes!");
-  }
-  
-  if(dragon == number) {
-    print("Dragon Cubes!");
-  }
-  
-  if(juice == number) {
-    print("Juice Cubes");
-  }
-  
-  if(bubble == number) {
-    print("Bubble Cubes");
-  }
-  
-  if(farm == number) {
-    print("Farm Cubes");
-  }
-  
-  if(lost == number) {
-    print("Lost Cubes");
-  }
-  
+    constant notfound = 404;
+    constant badrequest = 400;
+    constant requesttimeout = 408;
+    
+    notfound = badrequest; //error #1
+    badrequest = 100; //error #2
+    badrequest++; //error #3
 }
 </div>
   </div>

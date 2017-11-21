@@ -6,15 +6,6 @@ var SymbolTable = require("/node_modules/symbol-table/stack");
 var s = SymbolTable()
 var QwertyValue = require('/scripts/QwertyValue');
 var consoleBox = document.getElementById("consoleBox");
-var lastPrint;
-
-function wait(ms){
-	   var start = new Date().getTime();
-	   var end = start;
-	   while(end < start + ms) {
-	     end = new Date().getTime();
-	  }
-	}
 
 function getIdentifiers(input){
 	var tokenList = [];
@@ -187,6 +178,7 @@ AssignmentListener.prototype.exitProgram = function(ctx) {
 
 // Enter a parse tree produced by QwertyParser#var_decl.
 AssignmentListener.prototype.enterVar_decl = function(ctx) {
+	console.log(ctx);
 	// int, string, etc
 	var typeName = ctx.data_type().start.text;
 	// variable name
@@ -202,7 +194,25 @@ AssignmentListener.prototype.enterVar_decl = function(ctx) {
 	}
 	
 	if(s.has(varName)) {
-		//console.log("variable " + varName + " already in stack");
+		console.log("variable " + varName + " already in stack");
+	} else {		
+		s.set(varName, varValue);
+		//console.log("value and data type of " +varName+ ":" + s.get(varName).getValue() + " & " + typeof s.get(varName).getValue());
+	}
+};
+
+// Enter a parse tree produced by QwertyParser#const_statement.
+AssignmentListener.prototype.enterConst_statement = function(ctx) {
+	// int, string, etc
+	// variable name
+	var typeName = "constant";
+	var varName = ctx.VARIABLE_IDENTIFIER().getText();
+	var value = ctx.var_assignment_statement().getText();
+			
+	var varValue = new QwertyValue(typeName, value);
+	
+	if(s.has(varName)) {
+		console.log("variable " + varName + " already in stack");
 	} else {		
 		s.set(varName, varValue);
 		//console.log("value and data type of " +varName+ ":" + s.get(varName).getValue() + " & " + typeof s.get(varName).getValue());
@@ -211,7 +221,7 @@ AssignmentListener.prototype.enterVar_decl = function(ctx) {
 
 // Enter a parse tree produced by QwertyParser#assignment_statement.
 AssignmentListener.prototype.enterAssignment_statement = function(ctx) {
-	
+	console.log(ctx);
 	var varName = ctx.getChild(0).getText();
 	var varValue;
 	var heightDiff;
@@ -220,42 +230,46 @@ AssignmentListener.prototype.enterAssignment_statement = function(ctx) {
 	if(!s.has(varName)) {
 		//console.log("variable " + varName + " NOT in stack!");
 	}else{
-		height = s.height();
-		varHeight = s.getItsHeight(varName);
-		
-		if(height != varHeight){
-			heightDiff = height - varHeight;
-			for(var i=0; i<heightDiff ;i++){
-				s.pop();
+		if(s.get(varName).getDataType() == "constant") {
+			console.log("ERROR! Cannot re-assign constant");
+		} else {
+			height = s.height();
+			varHeight = s.getItsHeight(varName);
+			
+			if(height != varHeight){
+				heightDiff = height - varHeight;
+				for(var i=0; i<heightDiff ;i++){
+					s.pop();
+				}
 			}
-		}
-		////console.log(ctx.getChild(ctx.getChildCount()-1).getRuleIndex() +" aaaa");
-		if(ctx.getChild(1).getText() == "="){
-			varValue = ctx.getChild(2).getText();
-		}else if(ctx.getChild(1).getText() == "++"){
-			varValue = s.get(varName).getValue() + "+1";
-		}else if(ctx.getChild(1).getText() == "--"){
-			varValue = s.get(varName).getValue() + "-1";
-		}else if(ctx.getChild(1).getText() == "+="){
-			//console.log(ctx.getChild(2));
-			varValue = s.get(varName).getValue() + "+" + ctx.getChild(2).getText();
-		}else if(ctx.getChild(1).getText() == "-="){
-			varValue = s.get(varName).getValue() + "-" + ctx.getChild(2).getText();
-		}else if(ctx.getChild(1).getText() == "*="){
-			varValue = s.get(varName).getValue() + "*" + ctx.getChild(2).getText();
-		}else if(ctx.getChild(1).getText() == "/="){
-			varValue = s.get(varName).getValue() + "/" + ctx.getChild(2).getText();
-		}else if(ctx.getChild(1).getText() == "%="){
-			varValue = s.get(varName).getValue() + "%" + ctx.getChild(2).getText();
-		}
-		varValue = checkIfHasIdentifier(varValue);
-		
-		s.get(varName).setValue(varValue);
+			////console.log(ctx.getChild(ctx.getChildCount()-1).getRuleIndex() +" aaaa");
+			if(ctx.getChild(1).getText() == "="){
+				varValue = ctx.getChild(2).getText();
+			}else if(ctx.getChild(1).getText() == "++"){
+				varValue = s.get(varName).getValue() + "+1";
+			}else if(ctx.getChild(1).getText() == "--"){
+				varValue = s.get(varName).getValue() + "-1";
+			}else if(ctx.getChild(1).getText() == "+="){
+				//console.log(ctx.getChild(2));
+				varValue = s.get(varName).getValue() + "+" + ctx.getChild(2).getText();
+			}else if(ctx.getChild(1).getText() == "-="){
+				varValue = s.get(varName).getValue() + "-" + ctx.getChild(2).getText();
+			}else if(ctx.getChild(1).getText() == "*="){
+				varValue = s.get(varName).getValue() + "*" + ctx.getChild(2).getText();
+			}else if(ctx.getChild(1).getText() == "/="){
+				varValue = s.get(varName).getValue() + "/" + ctx.getChild(2).getText();
+			}else if(ctx.getChild(1).getText() == "%="){
+				varValue = s.get(varName).getValue() + "%" + ctx.getChild(2).getText();
+			}
+			varValue = checkIfHasIdentifier(varValue);
+			
+			s.get(varName).setValue(varValue);
 
-		//console.log("value and data type of " +varName+ ":" + s.get(varName).getValue() + " & " + typeof s.get(varName).getValue());
-		if(height != varHeight){
-			for(var i=0; i<heightDiff ;i++){
-				s.push();
+			//console.log("value and data type of " +varName+ ":" + s.get(varName).getValue() + " & " + typeof s.get(varName).getValue());
+			if(height != varHeight){
+				for(var i=0; i<heightDiff ;i++){
+					s.push();
+				}
 			}
 		}
 	}
@@ -286,6 +300,12 @@ function evaluateBoolean(input) {
 			if(poe.split("").includes("<")) {
 				// <=
 				var exp = arr[i].split("<=");
+				if(typeof(s.get(exp[0])) == "object") {
+					exp[0] = s.get(exp[0]).getValue();
+				}
+				if(typeof(s.get(exp[1])) == "object") {
+					exp[1] = s.get(exp[1]).getValue();
+				}
 				if(s.get(exp[0]).getValue() <= exp[1]) {
 	    
 				} else {
@@ -294,6 +314,12 @@ function evaluateBoolean(input) {
 			} else if(poe.split("").includes(">")) {
 				// >=
 				var exp = arr[i].split(">=");
+				if(typeof(s.get(exp[0])) == "object") {
+					exp[0] = s.get(exp[0]).getValue();
+				}
+				if(typeof(s.get(exp[1])) == "object") {
+					exp[1] = s.get(exp[1]).getValue();
+				}
 				if(s.get(exp[0]).getValue() >= exp[1]) {
 	    
 				} else {
@@ -316,8 +342,14 @@ function evaluateBoolean(input) {
 		} else if(poe.split("").includes("<")) {
 			// <
 			var exp = arr[i].split("<");
-			console.log(s.get(exp[0]).getValue() + " AND " + exp[1]);
-		    if(s.get(exp[0]).getValue() < (parseInt(exp[1])) - 1) {
+			if(typeof(s.get(exp[0])) == "object") {
+					exp[0] = s.get(exp[0]).getValue();
+				}
+				if(typeof(s.get(exp[1])) == "object") {
+					exp[1] = s.get(exp[1]).getValue();
+				}
+
+		    if(exp[0] < exp[1]) {
 		     
 		    } else {
 		        return false;
@@ -325,8 +357,14 @@ function evaluateBoolean(input) {
 		} else if(poe.split("").includes(">")) {
 			// >
 			var exp = arr[i].split(">");
-			console.log(s.get(exp[0]).getValue() + " AND " + exp[1]);
-		    if(s.get(exp[0]).getValue() > (parseInt(exp[1])) + 1) {
+			if(typeof(s.get(exp[0])) == "object") {
+					exp[0] = s.get(exp[0]).getValue();
+				}
+				if(typeof(s.get(exp[1])) == "object") {
+					exp[1] = s.get(exp[1]).getValue();
+				}
+
+		    if(exp[0] > exp[1]) {
 		     
 		    } else {
 		        return false;
