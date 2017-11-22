@@ -125,7 +125,7 @@ relational_ope
 	;
 logical_ope					
 	: AND
-	| OR
+	| OR_OPE
 	;
 							
 							
@@ -174,7 +174,7 @@ if_statement
 
 conditional_block			
 	: OPEN_PAR conditional_factor CLOSE_PAR
-	  code_block
+	  OPEN_BRACE (statement)* CLOSE_BRACE
 	;
 code_block					
 	: OPEN_BRACE (statement)* CLOSE_BRACE;
@@ -198,7 +198,6 @@ print_statement
 	: PRINT OPEN_PAR expression CLOSE_PAR
 	| PRINTLN OPEN_PAR expression CLOSE_PAR
 	;
-
 
 
 
@@ -273,7 +272,7 @@ INTEGER_LITERAL				: [0-9]+;
 FLOAT_LITERAL				: INTEGER_LITERAL? '.' [0-9]+;
 CHAR_LITERAL				: '\'' . '\'';
 STRING_LITERAL				: '"' .*? '"';
-BOOLEAN_LITERAL				: 'yas' | 'deins' ; 
+BOOLEAN_LITERAL				: 'true' | 'false' ; 
 VARIABLE_IDENTIFIER			: [a-z]+[0-9]*;
 FUNCTION_IDENTIFIER			: [A-Z]+[0-9]*;
 

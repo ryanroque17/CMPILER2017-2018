@@ -47,7 +47,7 @@ function checkIfHasIdentifier(input){
 	var test = tokens.getTokens(0, tokens.getNumberOfOnChannelTokens());
 	var token;
 	var type;
-
+	var hasFloat = false;
 	var hasIntegerLiteral = false;
 
 	var tokenList = [];
@@ -62,6 +62,7 @@ function checkIfHasIdentifier(input){
     		////console.log("token: " + token);
     		if(s.has(token)){
     			input = input.replace(token, s.get(token).getValue());
+    			console.log(typeof(s.get(token).getDataType()));
     			if(typeof s.get(token).getValue() == "number"){
     	    		hasIntegerLiteral = true;
     	    	}
@@ -73,11 +74,14 @@ function checkIfHasIdentifier(input){
         	tokenList.push(token);
 
     	if(type.includes("INTEGER_LITERAL")){
+    		console.log("hello");
     		hasIntegerLiteral = true;
     	}else if(type.includes("STRING_LITERAL")){
     		token = token.split('"').join("");
     		
     	//	console.log(token);
+    	} else if(type.includes("FLOAT_LITERAL")) {
+    		hasIntegerLiteral = true;
     	}
     }  
 
@@ -85,8 +89,8 @@ function checkIfHasIdentifier(input){
     // console.log("yard " + yard(input, tokenList));
     if(hasIntegerLiteral) {
     	//console.log("rpn " + rpn(yard(input, tokenList)));
-    	return rpn(yard(input, tokenList)); 
-    }
+    	return parseInt(rpn(yard(input, tokenList))); 
+    } 
     else 
     	return input;	
 }
@@ -201,6 +205,9 @@ function isValidAssignment(dataType, input) {
 		if(dataType == "float" && input.getDataType() != "float") {
 			return false;
 		}
+		if(dataType == "boolean" && input.getDataType() != "boolean") {
+			return false;
+		}
 	} else {
 		if(dataType == "string") {
 			if(typeof(input) == "number") {
@@ -221,6 +228,15 @@ function isValidAssignment(dataType, input) {
 				if(!(input.split("").includes('.'))) {
 					return false;
 				}
+			}
+		}
+		console.log(dataType);
+		console.log(input);
+		console.log(typeof(input));
+		if(dataType == "boolean") {
+			if(!(input.includes("true") || input.includes("false"))) {
+				console.log("not true!");
+				return false;
 			}
 		}
 	}
@@ -468,6 +484,7 @@ AssignmentListener.prototype.enterIf_statement = function(ctx) {
 			}
 		}else{		
 			if(ctx.getChild(i).constructor.name.includes("Conditional_blockContext")){
+				console.log(ctx);
 				condition = ctx.getChild(i).getChild(1).getText();
 	
 				if(evaluateBoolean(condition) == false){
@@ -496,27 +513,16 @@ AssignmentListener.prototype.enterCode_block = function(ctx) {
 AssignmentListener.prototype.enterWhile_statement = function(ctx) {
 	s.push();
 	console.log(ctx);
-	
 	var codeBlock = ctx.getChild(1).getChild(3);
 	var expression = ctx.getChild(1).getChild(1).getText();
-	
-	
-	if(evaluateBoolean(expression)){
-		//ctx.removeLastChild()
-		//console.log(ctx);
-		//ctx.addChild(codeBlock);	
-				
-		ctx.addChild(ctx);
-		//ctr++;
 
-		//ctx.addChild(codeBlock);
+	if(evaluateBoolean(expression)){
+		ctx.addChild(ctx);
 	}else{
 		for(var i=0; i<ctx.getChildCount(); i++){
 			ctx.removeLastChild();
 		}
 	}
-
-
 };
 
 // Exit a parse tree produced by QwertyParser#while_statement.
@@ -561,6 +567,19 @@ AssignmentListener.prototype.exitDo_while_statement = function(ctx) {
 };
 
 
+function forSecondExpression(input) {
+  var varName = input.split("")[input.length-1];
+  
+  var newString = input.split(varName)[0];
+  
+  if(typeof(s.get(varName)) == "object") {
+      varName = s.get(varName).getValue();
+  }
+  
+  return newString + varName;
+   
+}
+
 // Enter a parse tree produced by QwertyParser#for_statement.
 AssignmentListener.prototype.enterFor_statement = function(ctx) {
 	s.push();
@@ -576,8 +595,7 @@ AssignmentListener.prototype.enterFor_statement = function(ctx) {
 	var varValue = new QwertyValue(typeName, expFirst);
 
 	// i<10;
-	var exprSecond = ctx.bool_expression().getText();
-
+	var exprSecond = forSecondExpression(ctx.bool_expression().getText());
 	// i++;
 	var exprThird = ctx.assignment_statement().getText();
 	var incrementDecrement = exprThird.split(varName)[1];
@@ -603,7 +621,8 @@ AssignmentListener.prototype.enterScan_statement = function(ctx) {
 	/*consoleBox.innerHTML += "<input type='text' id='" + variable + "' value='Patrick Gan'>";
 	wait(7)*/
 	var input = prompt(lastPrint);
-	inputVal = input;
+	inputVal = checkIfHasIdentifier(input);
+	console.log("TYPE: " + typeof(inputVal));
 	s.get(variable).setValue(inputVal);
 };
 
