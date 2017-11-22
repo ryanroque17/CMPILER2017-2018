@@ -7,6 +7,8 @@ var s = SymbolTable()
 var QwertyValue = require('/scripts/QwertyValue');
 var consoleBox = document.getElementById("consoleBox");
 
+var lastPrint;
+
 function getIdentifiers(input){
 	var tokenList = [];
 	var chars = new antlr4.InputStream(input);
@@ -369,7 +371,7 @@ function evaluateBoolean(input) {
 				if(typeof(s.get(exp[1])) == "object") {
 					exp[1] = s.get(exp[1]).getValue();
 				}
-				if(s.get(exp[0]).getValue() <= exp[1]) {
+				if(exp[0] <= exp[1]) {
 	    
 				} else {
 				    return false;
@@ -383,7 +385,7 @@ function evaluateBoolean(input) {
 				if(typeof(s.get(exp[1])) == "object") {
 					exp[1] = s.get(exp[1]).getValue();
 				}
-				if(s.get(exp[0]).getValue() >= exp[1]) {
+				if(exp[0] >= exp[1]) {
 	    
 				} else {
 				    return false;
@@ -397,7 +399,7 @@ function evaluateBoolean(input) {
 				if(typeof(s.get(exp[1])) == "object") {
 					exp[1] = s.get(exp[1]).getValue();
 				}
-				if(s.get(exp[0]).getValue() != exp[1]) {
+				if(exp[0] != exp[1]) {
 	    
 				} else {
 				    return false;
@@ -491,39 +493,29 @@ AssignmentListener.prototype.enterCode_block = function(ctx) {
 	//console.log("CODE BLOC");
 };
 
-// Enter a parse tree produced by QwertyParser#while_statement.
 AssignmentListener.prototype.enterWhile_statement = function(ctx) {
 	s.push();
 	console.log(ctx);
 	
 	var codeBlock = ctx.getChild(1).getChild(3);
 	var expression = ctx.getChild(1).getChild(1).getText();
-	console.log(expression);
-	var hey = 0;
-	/*var identifiers = getIdentifiers(expression);
-	var identifiersInit = "";
-	for(var i=0; i<identifiers.length;i++){
-		identifiersInit = identifiersInit.concat("var " + identifiers[i] + "=" + s.get(identifiers[i]).getValue() + "; ");
-	}
-	console.log(codeBlock.getText());
-	console.log(identifiersInit);
-	var whileStmt = identifiersInit.concat("while("+expression+"){ctx.addChild(codeBlock); }");
-	console.log(whileStmt);*/
-	while(hey<10){
-		console.log("heyo " + codeBlock.constructor.name);
-		AssignmentListener.prototype.enterCode_block(codeBlock);
-		hey++;
-		console.log(evaluateBoolean(expression))
-	}
-	console.log(ctx);
-	/*while(hey<5){
-		this.visitTerminal(codeBlock);
-		console.log(evaluateBoolean(expression));
-		hey++;
-	}*/
+	
+	
+	if(evaluateBoolean(expression)){
+		//ctx.removeLastChild()
+		//console.log(ctx);
+		//ctx.addChild(codeBlock);	
+				
+		ctx.addChild(ctx);
+		//ctr++;
 
-	//eval(whileStmt);
-	//eval("var i=0; while(i<2){console.log('hey'); i++;}");
+		//ctx.addChild(codeBlock);
+	}else{
+		for(var i=0; i<ctx.getChildCount(); i++){
+			ctx.removeLastChild();
+		}
+	}
+
 
 };
 
@@ -536,25 +528,30 @@ AssignmentListener.prototype.exitWhile_statement = function(ctx) {
 // Enter a parse tree produced by QwertyParser#do_while_statement.
 AssignmentListener.prototype.enterDo_while_statement = function(ctx) {
 	s.push();
-	console.log("dowhile");
-	
+	//console.log("dowhile");
+	console.log(ctx);
 	var codeBlock = ctx.code_block();
 	var expression = ctx.conditional_factor().getText();
-	console.log(expression);
+	console.log(evaluateBoolean(expression));
 	
-	var identifiers = getIdentifiers(expression);
-	var identifiersInit = "";
-	for(var i=0; i<identifiers.length;i++){
-		identifiersInit = identifiersInit.concat("var " + identifiers[i] + "=" + s.get(identifiers[i]).getValue() + "; ");
-	}
-	console.log(codeBlock.getText());
-	console.log(identifiersInit);
-	var doWhileStmt = identifiersInit.concat("do{ctx.addChild(codeBlock); }while("+expression+");");
-	console.log(doWhileStmt);
-	
-	//eval(doWhileStmt);
+	if(evaluateBoolean(expression)){
+		console.log("ey1");
 
-	//eval("var i=0; do{console.log('hey'); i++;} while(i<2);");	
+		//ctx.removeLastChild()
+		//console.log(ctx);
+		ctx.addChild(codeBlock);	
+
+		ctx.addChild(ctx);
+		//ctr++;
+
+		//ctx.addChild(codeBlock);
+	}else{
+		console.log("ey");
+
+		for(var i=0; i<ctx.getChildCount(); i++){
+			ctx.removeLastChild();
+		}
+	}	
 
 };
 
@@ -605,7 +602,7 @@ AssignmentListener.prototype.enterScan_statement = function(ctx) {
 	var variable = ctx.VARIABLE_IDENTIFIER().getText();
 	/*consoleBox.innerHTML += "<input type='text' id='" + variable + "' value='Patrick Gan'>";
 	wait(7)*/
-	var input = prompt("");
+	var input = prompt(lastPrint);
 	inputVal = input;
 	s.get(variable).setValue(inputVal);
 };
@@ -638,6 +635,7 @@ AssignmentListener.prototype.enterPrint_statement = function(ctx) {
 	var statement = checkIfPrintHasIdentifier(ctx.expression().getText());
 	console.log(statement);
 	var split = statement.split("+").join("").split('"').join("");
+	lastPrint = split;
 	console.log(split);
 	var errorHtml = "<tr><td>(NOT ERROR) Print<td></td><td></td><td>" + split + "</td></tr>";
 	consoleBox.innerHTML += errorHtml;
