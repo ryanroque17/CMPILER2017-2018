@@ -11,13 +11,14 @@ var IdentifierHandler = function () {
 
 IdentifierHandler.prototype.convertVarToVal = function(input, s){
 	var tokenList = generateTokenList(input, s);
+	
 	if(hasString)
 		return buildInputString(tokenList);	
 	else
 		return evaluateExpression(tokenList);
 }
 
-function generateTokenList(input ,s){
+function generateTokenList(input, s){
 	var chars = new antlr4.InputStream(input);
 	var lexer = new QwertyLexer.QwertyLexer(chars);
 	var tokens  = new antlr4.CommonTokenStream(lexer);
@@ -37,8 +38,12 @@ function generateTokenList(input ,s){
 
     	if(type.includes("VARIABLE_IDENTIFIER")){
     		if(s.has(token)) {  		
-    			if(s.get(token).getValue())
+    			console.log("ASD" + s.get(token).getValue());
+    			if(s.get(token).getValue() != null){
+        			console.log("YEY" + s.get(token).getValue());
+
     				tokenList.push(s.get(token).getValue());
+    			}
     			else
     				tokenList.push('"null"');
     		}
@@ -76,8 +81,9 @@ IdentifierHandler.prototype.evaluatePrintExpression = function(input, s){
 	var printArgs = input.split("+");
 	var expression;
 	var printStmt = "";
+	
+	
 	for(var i=0; i<printArgs.length; i++){
-		//console.log("args" + printArgs[i]);
 		expression = generateTokenList(printArgs[i], s);
 		printStmt = printStmt.concat(expression.toString());
 	}

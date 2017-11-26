@@ -17,6 +17,7 @@ AssignmentListener = function(res) {
     QwertyListener.call(this);
     return this;
 };
+var assignmentListener = new AssignmentListener();
 
 // inherit default listener
 AssignmentListener.prototype = Object.create(QwertyListener.prototype);
@@ -95,6 +96,7 @@ AssignmentListener.prototype.enterAssignment_statement = function(ctx) {
 	var heightDiff;
 	var height;
 	var varHeight;
+	
 	if(!s.has(varName)) {
 		console.log("variable " + varName + " NOT in stack!");
 	}else{
@@ -131,6 +133,7 @@ AssignmentListener.prototype.enterAssignment_statement = function(ctx) {
 				varValue = s.get(varName).getValue() + "%" + ctx.getChild(2).getText();
 			}
 			varValue = identifierHandler.convertVarToVal(varValue, s);
+			s.get(varName).setValue(varValue);
 			//console.log(varValue);
 			//varValue = rpn(yard(varValue));
 			/*if(!isValidAssignment(s.get(varName).getDataType(), varValue)) {
@@ -313,15 +316,15 @@ function execWhile(ctx){
 	console.log(expression.getText());
 	//ctx.removeLastChild();
 	console.log(codeBlock);
-	antlr4.tree.ParseTreeWalker.DEFAULT.exitRule(this, conditionalBlock);
 	if(evaluateBoolean(expression.getText())){
-		ctx.addChild(ctx);
 		/*for(var i=0; i<codeBlock.length; i++){
 			//console.log(codeBlock[i]);
 			ctx.addChild(codeBlock[i]);	
 
 			console.log("ey");
 		}*/
+		ctx.addChild(ctx);
+		
 		//ctx.addChild();	
 	}else
 		for(var i=0; i<ctx.getChildCount(); i++){
@@ -400,7 +403,7 @@ AssignmentListener.prototype.enterFor_statement = function(ctx) {
 	console.log(assignBlock.getText());
 	// i = 0;
 	var init = ctx.var_decl().var_identifier_list().getText();
-	var expFirst = identifierHandler.convertVarToVal(ctx.var_decl().getText(), 1);		
+	var expFirst = identifierHandler.convertVarToVal(ctx.var_decl().getText(), s);		
 	var typeName = ctx.var_decl().data_type().getText();
 	var varName = ctx.var_decl().var_identifier_list().getText().split("=")[0];
 	var varValue = new QwertyValue(typeName, expFirst);
