@@ -181,7 +181,8 @@ code_block
 	
 	
 while_statement				
-	: WHILE conditional_block;
+	: WHILE OPEN_PAR conditional_factor CLOSE_PAR code_block;
+	
 do_while_statement			
 	: DO code_block WHILE OPEN_PAR conditional_factor CLOSE_PAR END
 	| DO code_block WHILE OPEN_PAR conditional_factor CLOSE_PAR {notifyErrorListeners("Insert ';' to complete statement'");} 
