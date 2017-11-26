@@ -38,9 +38,9 @@ function generateTokenList(input, s){
 
     	if(type.includes("VARIABLE_IDENTIFIER")){
     		if(s.has(token)) {  		
-    			console.log("ASD" + s.get(token).getValue());
+    			//console.log("ASD" + s.get(token).getValue());
     			if(s.get(token).getValue() != null){
-        			console.log("YEY" + s.get(token).getValue());
+        			//console.log("YEY" + s.get(token).getValue());
 
     				tokenList.push(s.get(token).getValue());
     			}

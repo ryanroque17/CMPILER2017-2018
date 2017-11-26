@@ -168,8 +168,9 @@ conditional_factor
 	| BOOLEAN_LITERAL
 	;
 if_statement				
-	: IF conditional_block
-	  (ELSE_IF conditional_block)*
+	: IF OPEN_PAR conditional_factor CLOSE_PAR
+	  code_block
+	  (ELSE_IF OPEN_PAR conditional_factor CLOSE_PAR code_block)*
 	  (ELSE code_block)*;
 
 conditional_block			

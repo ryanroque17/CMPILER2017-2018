@@ -271,31 +271,31 @@ function evaluateBoolean(input) {
 // Enter a parse tree produced by QwertyParser#if_statement.
 AssignmentListener.prototype.enterIf_statement = function(ctx) {
 	s.push();
-	var noOfIf = ctx.getChildCount();
-	var condition; 
-	var hasTrue = false;
-	for(var i=0; i<noOfIf; i++){
-		var count = ctx.getChild(i).getChildCount();
-		if(hasTrue){
-			for(var j=0; j<count;j++){
-				ctx.getChild(i).removeLastChild();
-			}
-		}else{		
-			if(ctx.getChild(i).constructor.name.includes("Conditional_blockContext")){
-				console.log(ctx);
-				condition = ctx.getChild(i).getChild(1).getText();
 	
-				if(evaluateBoolean(condition) == false){
-					for(var j=0; j<count;j++){
-						ctx.getChild(i).removeLastChild();
-					}
-				}else{
-					hasTrue = true;
-				}
-			}	
-		}
+	console.log(ctx);
+	var ctxHolder = ctx;
+	var codeBlocks = ctx.code_block();
+	var conditions = ctx.conditional_factor();
+	var ctxChildCount = ctx.getChildCount();
+	var hasTrue = false;
 		
+	for(var i=0; i<conditions.length;i++){
+		if(evaluateBoolean(conditions[i].getText())){
+			antlr4.tree.ParseTreeWalker.DEFAULT.walk(this, codeBlocks[i]);
+			
+			hasTrue = true;
+			this.exitIf_statement(ctx);
+
+			break;
+		}
 	}
+	
+	if(codeBlocks.length != conditions.length && !hasTrue){
+		antlr4.tree.ParseTreeWalker.DEFAULT.walk(this, codeBlocks[codeBlocks.length-1]);
+		this.exitIf_statement(ctx);
+
+	}
+	ctx = ctxHolder;
 };
 
 // Exit a parse tree produced by QwertyParser#if_statement.
@@ -308,30 +308,6 @@ AssignmentListener.prototype.enterCode_block = function(ctx) {
 	//console.log("CODE BLOC");
 };
 
-function execWhile(ctx){
-	var codeBlock = ctx.conditional_block().statement();
-	var expression = ctx.conditional_block().conditional_factor();
-	var conditionalBlock = ctx.conditional_block();
-	
-	console.log(expression.getText());
-	//ctx.removeLastChild();
-	console.log(codeBlock);
-	if(evaluateBoolean(expression.getText())){
-		/*for(var i=0; i<codeBlock.length; i++){
-			//console.log(codeBlock[i]);
-			ctx.addChild(codeBlock[i]);	
-
-			console.log("ey");
-		}*/
-		ctx.addChild(ctx);
-		
-		//ctx.addChild();	
-	}else
-		for(var i=0; i<ctx.getChildCount(); i++){
-			ctx.removeLastChild();
-		}
-
-}
 AssignmentListener.prototype.enterWhile_statement = function(ctx) {
 	s.push();
 
@@ -356,6 +332,7 @@ AssignmentListener.prototype.enterDo_while_statement = function(ctx) {
 	s.push();
 	//console.log("dowhile");
 	var codeBlock = ctx.code_block();
+	var codeBlockHolder = ctx.code_block();
 	var expression = ctx.conditional_factor().getText();
 	console.log(evaluateBoolean(expression));
 	
@@ -366,9 +343,11 @@ AssignmentListener.prototype.enterDo_while_statement = function(ctx) {
 	}			
 	
 	antlr4.tree.ParseTreeWalker.DEFAULT.walk(this, codeBlock);
+	codeBlock = codeBlockHolder;
 
 	while(evaluateBoolean(expression)){
 		console.log("ey1");
+		codeBlock = codeBlockHolder;
 
 		antlr4.tree.ParseTreeWalker.DEFAULT.walk(this, codeBlock);
 	}
