@@ -5,166 +5,12 @@ var QwertyListener = require('../generated-parser/QwertyListener').QwertyListene
 var SymbolTable = require("/node_modules/symbol-table/stack");
 var s = SymbolTable()
 var QwertyValue = require('/scripts/QwertyValue');
+var IdentifierHandler = require('/scripts/IdentifierHandler');
+
+var identifierHandler = new IdentifierHandler();
 var consoleBox = document.getElementById("consoleBox");
 
 var lastPrint;
-
-function getIdentifiers(input){
-	var tokenList = [];
-	var chars = new antlr4.InputStream(input);
-	var lexer = new QwertyLexer.QwertyLexer(chars);
-	var tokens  = new antlr4.CommonTokenStream(lexer);
-	var parser = new QwertyParser.QwertyParser(tokens);
-	var symbolNames = parser.symbolicNames;
-	var inputSplitted = input.split("");
-	var test = tokens.getTokens(0, tokens.getNumberOfOnChannelTokens());
-	var token;
-	var type;
-
-	for(var i=0; i<tokens.getNumberOfOnChannelTokens() - 1; i++) {
-    	token = inputSplitted.slice(test[i].start, test[i].stop + 1).join("");
-
-    	type = symbolNames[test[i].type];
-
-    	if(type.includes("VARIABLE_IDENTIFIER")){
-    		if(s.has(token)){
-    	    	tokenList.push(token);
-    		}else{
-    			console.log("ERROR!! Undeclared variable " + token);
-    		}
-    	}    	
-    }  
-	return tokenList;
-}
-
-function checkIfHasIdentifier(input){
-	var chars = new antlr4.InputStream(input);
-	var lexer = new QwertyLexer.QwertyLexer(chars);
-	var tokens  = new antlr4.CommonTokenStream(lexer);
-	var parser = new QwertyParser.QwertyParser(tokens);
-	var symbolNames = parser.symbolicNames;
-	var inputSplitted = input.split("");
-	var test = tokens.getTokens(0, tokens.getNumberOfOnChannelTokens());
-	var token;
-	var type;
-	var hasFloat = false;
-	var hasIntegerLiteral = false;
-
-	var tokenList = [];
-
-    for(var i=0; i<tokens.getNumberOfOnChannelTokens() - 1; i++) {
-    	token = inputSplitted.slice(test[i].start, test[i].stop + 1).join("");
-
-    	type = symbolNames[test[i].type];
-    	//input = input.replace(token, token.concat(""));
-    	////console.log(input);
-    	if(type.includes("VARIABLE_IDENTIFIER")){
-    		////console.log("token: " + token);
-    		if(s.has(token)){
-    			input = input.replace(token, s.get(token).getValue());
-    			console.log(typeof(s.get(token).getDataType()));
-    			if(typeof s.get(token).getValue() == "number"){
-    	    		hasIntegerLiteral = true;
-    	    	}
-    	    	tokenList.push(s.get(token).getValue());
-    		}else{
-    			console.log("ERROR!! Undeclared variable " + token);
-    		}
-    	}else
-        	tokenList.push(token);
-
-    	if(type.includes("INTEGER_LITERAL")){
-    		console.log("hello");
-    		hasIntegerLiteral = true;
-    	}else if(type.includes("STRING_LITERAL")){
-    		token = token.split('"').join("");
-    		
-    	//	console.log(token);
-    	} else if(type.includes("FLOAT_LITERAL")) {
-    		hasIntegerLiteral = true;
-    	}
-    }  
-
-    ////console.log(tokenList.length + ' = ' + (tokens.getNumberOfOnChannelTokens() - 1));
-    // console.log("yard " + yard(input, tokenList));
-    if(hasIntegerLiteral) {
-    	//console.log("rpn " + rpn(yard(input, tokenList)));
-    	return parseInt(rpn(yard(input, tokenList))); 
-    } 
-    else 
-    	return input;	
-}
-
-function changeNegative(tokenList){
-	var newTokenList = [];
-	var token;
-	
-	for(var i=0; i<tokenList.length; i++){
-		token = tokenList[i];
-		if(token == '-' && !(tokenList[i-1]>=0)){
-			newTokenList.push("(");
-			newTokenList.push("0");
-			newTokenList.push("-");
-			newTokenList.push(tokenList[i+1]);
-			newTokenList.push(")");
-			i++;
-		}else
-			newTokenList.push(token);
-	}
-	
-	return newTokenList;
-	
-}
-let yard = (infix, tokenList) => {
-	  let ops = {'+': 1, '-': 1, '*': 2, '/': 2};
-	  let peek = (a) => a[a.length - 1];
-	  let stack = [];
-	  let output = [];
-	  let token;
-	  
-	  tokenList = changeNegative(tokenList);
-	  for(var i=0; i<tokenList.length; i++){
-		  token = tokenList[i];
-		  if (!isNaN(parseFloat(token))) {
-	        output.push(token);
-	      }
-
-	      if (token in ops) {
-	    	
-		    while (peek(stack) in ops && ops[token] <= ops[peek(stack)])
-		      output.push(stack.pop());
-		    stack.push(token);
-	    	
-	      }
-	      /*if(token == '-' && !(tokenList[i-1]>=0)){
-	    	  stack.push("0");
-	      }*/
-	      if (token == '(') {
-	        stack.push(token);
-	      }
-
-	      if (token == ')') {
-	        while (peek(stack) != '(')
-	          output.push(stack.pop());
-	        stack.pop();
-	      }
-	  }
-	  let result = output.concat(stack.reverse()).join(' ')
-
-	  return result;
-};
-
-let rpn = (ts, s = []) => {
-	if(ts.length == 1){
-		ts = ts.concat(" 0 +");
-	}
-
-	ts.split(' ').forEach(t =>
-
-	  s.push(t == +t ? t : eval(s.splice(-2,1)[0] + t + s.pop())));
-	 
-	  return s[0];
-	}
 
 AssignmentListener = function(res) {
 	this.Res = res;
@@ -187,62 +33,7 @@ AssignmentListener.prototype.enterProgram = function(ctx) {
 AssignmentListener.prototype.exitProgram = function(ctx) {
 };
 
-function isValidAssignment(dataType, input) {
-	// Set the input as its value if ever it is a variable
-	var isVariable = false;;
-	if(typeof(s.get(input)) == "object") {
-		input = s.get(input);
-		isVariable = true;
-	}
 
-	if(isVariable) {
-		if(dataType == "string" && input.getDataType() != "string") {
-			return false;
-		}
-		if(dataType =="int" && input.getDataType() != "int") {
-			return false;
-		}
-		if(dataType == "float" && input.getDataType() != "float") {
-			return false;
-		}
-		if(dataType == "boolean" && input.getDataType() != "boolean") {
-			return false;
-		}
-	} else {
-		if(dataType == "string") {
-			if(typeof(input) == "number") {
-				return false;
-			} else {
-				if(!(input.split("").includes('"') || input.split("").includes("'"))) {
-					return false;
-				}
-			}
-		} 
-		if(dataType == "int" && typeof(input) == "string") {
-			return false;
-		}
-		if(dataType == "float") {
-			if(typeof(input) == "number") {
-				return false;
-			} else {
-				if(!(input.split("").includes('.'))) {
-					return false;
-				}
-			}
-		}
-		console.log(dataType);
-		console.log(input);
-		console.log(typeof(input));
-		if(dataType == "boolean") {
-			if(!(input.includes("true") || input.includes("false"))) {
-				console.log("not true!");
-				return false;
-			}
-		}
-	}
-
-	return true;
-}
 
 // Enter a parse tree produced by QwertyParser#var_decl.
 AssignmentListener.prototype.enterVar_decl = function(ctx) {
@@ -250,18 +41,20 @@ AssignmentListener.prototype.enterVar_decl = function(ctx) {
 	var typeName = ctx.data_type().start.text;
 	// variable name
 	var varName = ctx.var_identifier_list().start.text;
-	
+	console.log("VAR NAME" + varName);
 	// variable value
 	if(ctx.getChild(1).getChildCount() == 1){ // ex. int i;
 		var varValue = new QwertyValue(typeName, "null");
 	}
 	else{	// ex. int i = 1;		
-		var input = checkIfHasIdentifier(ctx.var_identifier_list().getChild(1).getChild(1).getText());		
+		var input = identifierHandler.convertVarToVal(ctx.var_identifier_list().getChild(1).getChild(1).getText(), s);	
+		//console.log("input " + input);
+		//console.log("typeofinput" + typeof(input));
 		var varValue = new QwertyValue(typeName, input);
-		if(!isValidAssignment(typeName, input)) {
+		/*if(!isValidAssignment(typeName, input)) {
 			var errorHtml = "<tr><td>Type Check Error<td></td><td>" + varName + "</td><td>Change var type or change value.</td></tr>";
 				consoleBox.innerHTML += errorHtml;
-		}
+		}*/
 	}
 	
 	if(s.has(varName)) {
@@ -337,14 +130,16 @@ AssignmentListener.prototype.enterAssignment_statement = function(ctx) {
 			}else if(ctx.getChild(1).getText() == "%="){
 				varValue = s.get(varName).getValue() + "%" + ctx.getChild(2).getText();
 			}
-			varValue = checkIfHasIdentifier(varValue);
-			if(!isValidAssignment(s.get(varName).getDataType(), varValue)) {
+			varValue = identifierHandler.convertVarToVal(varValue, s);
+			//console.log(varValue);
+			//varValue = rpn(yard(varValue));
+			/*if(!isValidAssignment(s.get(varName).getDataType(), varValue)) {
 				console.log("Type Checking Error for variable " + varName);
 				var errorHtml = "<tr><td>Type Check Error<td></td><td>" + varName + "</td><td>Change var type or change value.</td></tr>";
 				consoleBox.innerHTML += errorHtml;
 			} else {
 				s.get(varName).setValue(varValue);
-			}
+			}*/
 
 			//console.log("value and data type of " +varName+ ":" + s.get(varName).getValue() + " & " + typeof s.get(varName).getValue());
 			if(height != varHeight){
@@ -367,7 +162,7 @@ AssignmentListener.prototype.enterFunccall_statement = function(ctx) {
 function evaluateBoolean(input) {
 	var hasAnd = false;
 	var arr;
-
+	
 	if(input.split("").includes("&")) {
 	  arr = input.split("&&");
 	  hasAnd = true;
@@ -510,19 +305,35 @@ AssignmentListener.prototype.enterCode_block = function(ctx) {
 	//console.log("CODE BLOC");
 };
 
-AssignmentListener.prototype.enterWhile_statement = function(ctx) {
-	s.push();
-	console.log(ctx);
-	var codeBlock = ctx.getChild(1).getChild(3);
-	var expression = ctx.getChild(1).getChild(1).getText();
-
-	if(evaluateBoolean(expression)){
+function execWhile(ctx){
+	var codeBlock = ctx.conditional_block().statement();
+	var expression = ctx.conditional_block().conditional_factor();
+	var conditionalBlock = ctx.conditional_block();
+	
+	console.log(expression.getText());
+	//ctx.removeLastChild();
+	console.log(codeBlock);
+	antlr4.tree.ParseTreeWalker.DEFAULT.exitRule(this, conditionalBlock);
+	if(evaluateBoolean(expression.getText())){
 		ctx.addChild(ctx);
-	}else{
+		/*for(var i=0; i<codeBlock.length; i++){
+			//console.log(codeBlock[i]);
+			ctx.addChild(codeBlock[i]);	
+
+			console.log("ey");
+		}*/
+		//ctx.addChild();	
+	}else
 		for(var i=0; i<ctx.getChildCount(); i++){
 			ctx.removeLastChild();
 		}
-	}
+
+}
+AssignmentListener.prototype.enterWhile_statement = function(ctx) {
+	s.push();
+	console.log(ctx);
+	
+	execWhile(ctx);
 };
 
 // Exit a parse tree produced by QwertyParser#while_statement.
@@ -589,7 +400,7 @@ AssignmentListener.prototype.enterFor_statement = function(ctx) {
 	console.log(assignBlock.getText());
 	// i = 0;
 	var init = ctx.var_decl().var_identifier_list().getText();
-	var expFirst = checkIfHasIdentifier(ctx.var_decl().getText());		
+	var expFirst = identifierHandler.convertVarToVal(ctx.var_decl().getText(), 1);		
 	var typeName = ctx.var_decl().data_type().getText();
 	var varName = ctx.var_decl().var_identifier_list().getText().split("=")[0];
 	var varValue = new QwertyValue(typeName, expFirst);
@@ -617,12 +428,18 @@ AssignmentListener.prototype.exitProgram = function(ctx) {
 
 // Enter a parse tree produced by QwertyParser#scan_statement.
 AssignmentListener.prototype.enterScan_statement = function(ctx) {
+	//console.log(ctx);
 	var variable = ctx.VARIABLE_IDENTIFIER().getText();
+	var message = ctx.STRING_LITERAL().getText();
+	//console.log(variable);
+	//console.log(message);
+	message = message.split('"').join("");
 	/*consoleBox.innerHTML += "<input type='text' id='" + variable + "' value='Patrick Gan'>";
 	wait(7)*/
-	var input = prompt(lastPrint);
-	inputVal = checkIfHasIdentifier(input);
-	console.log("TYPE: " + typeof(inputVal));
+	var input = prompt(message);
+	
+	inputVal = identifierHandler.convertVarToVal(input, s);
+	//console.log("TYPE: " + typeof(inputVal));
 	s.get(variable).setValue(inputVal);
 };
 
@@ -634,28 +451,33 @@ AssignmentListener.prototype.exitScan_statement = function(ctx) {
 	s.get(variable).setValue(input);*/
 };
 
-function checkIfPrintHasIdentifier(input){
-	var printArgs = input.split("+");
-	var expression;
-	var printStmt = "";
-	for(var i=0; i<printArgs.length; i++){
-		
-		expression = checkIfHasIdentifier(printArgs[i]);
-		printStmt = printStmt.concat(expression);
-	}
-	//console.log("WWW" + printStmt);
-	printStmt = printStmt.split('"').join("");
-	
-	return printStmt;
-}
+
 // Enter a parse tree produced by QwertyParser#print_statement.
 AssignmentListener.prototype.enterPrint_statement = function(ctx) {
 	//console.log(ctx);
-	var statement = checkIfPrintHasIdentifier(ctx.expression().getText());
-	console.log(statement);
+	/*var stringExpCtx = ctx.expression();
+	do{
+		console.log(stringExpCtx);
+
+		console.log(stringExpCtx.getChildCount());
+		if(stringExpCtx.getChildCount()>1){
+			console.log("A");
+			console.log(stringExpCtx.string_expression());
+
+			stringExpCtx = stringExpCtx.string_expression()[1];
+		}
+		else{
+			console.log("eyaa");
+			stringExpCtx = stringExpCtx.string_expression();
+		}
+		console.log("ey" +stringExpCtx.getText());
+	}while(stringExpCtx != null)*/
+	
+	
+	var statement = identifierHandler.evaluatePrintExpression(ctx.expression().getText(), s);
 	var split = statement.split("+").join("").split('"').join("");
 	lastPrint = split;
-	console.log(split);
+	//console.log(split);
 	var errorHtml = "<tr><td>(NOT ERROR) Print<td></td><td></td><td>" + split + "</td></tr>";
 	consoleBox.innerHTML += errorHtml;
 };

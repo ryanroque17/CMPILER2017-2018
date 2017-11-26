@@ -193,7 +193,7 @@ for_statement
 return_statement			
 	: RETURN (expression| STRING_LITERAL | BOOLEAN_LITERAL | num_factor);
 scan_statement				
-	: SCAN OPEN_PAR VARIABLE_IDENTIFIER CLOSE_PAR;
+	: SCAN OPEN_PAR STRING_LITERAL ENUMERATION VARIABLE_IDENTIFIER CLOSE_PAR;
 print_statement				
 	: PRINT OPEN_PAR expression CLOSE_PAR
 	| PRINTLN OPEN_PAR expression CLOSE_PAR
