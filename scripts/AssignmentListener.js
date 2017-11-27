@@ -318,31 +318,42 @@ AssignmentListener.prototype.enterCode_block = function(ctx) {
 
 var temporaryWhileCodeBlock;
 var temporaryExpression;
+var holdCtx;
+
 AssignmentListener.prototype.enterWhile_statement = function(ctx) {
 	s.push();
+	holdCtx = ctx;
+
 
 	var codeBlock = ctx.code_block();
 	var expression = ctx.conditional_factor().getText();
-	console.log(codeBlock);
+
 	if(codeBlock!=null){
 		temporaryWhileCodeBlock = codeBlock;
 	}
 	else{
 		codeBlock = temporaryWhileCodeBlock;
 	}	
+	console.log(codeBlock);
+	console.log("Expression: " + expression);
+
 	if(expression!=null){
 		temporaryExpression = expression;
 	}else{
 		expression = temporaryExpression;
 	}
-	ctx.removeLastChild();
 
-	console.log(codeBlock);
+	console.log(ctx);
 
-	while(evaluateBoolean(expression)){
-		antlr4.tree.ParseTreeWalker.DEFAULT.walk(this, codeBlock);
+
+	while(true) {
+		if(evaluateBoolean(expression)) {
+			antlr4.tree.ParseTreeWalker.DEFAULT.walk(this, codeBlock);
+		} else {
+			// ctx.removeLastChild();
+			break;
+		}
 	}
-
 };
 
 // Exit a parse tree produced by QwertyParser#while_statement.
@@ -396,29 +407,63 @@ function forSecondExpression(input) {
    
 }
 
+var tempAssignBlock;
+var tempCodeBlock;
+var tempCondition;
+var tempInit;
+var run = true;
+
 // Enter a parse tree produced by QwertyParser#for_statement.
 AssignmentListener.prototype.enterFor_statement = function(ctx) {
 	s.push();
 	console.log(ctx);
 	var assignBlock = ctx.getChild(6);
+	if(assignBlock!=null){
+		tempAssignBlock = assignBlock;
+	}else{
+		assignBlock = tempAssignBlock;
+	}
 	var codeBlock = ctx.getChild(ctx.getChildCount() - 1);
-	console.log(assignBlock.getText());
+	if(codeBlock!=null){
+		tempCodeBlock = codeBlock;
+	}else{
+		codeBlock = tempCodeBlock;
+	}
+
 	// i = 0;
-	var init = ctx.var_decl().var_identifier_list().getText();
-	var expFirst = identifierHandler.convertVarToVal(ctx.var_decl().getText(), s);		
-	var typeName = ctx.var_decl().data_type().getText();
-	var varName = ctx.var_decl().var_identifier_list().getText().split("=")[0];
-	var varValue = new QwertyValue(typeName, expFirst);
+	var init = ctx.var_decl();
+	if(init!=null){
+		tempInit = init;
+	}else{
+		init = tempInit;
+	}
 
 	// i<10;
-	var exprSecond = forSecondExpression(ctx.bool_expression().getText());
+	var exprSecond = ctx.bool_expression();
+	if(exprSecond!=null){
+		tempCondition = exprSecond.getText();
+	}else{
+		exprSecond = tempCondition;
+	}
+
 	// i++;
 	var exprThird = ctx.assignment_statement().getText();
-	var incrementDecrement = exprThird.split(varName)[1];
 
-	var forCon = "for(var " + init + ";" + exprSecond + "-1;" + exprThird + ") { ctx.addChild(assignBlock); ctx.addChild(codeBlock); }";
+	antlr4.tree.ParseTreeWalker.DEFAULT.walk(this, init);
+
+	// var childCount = ctx.getChildCount();
+	// for(var i=0; i<childCount; i++){
+	// 	ctx.removeLastChild();
+	// }	
+
+	// while(evaluateBoolean(exprSecond.getText())){
+	// 	antlr4.tree.ParseTreeWalker.DEFAULT.walk(this, codeBlock);
+	// 	antlr4.tree.ParseTreeWalker.DEFAULT.walk(this, assignBlock);
+
+	// }
+	var forCon = "for(var " + init + ";" + exprSecond + "-1;" + exprThird + ") {  ctx.addChild(codeBlock); ctx.addChild(assignBlock); }";
 	eval(forCon);
-	console.log(forCon);
+	// console.log(forCon);
 };
 
 // Exit a parse tree produced by QwertyParser#for_statement.
