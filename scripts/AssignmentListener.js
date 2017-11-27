@@ -342,17 +342,10 @@ AssignmentListener.prototype.enterWhile_statement = function(ctx) {
 	}else{
 		expression = temporaryExpression;
 	}
+	ctx.removeLastChild();
 
-	console.log(ctx);
-
-
-	while(true) {
-		if(evaluateBoolean(expression)) {
-			antlr4.tree.ParseTreeWalker.DEFAULT.walk(this, codeBlock);
-		} else {
-			// ctx.removeLastChild();
-			break;
-		}
+	while(evaluateBoolean(expression)){
+		antlr4.tree.ParseTreeWalker.DEFAULT.walk(this, codeBlock);
 	}
 };
 
@@ -417,53 +410,51 @@ var run = true;
 AssignmentListener.prototype.enterFor_statement = function(ctx) {
 	s.push();
 	console.log(ctx);
-	var assignBlock = ctx.getChild(6);
+
+	// i = 0;
+	var declBlock = ctx.var_decl();
+	if(declBlock!=null){
+		tempInit = declBlock;
+	}else{
+		declBlock = tempInit;
+	}
+
+	// i++;
+	var assignBlock = ctx.assignment_statement();
 	if(assignBlock!=null){
 		tempAssignBlock = assignBlock;
 	}else{
 		assignBlock = tempAssignBlock;
 	}
-	var codeBlock = ctx.getChild(ctx.getChildCount() - 1);
+
+	// code inside loop
+	var boolBlock = ctx.bool_expression();
+	if(boolBlock!=null){
+		tempCondition = boolBlock;
+	}else{
+		boolBlock = tempCondition;
+	}
+
+	// code inside loop
+	var codeBlock = ctx.code_block();
 	if(codeBlock!=null){
 		tempCodeBlock = codeBlock;
 	}else{
 		codeBlock = tempCodeBlock;
 	}
 
-	// i = 0;
-	var init = ctx.var_decl();
-	if(init!=null){
-		tempInit = init;
-	}else{
-		init = tempInit;
+	antlr4.tree.ParseTreeWalker.DEFAULT.walk(this, declBlock);
+
+	var childCount = ctx.getChildCount();
+	for(var i=0; i<childCount; i++){
+		ctx.removeLastChild();
+	}	
+
+	while(evaluateBoolean(boolBlock.getText())){
+		antlr4.tree.ParseTreeWalker.DEFAULT.walk(this, codeBlock);
+		antlr4.tree.ParseTreeWalker.DEFAULT.walk(this, assignBlock);
 	}
 
-	// i<10;
-	var exprSecond = ctx.bool_expression();
-	if(exprSecond!=null){
-		tempCondition = exprSecond.getText();
-	}else{
-		exprSecond = tempCondition;
-	}
-
-	// i++;
-	var exprThird = ctx.assignment_statement().getText();
-
-	antlr4.tree.ParseTreeWalker.DEFAULT.walk(this, init);
-
-	// var childCount = ctx.getChildCount();
-	// for(var i=0; i<childCount; i++){
-	// 	ctx.removeLastChild();
-	// }	
-
-	// while(evaluateBoolean(exprSecond.getText())){
-	// 	antlr4.tree.ParseTreeWalker.DEFAULT.walk(this, codeBlock);
-	// 	antlr4.tree.ParseTreeWalker.DEFAULT.walk(this, assignBlock);
-
-	// }
-	var forCon = "for(var " + init + ";" + exprSecond + "-1;" + exprThird + ") {  ctx.addChild(codeBlock); ctx.addChild(assignBlock); }";
-	eval(forCon);
-	// console.log(forCon);
 };
 
 // Exit a parse tree produced by QwertyParser#for_statement.
