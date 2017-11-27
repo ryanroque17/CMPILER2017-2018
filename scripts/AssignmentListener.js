@@ -268,34 +268,42 @@ function evaluateBoolean(input) {
 	return true;
 };
 
+var temporaryIfCodeBlocks;
+var temporaryIfConditions;
 // Enter a parse tree produced by QwertyParser#if_statement.
 AssignmentListener.prototype.enterIf_statement = function(ctx) {
 	s.push();
-	
-	console.log(ctx);
-	var ctxHolder = ctx;
+	var ctxChildCount = ctx.getChildCount();
+
 	var codeBlocks = ctx.code_block();
 	var conditions = ctx.conditional_factor();
-	var ctxChildCount = ctx.getChildCount();
 	var hasTrue = false;
-		
+	
+	if(codeBlocks.length>0){
+		temporaryIfCodeBlocks = codeBlocks;
+		temporaryIfConditions = conditions;
+	}
+	else{
+		codeBlocks = temporaryIfCodeBlocks;
+		conditions = temporaryIfConditions;
+	}	
+	
+	for(var i=0; i<ctxChildCount;i++){
+		ctx.removeLastChild();
+	}
+	
 	for(var i=0; i<conditions.length;i++){
 		if(evaluateBoolean(conditions[i].getText())){
 			antlr4.tree.ParseTreeWalker.DEFAULT.walk(this, codeBlocks[i]);
 			
 			hasTrue = true;
-			this.exitIf_statement(ctx);
-
 			break;
 		}
 	}
 	
 	if(codeBlocks.length != conditions.length && !hasTrue){
 		antlr4.tree.ParseTreeWalker.DEFAULT.walk(this, codeBlocks[codeBlocks.length-1]);
-		this.exitIf_statement(ctx);
-
 	}
-	ctx = ctxHolder;
 };
 
 // Exit a parse tree produced by QwertyParser#if_statement.
@@ -308,17 +316,33 @@ AssignmentListener.prototype.enterCode_block = function(ctx) {
 	//console.log("CODE BLOC");
 };
 
+var temporaryWhileCodeBlock;
+var temporaryExpression;
 AssignmentListener.prototype.enterWhile_statement = function(ctx) {
 	s.push();
 
 	var codeBlock = ctx.code_block();
 	var expression = ctx.conditional_factor().getText();
-	
+	console.log(codeBlock);
+	if(codeBlock!=null){
+		temporaryWhileCodeBlock = codeBlock;
+	}
+	else{
+		codeBlock = temporaryWhileCodeBlock;
+	}	
+	if(expression!=null){
+		temporaryExpression = expression;
+	}else{
+		expression = temporaryExpression;
+	}
 	ctx.removeLastChild();
+
+	console.log(codeBlock);
 
 	while(evaluateBoolean(expression)){
 		antlr4.tree.ParseTreeWalker.DEFAULT.walk(this, codeBlock);
 	}
+
 };
 
 // Exit a parse tree produced by QwertyParser#while_statement.
