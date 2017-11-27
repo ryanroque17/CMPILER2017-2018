@@ -28,7 +28,7 @@ vardecl_list
 	: var_decl END (vardecl_list)?
 	;
 var_decl					
-	: data_type (OPEN_BRACKET array_size CLOSE_BRACKET)? (var_identifier_list);
+	: data_type (OPEN_BRACKET CLOSE_BRACKET)? (var_identifier_list);
 var_identifier_list			
 	: VARIABLE_IDENTIFIER var_assignment_statement? ENUMERATION (var_identifier_list)?
 	| VARIABLE_IDENTIFIER var_assignment_statement?
