@@ -158,12 +158,6 @@ AssignmentListener.prototype.enterAssignment_statement = function(ctx) {
 	}
 };
 
-//Enter a parse tree produced by QwertyParser#funccall_statement.
-AssignmentListener.prototype.enterFunccall_statement = function(ctx) {
-	console.log(ctx);
-	console.log(ctx.getText());
-
-};
 
 
 function evaluateBoolean(input) {
@@ -499,37 +493,84 @@ AssignmentListener.prototype.exitScan_statement = function(ctx) {
 
 // Enter a parse tree produced by QwertyParser#print_statement.
 AssignmentListener.prototype.enterPrint_statement = function(ctx) {
-	
 	var statement = identifierHandler.evaluatePrintExpression(ctx.expression().getText(), s);
 	var split = statement.split("+").join("").split('"').join("");
 	lastPrint = split;
 	//console.log(split);
+	console.log("enter print " + split);
+
 	var errorHtml = "<tr><td>(NOT ERROR) Print<td></td><td></td><td>" + split + "</td></tr>";
 	consoleBox.innerHTML += errorHtml;
 };
 
+function compareParameters(param1, param2){
+	var param1List;
+	var param1Count;
+	var param2List;
+	var param2Count;
+	
+	var hasNull = false;
+	if(param1 != null){
+		param1List = param1.getText().split(",");
+		param1Count = param1List.length;
+		hasNull = true;
+	}
+	if(param2 != null){
+		param2List = param2.toString().split(",");
+		param2Count = param2List.length;
+		hasNull = true;
+	}
+	console.log()
+	if(hasNull){
+		if(param1 == null && param2 == null){
+			console.log("execute");
+			return true;
+		}else{
+			console.log("ERROR! Parameters do not match!!");	
+			return false;
+		}
+			
+	}else if(param1Count != param2Count){
+		console.log("ERROR! Parameters do not match!!");	
+		return false;
+	}else{
+		console.log("execute"); 
+		return true;
+	}
+};
+
+//Enter a parse tree produced by QwertyParser#funccall_statement.
+AssignmentListener.prototype.enterFunccall_statement = function(ctx) {
+	var functionName = ctx.FUNCTION_IDENTIFIER().getText();
+	//console.log(functionName);
+
+	var calledFunction = functionTable.get(functionName);
+	var funcCallParams;
+	
+	if(ctx.actual_parameter_list()!=null)
+		funcCallParams = ctx.actual_parameter_list().actual_params();
+	
+	if(calledFunction.getParameter()!=null)
+		compareParameters(calledFunction.getParameter(), funcCallParams)
+	else
+		compareParameters(null, funcCallParams)
+		
+	if(compareParameters)
+		antlr4.tree.ParseTreeWalker.DEFAULT.walk(this, calledFunction.getCodeBlock());
+};
+
 //Enter a parse tree produced by QwertyParser#function_declaration.
 AssignmentListener.prototype.enterFunction_declaration = function(ctx) {
-	console.log(ctx);
-	console.log("ey");
-	var dataType = ctx.getChild(0).data_type().getText();
+	var dataType = ctx.getChild(0).getChild(0).getText();
 	var functionName = ctx.getChild(0).getChild(1).getText();
-	var parameters = ctx.getChild(0).function_block().parameters().getText();
+	var parameters = ctx.getChild(0).function_block().parameters();
 	var functionCodeBlock = ctx.getChild(0).function_block().code_block();
-
+	
+	ctx.removeLastChild();
+	//console.log(functionName);
 	functionTable.set(functionName, new QwertyFunction(dataType, parameters, functionCodeBlock))
-	console.log("datatype:" + dataType);
-	console.log("funcName:" + functionName);
-	console.log("params:" + parameters);
-	console.log("codeBlock:" + functionCodeBlock.getText());
-
 };
 
 // Exit a parse tree produced by QwertyParser#function_declaration.
 AssignmentListener.prototype.exitFunction_declaration = function(ctx) {
-};
-
-//Enter a parse tree produced by QwertyParser#main_function.
-QwertyListener.prototype.enterMain_function = function(ctx) {
-	console.log("FUNC1 datatypes is " + functionTable.get("FUNC1").getDataType());
 };
