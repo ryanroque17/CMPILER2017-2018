@@ -3,8 +3,11 @@ var QwertyLexer = require('../generated-parser/QwertyLexer');
 var QwertyParser = require('../generated-parser/QwertyParser');
 var QwertyListener = require('../generated-parser/QwertyListener').QwertyListener;
 var SymbolTable = require("/node_modules/symbol-table/stack");
-var s = SymbolTable()
+var s = SymbolTable();
+var functionTable = SymbolTable();
 var QwertyValue = require('/scripts/QwertyValue');
+var QwertyFunction	 = require('/scripts/QwertyFunction');
+
 var IdentifierHandler = require('/scripts/IdentifierHandler');
 
 var identifierHandler = new IdentifierHandler();
@@ -28,6 +31,7 @@ exports.AssignmentListener = AssignmentListener;
 // Enter a parse tree produced by QwertyParser#program.
 AssignmentListener.prototype.enterProgram = function(ctx) {
 	s.push();
+	functionTable.push();
 };
 
 // Exit a parse tree produced by QwertyParser#program.
@@ -495,25 +499,6 @@ AssignmentListener.prototype.exitScan_statement = function(ctx) {
 
 // Enter a parse tree produced by QwertyParser#print_statement.
 AssignmentListener.prototype.enterPrint_statement = function(ctx) {
-	//console.log(ctx);
-	/*var stringExpCtx = ctx.expression();
-	do{
-		console.log(stringExpCtx);
-
-		console.log(stringExpCtx.getChildCount());
-		if(stringExpCtx.getChildCount()>1){
-			console.log("A");
-			console.log(stringExpCtx.string_expression());
-
-			stringExpCtx = stringExpCtx.string_expression()[1];
-		}
-		else{
-			console.log("eyaa");
-			stringExpCtx = stringExpCtx.string_expression();
-		}
-		console.log("ey" +stringExpCtx.getText());
-	}while(stringExpCtx != null)*/
-	
 	
 	var statement = identifierHandler.evaluatePrintExpression(ctx.expression().getText(), s);
 	var split = statement.split("+").join("").split('"').join("");
@@ -521,4 +506,30 @@ AssignmentListener.prototype.enterPrint_statement = function(ctx) {
 	//console.log(split);
 	var errorHtml = "<tr><td>(NOT ERROR) Print<td></td><td></td><td>" + split + "</td></tr>";
 	consoleBox.innerHTML += errorHtml;
+};
+
+//Enter a parse tree produced by QwertyParser#function_declaration.
+AssignmentListener.prototype.enterFunction_declaration = function(ctx) {
+	console.log(ctx);
+	console.log("ey");
+	var dataType = ctx.getChild(0).data_type().getText();
+	var functionName = ctx.getChild(0).getChild(1).getText();
+	var parameters = ctx.getChild(0).function_block().parameters().getText();
+	var functionCodeBlock = ctx.getChild(0).function_block().code_block();
+
+	functionTable.set(functionName, new QwertyFunction(dataType, parameters, functionCodeBlock))
+	console.log("datatype:" + dataType);
+	console.log("funcName:" + functionName);
+	console.log("params:" + parameters);
+	console.log("codeBlock:" + functionCodeBlock.getText());
+
+};
+
+// Exit a parse tree produced by QwertyParser#function_declaration.
+AssignmentListener.prototype.exitFunction_declaration = function(ctx) {
+};
+
+//Enter a parse tree produced by QwertyParser#main_function.
+QwertyListener.prototype.enterMain_function = function(ctx) {
+	console.log("FUNC1 datatypes is " + functionTable.get("FUNC1").getDataType());
 };

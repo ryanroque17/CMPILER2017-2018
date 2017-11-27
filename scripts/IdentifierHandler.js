@@ -90,7 +90,7 @@ IdentifierHandler.prototype.evaluatePrintExpression = function(input, s){
 	//console.log("WWW" + printStmt);
 
 	printStmt = printStmt.split('"').join("");
-	console.log(printStmt);
+	//console.log(printStmt);
 	
 	return printStmt;
 }
