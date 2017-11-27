@@ -510,17 +510,21 @@ function compareParameters(param1, param2){
 	var param2Count;
 	
 	var hasNull = false;
-	if(param1 != null){
-		param1List = param1.getText().split(",");
+	if(param1 == null){
+		console.log("param1 is null");		
+		hasNull = true;
+	}else{
+		param1List = param1.getText().split(",");		
 		param1Count = param1List.length;
-		hasNull = true;
 	}
-	if(param2 != null){
-		param2List = param2.toString().split(",");
+	if(param2 == null){
+		console.log("param2 is null");
+		hasNull = true;
+	}else{
+		param2List = param2.getText().split(",");
 		param2Count = param2List.length;
-		hasNull = true;
 	}
-	console.log()
+	console.log("param1count is " + param1Count + " param2Count is " + param2Count);
 	if(hasNull){
 		if(param1 == null && param2 == null){
 			console.log("execute");
@@ -542,20 +546,22 @@ function compareParameters(param1, param2){
 //Enter a parse tree produced by QwertyParser#funccall_statement.
 AssignmentListener.prototype.enterFunccall_statement = function(ctx) {
 	var functionName = ctx.FUNCTION_IDENTIFIER().getText();
-	//console.log(functionName);
-
+	var isValidParams;
 	var calledFunction = functionTable.get(functionName);
 	var funcCallParams;
 	
-	if(ctx.actual_parameter_list()!=null)
+	if(ctx.actual_parameter_list()!=null){
+		console.log("YOO")
 		funcCallParams = ctx.actual_parameter_list().actual_params();
-	
-	if(calledFunction.getParameter()!=null)
-		compareParameters(calledFunction.getParameter(), funcCallParams)
+	}else
+		console.log("ZZ");
+	if(calledFunction.getParameter()!=null){
+		isValidParams = compareParameters(calledFunction.getParameter(), funcCallParams)
+	}
 	else
-		compareParameters(null, funcCallParams)
+		isValidParams = compareParameters(null, funcCallParams)
 		
-	if(compareParameters)
+	if(isValidParams)
 		antlr4.tree.ParseTreeWalker.DEFAULT.walk(this, calledFunction.getCodeBlock());
 };
 
