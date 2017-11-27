@@ -504,43 +504,98 @@ AssignmentListener.prototype.enterPrint_statement = function(ctx) {
 };
 
 function compareParameters(param1, param2){
+	// param 1 = the parameters of the function
+	// param 2 = the parameters given during the function call
 	var param1List;
 	var param1Count;
 	var param2List;
 	var param2Count;
-	
-	var hasNull = false;
-	if(param1 == null){
-		console.log("param1 is null");		
-		hasNull = true;
-	}else{
-		param1List = param1.getText().split(",");		
-		param1Count = param1List.length;
-	}
-	if(param2 == null){
-		console.log("param2 is null");
-		hasNull = true;
-	}else{
-		param2List = param2.getText().split(",");
-		param2Count = param2List.length;
-	}
-	console.log("param1count is " + param1Count + " param2Count is " + param2Count);
-	if(hasNull){
-		if(param1 == null && param2 == null){
-			console.log("execute");
-			return true;
-		}else{
-			console.log("ERROR! Parameters do not match!!");	
-			return false;
+
+	var listFuncTypes = [];
+	listFuncTypes.push(param1.data_type().getText());
+	var current_param = param1;
+	while(true) {
+		if(current_param.parameters() != null) {
+			listFuncTypes.push(current_param.parameters().data_type().getText());
+			current_param = current_param.parameters();
+		} else {
+			break;
 		}
-			
-	}else if(param1Count != param2Count){
-		console.log("ERROR! Parameters do not match!!");	
-		return false;
-	}else{
-		console.log("execute"); 
-		return true;
 	}
+	console.log(listFuncTypes);
+
+	var firstPar;
+
+	if(typeof(param2.actual_params()) != "object")
+		firstPar = param2.VARIABLE_IDENTIFIER().getText();
+	else
+		firstPar = param2.expression().getText();
+	var restPar = param2.actual_params().getText();
+	var listCallTypes = (firstPar + "," + restPar).split(",");
+	console.log(listCallTypes);
+
+	// if number of parameters does not match!
+	if(listFuncTypes.length != listCallTypes.length) {
+		var errorHtml = "<tr><td>Parameters number don't match!<td></td><td></td><td>Add/subtract variables.</td></tr>";
+		consoleBox.innerHTML += errorHtml;
+		return false;
+	} else {
+		for(var i=0; i<listCallTypes.length; i++) {
+			var item = listCallTypes[i];
+			if(typeof(s.get(item)) == "object") {
+				listCallTypes[i] = s.get(item).getDataType();
+			} else {
+				listCallTypes[i] = String(typeof(eval(item)));
+				console.log(listCallTypes[i]);
+				// subject to error if there is a float
+				if(listCallTypes[i] == "number") {
+					listCallTypes[i] = "int";
+				}
+			}
+		}
+	}
+
+	console.log(listCallTypes);
+
+	// since we now know that both array have the same lengths, does not matter which we use for condition
+	for(var i=0; i<listCallTypes.length; i++)
+		if(listCallTypes[i] != listFuncTypes[i])
+			return false;
+
+	return true;
+
+	// var hasNull = false;
+	// if(param1 == null){
+	// 	console.log("param1 is null");		
+	// 	hasNull = true;
+	// }else{
+	// 	param1List = param1.getText().split(",");		
+	// 	param1Count = param1List.length;
+	// }
+	// if(param2 == null){
+	// 	console.log("param2 is null");
+	// 	hasNull = true;
+	// }else{
+	// 	param2List = param2.getText().split(",");
+	// 	param2Count = param2List.length;
+	// }
+	// console.log("param1count is " + param1Count + " param2Count is " + param2Count);
+	// if(hasNull){
+	// 	if(param1 == null && param2 == null){
+	// 		console.log("execute");
+	// 		return true;
+	// 	}else{
+	// 		console.log("ERROR! Parameters do not match!!");	
+	// 		return false;
+	// 	}
+			
+	// }else if(param1Count != param2Count){
+	// 	console.log("ERROR! Parameters do not match!!");	
+	// 	return false;
+	// }else{
+	// 	console.log("execute"); 
+	// 	return true;
+	// }
 };
 
 //Enter a parse tree produced by QwertyParser#funccall_statement.
@@ -555,10 +610,10 @@ AssignmentListener.prototype.enterFunccall_statement = function(ctx) {
 		funcCallParams = ctx.actual_parameter_list().actual_params();
 	}else
 		console.log("ZZ");
+
 	if(calledFunction.getParameter()!=null){
 		isValidParams = compareParameters(calledFunction.getParameter(), funcCallParams)
-	}
-	else
+	} else
 		isValidParams = compareParameters(null, funcCallParams)
 		
 	if(isValidParams)
