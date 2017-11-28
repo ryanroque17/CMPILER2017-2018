@@ -5,6 +5,7 @@ var QwertyFunction = function (dataType, parameter, codeBlock) {
 	this.setDataType(dataType);
 	this.setParameter(parameter);
 	this.setCodeBlock(codeBlock);
+	this.returnValue = null;
 };
 
 QwertyFunction.prototype.setDataType = function (dataType) {
@@ -30,5 +31,14 @@ QwertyFunction.prototype.setParameter = function (parameter) {
 QwertyFunction.prototype.getParameter = function () {
 	return this.parameter;
 };
+
+QwertyFunction.prototype.setReturnValue = function (returnValue) {
+	this.returnValue = returnValue;
+};
+
+QwertyFunction.prototype.getReturnValue = function () {
+	return this.returnValue;
+};
+
 
 module.exports = QwertyFunction;

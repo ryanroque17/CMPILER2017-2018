@@ -579,7 +579,6 @@ AssignmentListener.prototype.enterFunccall_statement = function(ctx) {
 		funcCallParams = ctx.actual_parameter_list().actual_params();
 	}
 	
-
 	if(calledFunction.getParameter()!=null){
 		antlr4.tree.ParseTreeWalker.DEFAULT.walk(this, calledFunction.getParameter());
 
@@ -590,11 +589,12 @@ AssignmentListener.prototype.enterFunccall_statement = function(ctx) {
 	if(isValidParams){
 		antlr4.tree.ParseTreeWalker.DEFAULT.walk(this, calledFunction.getCodeBlock());
 	}
+	
+	console.log("RETURN VALUE OF " + functionName + " is " + calledFunction.getReturnValue());
 };
 
 //Enter a parse tree produced by QwertyParser#parameters.
 AssignmentListener.prototype.enterParameters = function(ctx) {
-	//console.log(ctx);
 	var listDataTypes = ctx.data_type();
 	var listVariables = ctx.VARIABLE_IDENTIFIER();
 	var varValue;
@@ -603,17 +603,55 @@ AssignmentListener.prototype.enterParameters = function(ctx) {
 	for(var i=0; i<listDataTypes.length; i++){
 		dataType = listDataTypes[i].getText();
 		varName = listVariables[i].getText();
-		/*console.log("dtype =" + dataType);
-		console.log("varname =" + varName);*/
 		
 		varValue = new QwertyValue(dataType, "null");
 
 		s.set(varName, varValue);
-		
+	}	
+};
 
-		
-	}
+
+//Enter a parse tree produced by QwertyParser#return_statement.
+AssignmentListener.prototype.enterReturn_statement = function(ctx) {
+	console.log(ctx);
+	var returnValue = ctx.getChild(1).getText();
+	var functionParent = ctx.parentCtx.parentCtx.parentCtx.parentCtx;
 	
+	var functionDataType = functionParent.getChild(0).getText();
+	var functionName = functionParent.FUNCTION_IDENTIFIER().getText();
+
+	var returnDataType;
+	//returnValue = identifierHandler.convertVarToVal(returnValue, s);
+	if(functionDataType.includes("void")){
+		console.log("Remove return statement");
+	}else{
+		if(s.has(returnValue)){
+			returnDataType = s.get(returnValue).getDataType();
+			returnValue = identifierHandler.convertVarToVal(returnValue, s);
+
+		}else{
+			returnValue = identifierHandler.convertVarToVal(returnValue, s);
+			if(typeof returnValue == "number"){
+				if(returnValue.toString().includes("."))
+					returnDataType = "float";
+				else
+					returnDataType = "int";
+			}else if(typeof returnValue == "object"){
+				if(!returnValue){
+					console.log("EY");
+					returnDataType = functionDataType;
+				}
+				else
+					returnDataType = "boolean";
+			}else
+				returnDataType = "string"
+		}
+		if(functionDataType.includes(returnDataType)){
+			functionTable.get(functionName).setReturnValue(returnValue);
+			console.log("return accepted");
+		}else
+			console.log("Return data type mismatch!");		
+	}
 };
 
 //Exit a parse tree produced by QwertyParser#funccall_statement.
