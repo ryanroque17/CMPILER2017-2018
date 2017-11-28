@@ -682,7 +682,8 @@ AssignmentListener.prototype.enterFunction_declaration = function(ctx) {
 	var parameters = ctx.getChild(0).function_block().parameters();
 	var functionCodeBlock = ctx.getChild(0).function_block().code_block();
 	
-	ctx.removeLastChild();	ctx.removeLastChild();
+	ctx.removeLastChild();
+	ctx.removeLastChild();
 
 
 	//console.log(functionName);
@@ -692,4 +693,37 @@ AssignmentListener.prototype.enterFunction_declaration = function(ctx) {
 
 // Exit a parse tree produced by QwertyParser#function_declaration.
 AssignmentListener.prototype.exitFunction_declaration = function(ctx) {
+};
+
+// Enter a parse tree produced by QwertyParser#arr_decl.
+AssignmentListener.prototype.enterArr_decl = function(ctx) {
+	var dataType = ctx.data_type().getText();
+	var varName = ctx.VARIABLE_IDENTIFIER().getText();
+
+	console.log(dataType);
+	console.log(varName);
+
+	var varValue = new QwertyValue(dataType, []);
+	s.set(varName, varValue);
+};
+
+// Enter a parse tree produced by QwertyParser#arr_assignment.
+AssignmentListener.prototype.enterArr_assignment = function(ctx) {
+	// 0 will ALWAYS be varName then 1 could be either the index or whatever
+	var varName = ctx.VARIABLE_IDENTIFIER()[0].getText();
+	var indexVal = ctx.INTEGER_LITERAL().getText();
+
+	var toBeAssigned = identifierHandler.convertVarToVal(ctx.var_assignment_statement().assignment_factor().getText(), s, functionTable);
+
+	console.log("To be assigned! " + toBeAssigned);
+
+	var getArr = s.get(varName).getValue();
+	console.log("BEFORE = " + getArr);
+	getArr[parseInt(indexVal)] = parseInt(toBeAssigned);
+	console.log("AFTER = " + getArr);
+	s.get(varName).setValue(getArr);
+};
+
+// Enter a parse tree produced by QwertyParser#arr_expression.
+AssignmentListener.prototype.enterArr_expression = function(ctx) {
 };

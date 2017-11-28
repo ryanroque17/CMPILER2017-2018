@@ -222,5 +222,20 @@ QwertyVisitor.prototype.visitPrint_statement = function(ctx) {
 };
 
 
+// Visit a parse tree produced by QwertyParser#arr_decl.
+QwertyVisitor.prototype.visitArr_decl = function(ctx) {
+};
+
+
+// Visit a parse tree produced by QwertyParser#arr_assignment.
+QwertyVisitor.prototype.visitArr_assignment = function(ctx) {
+};
+
+
+// Visit a parse tree produced by QwertyParser#arr_expression.
+QwertyVisitor.prototype.visitArr_expression = function(ctx) {
+};
+
+
 
 exports.QwertyVisitor = QwertyVisitor;

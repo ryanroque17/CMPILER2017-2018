@@ -8,6 +8,7 @@ statement
 	| const_statement END
 	| const_statement 			{notifyErrorListeners("Insert ';' to complete statement.");}
 	| assignment_statement END
+	| arr_assignment END
 	| funccall_statement END
 	| if_statement
 	| while_statement
@@ -26,9 +27,10 @@ statement
  // Variable Declaration       
 vardecl_list 				
 	: var_decl END (vardecl_list)?
+	| arr_decl END
 	;
 var_decl					
-	: data_type (OPEN_BRACKET CLOSE_BRACKET)? (var_identifier_list);
+	: data_type (var_identifier_list);
 var_identifier_list			
 	: VARIABLE_IDENTIFIER var_assignment_statement? ENUMERATION (var_identifier_list)?
 	| VARIABLE_IDENTIFIER var_assignment_statement?
@@ -42,7 +44,6 @@ data_type
 	| STRING
 	| BOOLEAN
 	;
-
 
 // Function Declaration
 function_declaration 		
@@ -70,7 +71,7 @@ expression
 string_expression			
 	: OPEN_PAR string_expression CLOSE_PAR
 	| string_expression ADD string_expression
-	| STRING_LITERAL | VARIABLE_IDENTIFIER
+	| STRING_LITERAL | VARIABLE_IDENTIFIER (OPEN_BRACKET (INTEGER_LITERAL | VARIABLE_IDENTIFIER) CLOSE_BRACKET)?
 	;
 		/*** 	   ***/
 num_expression				
@@ -200,6 +201,13 @@ print_statement
 	| PRINTLN OPEN_PAR expression CLOSE_PAR
 	;
 
+// Arrays
+arr_decl
+	: data_type OPEN_BRACKET CLOSE_BRACKET VARIABLE_IDENTIFIER;
+arr_assignment
+	: VARIABLE_IDENTIFIER OPEN_BRACKET (INTEGER_LITERAL | VARIABLE_IDENTIFIER) CLOSE_BRACKET var_assignment_statement;
+arr_expression
+	: VARIABLE_IDENTIFIER OPEN_BRACKET (INTEGER_LITERAL | VARIABLE_IDENTIFIER) CLOSE_BRACKET;
 
 
 

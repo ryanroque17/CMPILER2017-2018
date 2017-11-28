@@ -29,6 +29,7 @@ QwertyValue.prototype.setValue = function (value) {
 		console.log("Invalid Assignment! Data type mismatch!");
 		this.value = null;
 	}
+	this.value = value;
 	
 };
 
@@ -42,6 +43,9 @@ function isValidAssignment(dataType, input) {
 	//console.log(typeof(input));
 	//console.log(isNaN(input));
 	
+	console.log('dataType = ' + dataType);
+	console.log('input = ' + input);
+
 	if(dataType == "string") {
 		//console.log("yey");
 		if(typeof(input) != "string") {
@@ -55,7 +59,6 @@ function isValidAssignment(dataType, input) {
 		return true;
 	} else if(!isNaN(input)){
 		if(dataType == "int") {
-			//console.log("int");
 			if(typeof(input) != "number" || input.toString().includes(".")) {
 				return false;
 			}
@@ -65,7 +68,6 @@ function isValidAssignment(dataType, input) {
 			}
 		} 
 		return true;
-
 	}else{
 		return false;
 	}
