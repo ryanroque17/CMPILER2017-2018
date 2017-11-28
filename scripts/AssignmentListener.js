@@ -46,20 +46,13 @@ AssignmentListener.prototype.enterVar_decl = function(ctx) {
 	var typeName = ctx.data_type().start.text;
 	// variable name
 	var varName = ctx.var_identifier_list().start.text;
-	console.log("VAR NAME" + varName);
 	// variable value
 	if(ctx.getChild(1).getChildCount() == 1){ // ex. int i;
 		var varValue = new QwertyValue(typeName, "null");
 	}
-	else{	// ex. int i = 1;		
+	else{	// ex. int i = 1;	
 		var input = identifierHandler.convertVarToVal(ctx.var_identifier_list().getChild(1).getChild(1).getText(), s, functionTable);	
-		//console.log("input " + input);
-		//console.log("typeofinput" + typeof(input));
 		var varValue = new QwertyValue(typeName, input);
-		/*if(!isValidAssignment(typeName, input)) {
-			var errorHtml = "<tr><td>Type Check Error<td></td><td>" + varName + "</td><td>Change var type or change value.</td></tr>";
-				consoleBox.innerHTML += errorHtml;
-		}*/
 	}
 	
 	if(s.has(varName)) {
@@ -68,7 +61,6 @@ AssignmentListener.prototype.enterVar_decl = function(ctx) {
 		consoleBox.innerHTML += errorHtml;
 	} else {		
 		s.set(varName, varValue);
-		//console.log("value and data type of " +varName+ ":" + s.get(varName).getValue() + " & " + typeof s.get(varName).getValue());
 	}
 };
 
@@ -95,14 +87,14 @@ AssignmentListener.prototype.enterConst_statement = function(ctx) {
 // Enter a parse tree produced by QwertyParser#assignment_statement.
 AssignmentListener.prototype.enterAssignment_statement = function(ctx) {
 	// var input = ctx.assignment_factor().getText();
-	var varName = ctx.getChild(0).getText();
+	console.log(ctx.getText());
+	var varName = ctx.VARIABLE_IDENTIFIER().getText();
+	console.log("ASSIGNING FOR VAR " + varName);
 	var varValue;
 	var heightDiff;
 	var height;
 	var varHeight;
 	var funcCalls = [];
-
-	console.log(ctx.assignment_factor());
 	
 	if(ctx.assignment_factor() != null) {
 		funcCalls = ctx.assignment_factor().expression().funccall_statement();
@@ -174,8 +166,6 @@ AssignmentListener.prototype.enterAssignment_statement = function(ctx) {
 		}
 	}
 };
-
-
 
 function evaluateBoolean(input) {
 	var hasAnd = false;
@@ -415,17 +405,16 @@ function forSecondExpression(input) {
    
 }
 
+
+
 var tempAssignBlock;
 var tempCodeBlock;
 var tempCondition;
 var tempInit;
-var run = true;
+
 
 // Enter a parse tree produced by QwertyParser#for_statement.
 AssignmentListener.prototype.enterFor_statement = function(ctx) {
-	s.push();
-	console.log(ctx);
-
 	// i = 0;
 	var declBlock = ctx.var_decl();
 	if(declBlock!=null){
@@ -433,6 +422,9 @@ AssignmentListener.prototype.enterFor_statement = function(ctx) {
 	}else{
 		declBlock = tempInit;
 	}
+	antlr4.tree.ParseTreeWalker.DEFAULT.walk(this, declBlock);
+	
+	s.push();
 
 	// i++;
 	var assignBlock = ctx.assignment_statement();
@@ -457,8 +449,6 @@ AssignmentListener.prototype.enterFor_statement = function(ctx) {
 	}else{
 		codeBlock = tempCodeBlock;
 	}
-
-	antlr4.tree.ParseTreeWalker.DEFAULT.walk(this, declBlock);
 
 	var childCount = ctx.getChildCount();
 	for(var i=0; i<childCount; i++){

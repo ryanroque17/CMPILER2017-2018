@@ -11,14 +11,10 @@ var IdentifierHandler = function () {
 
 IdentifierHandler.prototype.convertVarToVal = function(input, s, f){
 	var tokenList = generateTokenList(input, s, f);
-	if(hasString) {
-		console.log("buildInputString");
-		return buildInputString(tokenList);	
-	}
-	else {
-		console.log("evaluateExpression");
+	if(hasString) 
+		return buildInputString(tokenList);
+	else 
 		return evaluateExpression(tokenList);
-	}
 }
 
 function convertArrToVal(input, s, f) {
@@ -52,7 +48,6 @@ function generateTokenList(input, s, f){
 	var hasFunction = false;
     for(var i=0; i<tokens.getNumberOfOnChannelTokens() - 1; i++) {
     	token = inputSplitted.slice(test[i].start, test[i].stop + 1).join("");
-    	console.log(token);
 
     	type = symbolNames[test[i].type];
 
@@ -156,10 +151,6 @@ IdentifierHandler.prototype.evaluatePrintExpression = function(input, s, f){
 }
 
 function evaluateExpression (input){
-	//console.log("ps" + input.toString());
-	//console.log(input);
-	console.log(input);
-
     if(input.toString().includes("null")){
     	console.log("AS");
     	return null;

@@ -43,9 +43,6 @@ function isValidAssignment(dataType, input) {
 	//console.log(typeof(input));
 	//console.log(isNaN(input));
 	
-	console.log('dataType = ' + dataType);
-	console.log('input = ' + input);
-
 	if(dataType == "string") {
 		//console.log("yey");
 		if(typeof(input) != "string") {

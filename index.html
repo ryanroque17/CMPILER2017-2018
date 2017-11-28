@@ -32,20 +32,16 @@
   <!-- Ace Editor -->
   <div class="row">
           <div id="editor">void main() {
-  constant multiplier = 2.0;
-  
-  int x = 0;
-  int y = 0;
-  int z = 0;
-  
-  x++;
-  y += 2;
-  z += 3;
-  
-  print("Value of X: "+x);
-  print("Value of Y: "+y);
-  print("Value of Z: "+z);
-  print("Multipler: " +multiplier);
+    int highestnumber = 0;
+    int e;
+    for(int i=0; i<=2; i++) {
+        scan("Enter e: ", e);
+        if(e > highestnumber) {
+            highestnumber = e;
+        }
+    }
+    
+    print("highest number is " + highestnumber);
 }
 </div>
   </div>
