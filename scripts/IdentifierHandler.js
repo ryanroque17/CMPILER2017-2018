@@ -23,6 +23,10 @@ function convertArrToVal(input, s, f) {
 	var splitForIndex = splitForVariable[1].split("]");
 	var index = splitForIndex[0];
 
+	if(typeof(s.get(index)) == "object") {
+		index = s.get(index).getValue();
+	}
+
 	var arrValue = s.get(varName).getValue();
 	var returnThis = arrValue[parseInt(index)];
 

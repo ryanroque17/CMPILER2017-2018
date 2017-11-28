@@ -87,9 +87,7 @@ AssignmentListener.prototype.enterConst_statement = function(ctx) {
 // Enter a parse tree produced by QwertyParser#assignment_statement.
 AssignmentListener.prototype.enterAssignment_statement = function(ctx) {
 	// var input = ctx.assignment_factor().getText();
-	console.log(ctx.getText());
 	var varName = ctx.VARIABLE_IDENTIFIER().getText();
-	console.log("ASSIGNING FOR VAR " + varName);
 	var varValue;
 	var heightDiff;
 	var height;
