@@ -61,17 +61,16 @@ main_function
 
 // Expression
 expression					
-	: string_expression 
-	| string_expression ADD expression
-	| var_func_expression
-	| num_expression num_ope num_expression
+	: string_expression (num_ope (string_expression | funccall_statement | num_expression))*
+	| funccall_statement (num_ope (string_expression | funccall_statement | num_expression))*
+	| num_expression (num_ope (string_expression | funccall_statement | num_expression))*
 	| bool_expression
 	;
 		/*** Added ***/						
 string_expression			
 	: OPEN_PAR string_expression CLOSE_PAR
 	| string_expression ADD string_expression
-	| STRING_LITERAL | funccall_statement | VARIABLE_IDENTIFIER
+	| STRING_LITERAL | VARIABLE_IDENTIFIER
 	;
 		/*** 	   ***/
 num_expression				

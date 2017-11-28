@@ -9,8 +9,8 @@ var IdentifierHandler = function () {
 
 };
 
-IdentifierHandler.prototype.convertVarToVal = function(input, s){
-	var tokenList = generateTokenList(input, s);
+IdentifierHandler.prototype.convertVarToVal = function(input, s, f){
+	var tokenList = generateTokenList(input, s, f);
 	
 	if(hasString)
 		return buildInputString(tokenList);	
@@ -18,7 +18,7 @@ IdentifierHandler.prototype.convertVarToVal = function(input, s){
 		return evaluateExpression(tokenList);
 }
 
-function generateTokenList(input, s){
+function generateTokenList(input, s, f){
 	var chars = new antlr4.InputStream(input);
 	var lexer = new QwertyLexer.QwertyLexer(chars);
 	var tokens  = new antlr4.CommonTokenStream(lexer);
@@ -30,7 +30,8 @@ function generateTokenList(input, s){
 	var token;
 	var type;
 	var tokenList = [];
-	hasString = false;
+	var hasString = false;
+	var hasFunction = false;
     for(var i=0; i<tokens.getNumberOfOnChannelTokens() - 1; i++) {
     	token = inputSplitted.slice(test[i].start, test[i].stop + 1).join("");
 
@@ -54,9 +55,34 @@ function generateTokenList(input, s){
     			}else
     				console.log("Undeclared variable " + token + "!");
     		}
-    	}else
-        	tokenList.push(token);
-    	
+    	}else if(type.includes("FUNCTION_IDENTIFIER")){
+    	//	console.log("has func ident " + token);
+    		if(f.has(token)){
+    	//		console.log(f.get(token).getReturnValue());
+
+    			if(f.get(token).getReturnValue() != null){
+        			//console.log("YEY" + s.get(token).getValue());
+
+    				tokenList.push(f.get(token).getReturnValue());
+    			}
+    			else
+    				tokenList.push('"null"');
+    		}
+    		else{
+    			if(token.includes("null")){
+    				tokenList.push('"null"');
+    			}else
+    				console.log("Undeclared variable " + token + "!");
+    		}
+    		hasFunction=true;
+    	}else{
+    		if(!hasFunction)
+    			tokenList.push(token);
+    		else{
+    			if(token.includes(")"))
+    				hasFunction=false;
+    		}
+    	}
     	if(type.includes("STRING_LITERAL"))
     		hasString = true;
     }    
@@ -77,14 +103,14 @@ function buildInputString(tokenList){
 	return input;
 }
 
-IdentifierHandler.prototype.evaluatePrintExpression = function(input, s){
+IdentifierHandler.prototype.evaluatePrintExpression = function(input, s, f){
 	var printArgs = input.split("+");
 	var expression;
 	var printStmt = "";
 	
 	
 	for(var i=0; i<printArgs.length; i++){
-		expression = generateTokenList(printArgs[i], s);
+		expression = generateTokenList(printArgs[i], s, f);
 		printStmt = printStmt.concat(expression.toString());
 	}
 	//console.log("WWW" + printStmt);
@@ -97,6 +123,8 @@ IdentifierHandler.prototype.evaluatePrintExpression = function(input, s){
 
 function evaluateExpression (input){
 	//console.log("ps" + input.toString());
+	//console.log(input);
+
     if(input.toString().includes("null")){
     	console.log("AS");
     	return null;

@@ -52,7 +52,7 @@ AssignmentListener.prototype.enterVar_decl = function(ctx) {
 		var varValue = new QwertyValue(typeName, "null");
 	}
 	else{	// ex. int i = 1;		
-		var input = identifierHandler.convertVarToVal(ctx.var_identifier_list().getChild(1).getChild(1).getText(), s);	
+		var input = identifierHandler.convertVarToVal(ctx.var_identifier_list().getChild(1).getChild(1).getText(), s, functionTable);	
 		//console.log("input " + input);
 		//console.log("typeofinput" + typeof(input));
 		var varValue = new QwertyValue(typeName, input);
@@ -100,7 +100,13 @@ AssignmentListener.prototype.enterAssignment_statement = function(ctx) {
 	var heightDiff;
 	var height;
 	var varHeight;
+	var funcCalls = [];
 	
+	funcCalls = ctx.assignment_factor().expression().funccall_statement();
+
+
+	//Code below yung pangkuha ng context
+	//funcCall = ctx.assignment_factor().expression().var_func_expression().var_func_factor().funccall_statement();
 	if(!s.has(varName)) {
 		console.log("variable " + varName + " NOT in stack!");
 	}else{
@@ -136,7 +142,15 @@ AssignmentListener.prototype.enterAssignment_statement = function(ctx) {
 			}else if(ctx.getChild(1).getText() == "%="){
 				varValue = s.get(varName).getValue() + "%" + ctx.getChild(2).getText();
 			}
-			varValue = identifierHandler.convertVarToVal(varValue, s);
+			
+			//loop thru lahat ng funcCall context tapos walk
+			if(funcCalls.length > 0){
+				for(var i=0; i<funcCalls.length;i++){
+				antlr4.tree.ParseTreeWalker.DEFAULT.walk(this, funcCalls[i]);
+				}
+			}
+
+			varValue = identifierHandler.convertVarToVal(varValue, s, functionTable);
 			s.get(varName).setValue(varValue);
 			//console.log(varValue);
 			//varValue = rpn(yard(varValue));
@@ -477,7 +491,7 @@ AssignmentListener.prototype.enterScan_statement = function(ctx) {
 	wait(7)*/
 	var input = prompt(message);
 	
-	inputVal = identifierHandler.convertVarToVal(input, s);
+	inputVal = identifierHandler.convertVarToVal(input, s, functionTable);
 	//console.log("TYPE: " + typeof(inputVal));
 	s.get(variable).setValue(inputVal);
 };
@@ -552,8 +566,8 @@ function compareParameters(param1, param2){
 			return false;
 	 }else{
 		for(var i=0; i<listParam1Variables.length; i++){
-			console.log(listParam1Variables[i] + " = " + listParam2Arguments[i]);
-			value = identifierHandler.convertVarToVal(listParam2Arguments[i]);
+		//	console.log(listParam1Variables[i] + " = " + listParam2Arguments[i]);
+			value = identifierHandler.convertVarToVal(listParam2Arguments[i], functionTable);
 			s.get(listParam1Variables[i]).setValue(value);
 		}
 	 	console.log("execute"); 
@@ -583,6 +597,7 @@ AssignmentListener.prototype.enterFunccall_statement = function(ctx) {
 		antlr4.tree.ParseTreeWalker.DEFAULT.walk(this, calledFunction.getParameter());
 
 		isValidParams = compareParameters(calledFunction.getParameter(), funcCallParams)
+		console.log("after");
 	} else
 		isValidParams = compareParameters(null, funcCallParams)
 		
@@ -613,7 +628,7 @@ AssignmentListener.prototype.enterParameters = function(ctx) {
 
 //Enter a parse tree produced by QwertyParser#return_statement.
 AssignmentListener.prototype.enterReturn_statement = function(ctx) {
-	console.log(ctx);
+	//console.log(ctx);
 	var returnValue = ctx.getChild(1).getText();
 	var functionParent = ctx.parentCtx.parentCtx.parentCtx.parentCtx;
 	
@@ -627,10 +642,10 @@ AssignmentListener.prototype.enterReturn_statement = function(ctx) {
 	}else{
 		if(s.has(returnValue)){
 			returnDataType = s.get(returnValue).getDataType();
-			returnValue = identifierHandler.convertVarToVal(returnValue, s);
+			returnValue = identifierHandler.convertVarToVal(returnValue, s, functionTable);
 
 		}else{
-			returnValue = identifierHandler.convertVarToVal(returnValue, s);
+			returnValue = identifierHandler.convertVarToVal(returnValue, s, functionTable);
 			if(typeof returnValue == "number"){
 				if(returnValue.toString().includes("."))
 					returnDataType = "float";
