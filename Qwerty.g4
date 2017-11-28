@@ -52,7 +52,7 @@ function_return
 function_noreturn    		
 	: VOID FUNCTION_IDENTIFIER function_block;
 parameters	     			
-	: data_type VARIABLE_IDENTIFIER (ENUMERATION parameters)?;
+	: data_type VARIABLE_IDENTIFIER (ENUMERATION data_type VARIABLE_IDENTIFIER)*;
 function_block				
 	: OPEN_PAR parameters? CLOSE_PAR code_block;
 main_function	     		

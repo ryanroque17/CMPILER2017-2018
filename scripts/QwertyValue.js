@@ -43,7 +43,7 @@ function isValidAssignment(dataType, input) {
 	//console.log(isNaN(input));
 	
 	if(dataType == "string") {
-		console.log("yey");
+		//console.log("yey");
 		if(typeof(input) != "string") {
 			return false;
 		}
@@ -55,7 +55,7 @@ function isValidAssignment(dataType, input) {
 		return true;
 	} else if(!isNaN(input)){
 		if(dataType == "int") {
-			console.log("int");
+			//console.log("int");
 			if(typeof(input) != "number" || input.toString().includes(".")) {
 				return false;
 			}

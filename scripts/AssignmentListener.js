@@ -506,129 +506,134 @@ AssignmentListener.prototype.enterPrint_statement = function(ctx) {
 function compareParameters(param1, param2){
 	// param 1 = the parameters of the function
 	// param 2 = the parameters given during the function call
+
 	var param1List;
 	var param1Count;
 	var param2List;
 	var param2Count;
-
 	var listFuncTypes = [];
-	listFuncTypes.push(param1.data_type().getText());
-	var current_param = param1;
-	while(true) {
-		if(current_param.parameters() != null) {
-			listFuncTypes.push(current_param.parameters().data_type().getText());
-			current_param = current_param.parameters();
-		} else {
-			break;
-		}
+	var listParam1Variables = [];
+	var listParam2Arguments = [];
+	var current_param;
+	var hasNull = false;
+	var value;
+	if(param1 == null){
+		console.log("param1 is null");		
+	 	hasNull = true;
+	}else{	 	
+		listFuncTypes = param1.data_type();
+		listParam1Variables = param1.VARIABLE_IDENTIFIER();
+		
+		//console.log("param1Types" +listFuncTypes.toString());
+		//console.log("param1Vars" +listParam1Variables.toString());
+
 	}
-	console.log(listFuncTypes);
-
-	var firstPar;
-
-	if(typeof(param2.actual_params()) != "object")
-		firstPar = param2.VARIABLE_IDENTIFIER().getText();
-	else
-		firstPar = param2.expression().getText();
-	var restPar = param2.actual_params().getText();
-	var listCallTypes = (firstPar + "," + restPar).split(",");
-	console.log(listCallTypes);
-
-	// if number of parameters does not match!
-	if(listFuncTypes.length != listCallTypes.length) {
-		var errorHtml = "<tr><td>Parameters number don't match!<td></td><td></td><td>Add/subtract variables.</td></tr>";
-		consoleBox.innerHTML += errorHtml;
-		return false;
-	} else {
-		for(var i=0; i<listCallTypes.length; i++) {
-			var item = listCallTypes[i];
-			if(typeof(s.get(item)) == "object") {
-				listCallTypes[i] = s.get(item).getDataType();
-			} else {
-				listCallTypes[i] = String(typeof(eval(item)));
-				console.log(listCallTypes[i]);
-				// subject to error if there is a float
-				if(listCallTypes[i] == "number") {
-					listCallTypes[i] = "int";
-				}
-			}
-		}
+	
+	if(param2 == null){
+		console.log("param2 is null");
+	 	hasNull = true;
+	}else{
+		listParam2Arguments = param2.getText().split(",");
+	//	console.log("param2" + listParam2Arguments);
 	}
-
-	console.log(listCallTypes);
-
-	// since we now know that both array have the same lengths, does not matter which we use for condition
-	for(var i=0; i<listCallTypes.length; i++)
-		if(listCallTypes[i] != listFuncTypes[i])
+	
+	if(hasNull){
+	 	if(param1 == null && param2 == null){
+	 		console.log("execute");
+	 		return true;
+	 	}else{
+	 		var errorHtml = "<tr><td>Number of parameters don't match!<td></td><td></td><td>Add/subtract parameters.</td></tr>";
+			consoleBox.innerHTML += errorHtml;
 			return false;
+	 	}			
+	 }else if(param1Count != param2Count){
+		 var errorHtml = "<tr><td>Number of parameters don't match!<td></td><td></td><td>Add/subtract parameters.</td></tr>";
+			consoleBox.innerHTML += errorHtml;
+			return false;
+	 }else{
+		for(var i=0; i<listParam1Variables.length; i++){
+			console.log(listParam1Variables[i] + " = " + listParam2Arguments[i]);
+			value = identifierHandler.convertVarToVal(listParam2Arguments[i]);
+			s.get(listParam1Variables[i]).setValue(value);
+		}
+	 	console.log("execute"); 
+	 	return true;
+	 }
 
 	return true;
 
-	// var hasNull = false;
-	// if(param1 == null){
-	// 	console.log("param1 is null");		
-	// 	hasNull = true;
-	// }else{
-	// 	param1List = param1.getText().split(",");		
-	// 	param1Count = param1List.length;
-	// }
-	// if(param2 == null){
-	// 	console.log("param2 is null");
-	// 	hasNull = true;
-	// }else{
-	// 	param2List = param2.getText().split(",");
-	// 	param2Count = param2List.length;
-	// }
-	// console.log("param1count is " + param1Count + " param2Count is " + param2Count);
-	// if(hasNull){
-	// 	if(param1 == null && param2 == null){
-	// 		console.log("execute");
-	// 		return true;
-	// 	}else{
-	// 		console.log("ERROR! Parameters do not match!!");	
-	// 		return false;
-	// 	}
-			
-	// }else if(param1Count != param2Count){
-	// 	console.log("ERROR! Parameters do not match!!");	
-	// 	return false;
-	// }else{
-	// 	console.log("execute"); 
-	// 	return true;
-	// }
+	
 };
 
 //Enter a parse tree produced by QwertyParser#funccall_statement.
 AssignmentListener.prototype.enterFunccall_statement = function(ctx) {
+	s.push();
+	//console.log("enterfunccall")
+
 	var functionName = ctx.FUNCTION_IDENTIFIER().getText();
 	var isValidParams;
 	var calledFunction = functionTable.get(functionName);
 	var funcCallParams;
 	
 	if(ctx.actual_parameter_list()!=null){
-		console.log("YOO")
 		funcCallParams = ctx.actual_parameter_list().actual_params();
-	}else
-		console.log("ZZ");
+	}
+	
 
 	if(calledFunction.getParameter()!=null){
+		antlr4.tree.ParseTreeWalker.DEFAULT.walk(this, calledFunction.getParameter());
+
 		isValidParams = compareParameters(calledFunction.getParameter(), funcCallParams)
 	} else
 		isValidParams = compareParameters(null, funcCallParams)
 		
-	if(isValidParams)
+	if(isValidParams){
 		antlr4.tree.ParseTreeWalker.DEFAULT.walk(this, calledFunction.getCodeBlock());
+	}
+};
+
+//Enter a parse tree produced by QwertyParser#parameters.
+AssignmentListener.prototype.enterParameters = function(ctx) {
+	//console.log(ctx);
+	var listDataTypes = ctx.data_type();
+	var listVariables = ctx.VARIABLE_IDENTIFIER();
+	var varValue;
+	var dataType;
+	var varName;
+	for(var i=0; i<listDataTypes.length; i++){
+		dataType = listDataTypes[i].getText();
+		varName = listVariables[i].getText();
+		/*console.log("dtype =" + dataType);
+		console.log("varname =" + varName);*/
+		
+		varValue = new QwertyValue(dataType, "null");
+
+		s.set(varName, varValue);
+		
+
+		
+	}
+	
+};
+
+//Exit a parse tree produced by QwertyParser#funccall_statement.
+AssignmentListener.prototype.exitFunccall_statement = function(ctx) {
+	s.pop();
 };
 
 //Enter a parse tree produced by QwertyParser#function_declaration.
 AssignmentListener.prototype.enterFunction_declaration = function(ctx) {
+	
 	var dataType = ctx.getChild(0).getChild(0).getText();
 	var functionName = ctx.getChild(0).getChild(1).getText();
 	var parameters = ctx.getChild(0).function_block().parameters();
 	var functionCodeBlock = ctx.getChild(0).function_block().code_block();
 	
-	ctx.removeLastChild();
+	ctx.removeLastChild();	ctx.removeLastChild();
+
+
 	//console.log(functionName);
+	//console.log("YEEEWW" +parameters.VARIABLE_IDENTIFIER().getText());
 	functionTable.set(functionName, new QwertyFunction(dataType, parameters, functionCodeBlock))
 };
 
