@@ -7,7 +7,7 @@ var QwertyVisitor = require('./QwertyVisitor').QwertyVisitor;
 var grammarFileName = "Qwerty.g4";
 
 var serializedATN = ["\u0003\u0430\ud6d1\u8206\uad2d\u4417\uaef1\u8d80\uaadd",
-    "\u0003<\u022f\u0004\u0002\t\u0002\u0004\u0003\t\u0003\u0004\u0004\t",
+    "\u0003<\u0230\u0004\u0002\t\u0002\u0004\u0003\t\u0003\u0004\u0004\t",
     "\u0004\u0004\u0005\t\u0005\u0004\u0006\t\u0006\u0004\u0007\t\u0007\u0004",
     "\b\t\b\u0004\t\t\t\u0004\n\t\n\u0004\u000b\t\u000b\u0004\f\t\f\u0004",
     "\r\t\r\u0004\u000e\t\u000e\u0004\u000f\t\u000f\u0004\u0010\t\u0010\u0004",
@@ -86,13 +86,13 @@ var serializedATN = ["\u0003\u0430\ud6d1\u8206\uad2d\u4417\uaef1\u8d80\uaadd",
     "(\u0003(\u0003(\u0003(\u0003(\u0003(\u0003(\u0003(\u0003)\u0003)\u0003",
     ")\u0003)\u0003)\u0005)\u020a\n)\u0003*\u0003*\u0003*\u0003*\u0003*\u0003",
     "*\u0003*\u0003+\u0003+\u0003+\u0003+\u0003+\u0003+\u0003+\u0003+\u0003",
-    "+\u0003+\u0005+\u021d\n+\u0003,\u0003,\u0003,\u0003,\u0003,\u0003-\u0003",
-    "-\u0003-\u0003-\u0003-\u0003-\u0003.\u0003.\u0003.\u0003.\u0003.\u0003",
-    ".\u0002\u0006\u001e (,/\u0002\u0004\u0006\b\n\f\u000e\u0010\u0012\u0014",
-    "\u0016\u0018\u001a\u001c\u001e \"$&(*,.02468:<>@BDFHJLNPRTVXZ\u0002",
-    "\u000b\u0003\u0002\u0004\b\u0004\u000266;;\u0004\u0002\u001c\u001f%",
-    "%\u0003\u0002\u001c\u001d\u0003\u0002*+\u0003\u0002&+\u0003\u0002/0",
-    "\u0003\u0002,-\u0003\u0002 #\u0256\u0002_\u0003\u0002\u0002\u0002\u0004",
+    "+\u0003+\u0005+\u021d\n+\u0003,\u0003,\u0003,\u0003,\u0003,\u0003,\u0003",
+    "-\u0003-\u0003-\u0003-\u0003-\u0003-\u0003.\u0003.\u0003.\u0003.\u0003",
+    ".\u0003.\u0002\u0006\u001e (,/\u0002\u0004\u0006\b\n\f\u000e\u0010\u0012",
+    "\u0014\u0016\u0018\u001a\u001c\u001e \"$&(*,.02468:<>@BDFHJLNPRTVXZ",
+    "\u0002\u000b\u0003\u0002\u0004\b\u0004\u000266;;\u0004\u0002\u001c\u001f",
+    "%%\u0003\u0002\u001c\u001d\u0003\u0002*+\u0003\u0002&+\u0003\u0002/",
+    "0\u0003\u0002,-\u0003\u0002 #\u0257\u0002_\u0003\u0002\u0002\u0002\u0004",
     "\u008a\u0003\u0002\u0002\u0002\u0006\u0094\u0003\u0002\u0002\u0002\b",
     "\u0096\u0003\u0002\u0002\u0002\n\u00a5\u0003\u0002\u0002\u0002\f\u00a7",
     "\u0003\u0002\u0002\u0002\u000e\u00a9\u0003\u0002\u0002\u0002\u0010\u00ad",
@@ -112,8 +112,8 @@ var serializedATN = ["\u0003\u0430\ud6d1\u8206\uad2d\u4417\uaef1\u8d80\uaadd",
     "H\u01d9\u0003\u0002\u0002\u0002J\u01e2\u0003\u0002\u0002\u0002L\u01f8",
     "\u0003\u0002\u0002\u0002N\u01fa\u0003\u0002\u0002\u0002P\u0204\u0003",
     "\u0002\u0002\u0002R\u020b\u0003\u0002\u0002\u0002T\u021c\u0003\u0002",
-    "\u0002\u0002V\u021e\u0003\u0002\u0002\u0002X\u0223\u0003\u0002\u0002",
-    "\u0002Z\u0229\u0003\u0002\u0002\u0002\\^\u0005\u0010\t\u0002]\\\u0003",
+    "\u0002\u0002V\u021e\u0003\u0002\u0002\u0002X\u0224\u0003\u0002\u0002",
+    "\u0002Z\u022a\u0003\u0002\u0002\u0002\\^\u0005\u0010\t\u0002]\\\u0003",
     "\u0002\u0002\u0002^a\u0003\u0002\u0002\u0002_]\u0003\u0002\u0002\u0002",
     "_`\u0003\u0002\u0002\u0002`b\u0003\u0002\u0002\u0002a_\u0003\u0002\u0002",
     "\u0002bc\u0005\u001a\u000e\u0002cd\u0007\u0002\u0002\u0003d\u0003\u0003",
@@ -370,17 +370,18 @@ var serializedATN = ["\u0003\u0430\ud6d1\u8206\uad2d\u4417\uaef1\u8d80\uaadd",
     "\u0002\u021b\u021d\u0003\u0002\u0002\u0002\u021c\u0212\u0003\u0002\u0002",
     "\u0002\u021c\u0217\u0003\u0002\u0002\u0002\u021dU\u0003\u0002\u0002",
     "\u0002\u021e\u021f\u0005\u000e\b\u0002\u021f\u0220\u0007\u0016\u0002",
-    "\u0002\u0220\u0221\u0007\u0017\u0002\u0002\u0221\u0222\u0007;\u0002",
-    "\u0002\u0222W\u0003\u0002\u0002\u0002\u0223\u0224\u0007;\u0002\u0002",
-    "\u0224\u0225\u0007\u0016\u0002\u0002\u0225\u0226\t\u0003\u0002\u0002",
-    "\u0226\u0227\u0007\u0017\u0002\u0002\u0227\u0228\u00054\u001b\u0002",
-    "\u0228Y\u0003\u0002\u0002\u0002\u0229\u022a\u0007;\u0002\u0002\u022a",
-    "\u022b\u0007\u0016\u0002\u0002\u022b\u022c\t\u0003\u0002\u0002\u022c",
-    "\u022d\u0007\u0017\u0002\u0002\u022d[\u0003\u0002\u0002\u00022_\u008a",
-    "\u008f\u0094\u009b\u009f\u00a3\u00a5\u00ad\u00bf\u00c4\u00d4\u00d8\u00e0",
-    "\u00e4\u00ec\u00f0\u00f4\u0100\u0102\u0109\u0112\u011a\u0123\u0127\u012a",
-    "\u0136\u0142\u0146\u014b\u0151\u0157\u015b\u0172\u017a\u0192\u0194\u019c",
-    "\u01a1\u01b0\u01b4\u01c3\u01ca\u01d4\u01dd\u01f8\u0209\u021c"].join("");
+    "\u0002\u0220\u0221\t\u0003\u0002\u0002\u0221\u0222\u0007\u0017\u0002",
+    "\u0002\u0222\u0223\u0007;\u0002\u0002\u0223W\u0003\u0002\u0002\u0002",
+    "\u0224\u0225\u0007;\u0002\u0002\u0225\u0226\u0007\u0016\u0002\u0002",
+    "\u0226\u0227\t\u0003\u0002\u0002\u0227\u0228\u0007\u0017\u0002\u0002",
+    "\u0228\u0229\u00054\u001b\u0002\u0229Y\u0003\u0002\u0002\u0002\u022a",
+    "\u022b\u0007;\u0002\u0002\u022b\u022c\u0007\u0016\u0002\u0002\u022c",
+    "\u022d\t\u0003\u0002\u0002\u022d\u022e\u0007\u0017\u0002\u0002\u022e",
+    "[\u0003\u0002\u0002\u00022_\u008a\u008f\u0094\u009b\u009f\u00a3\u00a5",
+    "\u00ad\u00bf\u00c4\u00d4\u00d8\u00e0\u00e4\u00ec\u00f0\u00f4\u0100\u0102",
+    "\u0109\u0112\u011a\u0123\u0127\u012a\u0136\u0142\u0146\u014b\u0151\u0157",
+    "\u015b\u0172\u017a\u0192\u0194\u019c\u01a1\u01b0\u01b4\u01c3\u01ca\u01d4",
+    "\u01dd\u01f8\u0209\u021c"].join("");
 
 
 var atn = new antlr4.atn.ATNDeserializer().deserialize(serializedATN);
@@ -5364,8 +5365,20 @@ Arr_declContext.prototype.CLOSE_BRACKET = function() {
     return this.getToken(QwertyParser.CLOSE_BRACKET, 0);
 };
 
-Arr_declContext.prototype.VARIABLE_IDENTIFIER = function() {
-    return this.getToken(QwertyParser.VARIABLE_IDENTIFIER, 0);
+Arr_declContext.prototype.VARIABLE_IDENTIFIER = function(i) {
+	if(i===undefined) {
+		i = null;
+	}
+    if(i===null) {
+        return this.getTokens(QwertyParser.VARIABLE_IDENTIFIER);
+    } else {
+        return this.getToken(QwertyParser.VARIABLE_IDENTIFIER, i);
+    }
+};
+
+
+Arr_declContext.prototype.INTEGER_LITERAL = function() {
+    return this.getToken(QwertyParser.INTEGER_LITERAL, 0);
 };
 
 Arr_declContext.prototype.enterRule = function(listener) {
@@ -5397,6 +5410,7 @@ QwertyParser.prototype.arr_decl = function() {
 
     var localctx = new Arr_declContext(this, this._ctx, this.state);
     this.enterRule(localctx, 84, QwertyParser.RULE_arr_decl);
+    var _la = 0; // Token type
     try {
         this.enterOuterAlt(localctx, 1);
         this.state = 540;
@@ -5404,8 +5418,16 @@ QwertyParser.prototype.arr_decl = function() {
         this.state = 541;
         this.match(QwertyParser.OPEN_BRACKET);
         this.state = 542;
-        this.match(QwertyParser.CLOSE_BRACKET);
+        _la = this._input.LA(1);
+        if(!(_la===QwertyParser.INTEGER_LITERAL || _la===QwertyParser.VARIABLE_IDENTIFIER)) {
+        this._errHandler.recoverInline(this);
+        }
+        else {
+            this.consume();
+        }
         this.state = 543;
+        this.match(QwertyParser.CLOSE_BRACKET);
+        this.state = 544;
         this.match(QwertyParser.VARIABLE_IDENTIFIER);
     } catch (re) {
     	if(re instanceof antlr4.error.RecognitionException) {
@@ -5497,11 +5519,11 @@ QwertyParser.prototype.arr_assignment = function() {
     var _la = 0; // Token type
     try {
         this.enterOuterAlt(localctx, 1);
-        this.state = 545;
-        this.match(QwertyParser.VARIABLE_IDENTIFIER);
         this.state = 546;
-        this.match(QwertyParser.OPEN_BRACKET);
+        this.match(QwertyParser.VARIABLE_IDENTIFIER);
         this.state = 547;
+        this.match(QwertyParser.OPEN_BRACKET);
+        this.state = 548;
         _la = this._input.LA(1);
         if(!(_la===QwertyParser.INTEGER_LITERAL || _la===QwertyParser.VARIABLE_IDENTIFIER)) {
         this._errHandler.recoverInline(this);
@@ -5509,9 +5531,9 @@ QwertyParser.prototype.arr_assignment = function() {
         else {
             this.consume();
         }
-        this.state = 548;
-        this.match(QwertyParser.CLOSE_BRACKET);
         this.state = 549;
+        this.match(QwertyParser.CLOSE_BRACKET);
+        this.state = 550;
         this.var_assignment_statement();
     } catch (re) {
     	if(re instanceof antlr4.error.RecognitionException) {
@@ -5599,11 +5621,11 @@ QwertyParser.prototype.arr_expression = function() {
     var _la = 0; // Token type
     try {
         this.enterOuterAlt(localctx, 1);
-        this.state = 551;
-        this.match(QwertyParser.VARIABLE_IDENTIFIER);
         this.state = 552;
-        this.match(QwertyParser.OPEN_BRACKET);
+        this.match(QwertyParser.VARIABLE_IDENTIFIER);
         this.state = 553;
+        this.match(QwertyParser.OPEN_BRACKET);
+        this.state = 554;
         _la = this._input.LA(1);
         if(!(_la===QwertyParser.INTEGER_LITERAL || _la===QwertyParser.VARIABLE_IDENTIFIER)) {
         this._errHandler.recoverInline(this);
@@ -5611,7 +5633,7 @@ QwertyParser.prototype.arr_expression = function() {
         else {
             this.consume();
         }
-        this.state = 554;
+        this.state = 555;
         this.match(QwertyParser.CLOSE_BRACKET);
     } catch (re) {
     	if(re instanceof antlr4.error.RecognitionException) {

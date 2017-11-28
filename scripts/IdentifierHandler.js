@@ -11,11 +11,26 @@ var IdentifierHandler = function () {
 
 IdentifierHandler.prototype.convertVarToVal = function(input, s, f){
 	var tokenList = generateTokenList(input, s, f);
-	
-	if(hasString)
+	if(hasString) {
+		console.log("buildInputString");
 		return buildInputString(tokenList);	
-	else
+	}
+	else {
+		console.log("evaluateExpression");
 		return evaluateExpression(tokenList);
+	}
+}
+
+function convertArrToVal(input, s, f) {
+	var splitForVariable = input.split("[");
+	var varName = splitForVariable[0];
+	var splitForIndex = splitForVariable[1].split("]");
+	var index = splitForIndex[0];
+
+	var arrValue = s.get(varName).getValue();
+	var returnThis = arrValue[parseInt(index)];
+
+	return returnThis;
 }
 
 function generateTokenList(input, s, f){
@@ -26,6 +41,9 @@ function generateTokenList(input, s, f){
 	var symbolNames = parser.symbolicNames;
 	var inputSplitted = input.split("");
 	var test = tokens.getTokens(0, tokens.getNumberOfOnChannelTokens());
+
+	var searchArray = false;
+	var tempArr = "";
 	
 	var token;
 	var type;
@@ -34,15 +52,35 @@ function generateTokenList(input, s, f){
 	var hasFunction = false;
     for(var i=0; i<tokens.getNumberOfOnChannelTokens() - 1; i++) {
     	token = inputSplitted.slice(test[i].start, test[i].stop + 1).join("");
+    	console.log(token);
 
     	type = symbolNames[test[i].type];
 
     	if(type.includes("VARIABLE_IDENTIFIER")){
-    		if(s.has(token)) {  		
-    			//console.log("ASD" + s.get(token).getValue());
-    			if(s.get(token).getValue() != null){
-        			//console.log("YEY" + s.get(token).getValue());
+    		// s contains the token 
+    		if(s.has(token)) {  	
+    			// if value is a variable then char after is '[' means its an array!
+    			if(i != (tokens.getNumberOfOnChannelTokens() - 1) && inputSplitted.slice(test[i].start + 1, test[i].stop + 2).join("") == '[') {
+    				searchArray = true;
+    				tempArr += token;
+    				var j = 1;
+    				// loop through the tokens until you reach a ']' 
+    				// once you reach that, add into 'i' how many times you looped so you don't have to revisit them in the token list
+    				// continue -- so you continue AFTER the ']'
+    				do {
+    					tempArr += inputSplitted.slice(test[i].start + j, test[i].stop + (j+1)).join("");
+    					if(inputSplitted.slice(test[i].start + j, test[i].stop + (j+1)).join("") == ']') {
+    						tokenList.push(convertArrToVal(tempArr, s, f));
+    						searchArray = false;
+    						i += j;
+    						tempArr = "";
+    					}
+    					j++;
+    				} while(searchArray);
+    				continue;
+    			}
 
+    			if(s.get(token).getValue() != null){
     				tokenList.push(s.get(token).getValue());
     			}
     			else
@@ -55,20 +93,16 @@ function generateTokenList(input, s, f){
     			}else
     				console.log("Undeclared variable " + token + "!");
     		}
-    	}else if(type.includes("FUNCTION_IDENTIFIER")){
-    	//	console.log("has func ident " + token);
+    	} 
+		else if(type.includes("FUNCTION_IDENTIFIER")){
     		if(f.has(token)){
-    	//		console.log(f.get(token).getReturnValue());
-
     			if(f.get(token).getReturnValue() != null){
-        			//console.log("YEY" + s.get(token).getValue());
-
     				tokenList.push(f.get(token).getReturnValue());
     			}
     			else
     				tokenList.push('"null"');
     		}
-    		else{
+    		else{ 
     			if(token.includes("null")){
     				tokenList.push('"null"');
     			}else
@@ -124,6 +158,7 @@ IdentifierHandler.prototype.evaluatePrintExpression = function(input, s, f){
 function evaluateExpression (input){
 	//console.log("ps" + input.toString());
 	//console.log(input);
+	console.log(input);
 
     if(input.toString().includes("null")){
     	console.log("AS");

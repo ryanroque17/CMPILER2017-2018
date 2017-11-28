@@ -104,7 +104,6 @@ AssignmentListener.prototype.enterAssignment_statement = function(ctx) {
 	
 	funcCalls = ctx.assignment_factor().expression().funccall_statement();
 
-
 	//Code below yung pangkuha ng context
 	//funcCall = ctx.assignment_factor().expression().var_func_expression().var_func_factor().funccall_statement();
 	if(!s.has(varName)) {
@@ -697,13 +696,19 @@ AssignmentListener.prototype.exitFunction_declaration = function(ctx) {
 
 // Enter a parse tree produced by QwertyParser#arr_decl.
 AssignmentListener.prototype.enterArr_decl = function(ctx) {
+	console.log(ctx);
 	var dataType = ctx.data_type().getText();
-	var varName = ctx.VARIABLE_IDENTIFIER().getText();
+	var varName = ctx.VARIABLE_IDENTIFIER()[0].getText();
+	var size = ctx.INTEGER_LITERAL().getText();
 
 	console.log(dataType);
 	console.log(varName);
 
-	var varValue = new QwertyValue(dataType, []);
+	// create a new array of size -- 
+	var arr = new Array(parseInt(size));
+	console.log(arr.length);
+
+	var varValue = new QwertyValue(dataType, arr);
 	s.set(varName, varValue);
 };
 
@@ -711,17 +716,29 @@ AssignmentListener.prototype.enterArr_decl = function(ctx) {
 AssignmentListener.prototype.enterArr_assignment = function(ctx) {
 	// 0 will ALWAYS be varName then 1 could be either the index or whatever
 	var varName = ctx.VARIABLE_IDENTIFIER()[0].getText();
-	var indexVal = ctx.INTEGER_LITERAL().getText();
+	var indexVal;
+
+	if(ctx.INTEGER_LITERAL() != null)
+		indexVal = ctx.INTEGER_LITERAL().getText();
+	else {
+		var temp = s.get(ctx.VARIABLE_IDENTIFIER()[1].getText());
+		if(temp.getDataType() == "int")
+			indexVal = temp.getValue();
+		else
+			console.log("Error in array index! Invalid data type!");
+	}
 
 	var toBeAssigned = identifierHandler.convertVarToVal(ctx.var_assignment_statement().assignment_factor().getText(), s, functionTable);
 
-	console.log("To be assigned! " + toBeAssigned);
-
-	var getArr = s.get(varName).getValue();
-	console.log("BEFORE = " + getArr);
-	getArr[parseInt(indexVal)] = parseInt(toBeAssigned);
-	console.log("AFTER = " + getArr);
-	s.get(varName).setValue(getArr);
+	if(parseInt(indexVal) >= s.get(varName).getValue().length) {
+		console.log("Array index out of bounds!");
+	} else {
+		console.log(s.get(varName).getValue().length);
+		var getArr = s.get(varName).getValue();
+		getArr[parseInt(indexVal)] = parseInt(toBeAssigned);
+		s.get(varName).setValue(getArr);
+		console.log(s.get(varName).getValue().length);
+	}
 };
 
 // Enter a parse tree produced by QwertyParser#arr_expression.
