@@ -101,8 +101,12 @@ AssignmentListener.prototype.enterAssignment_statement = function(ctx) {
 	var height;
 	var varHeight;
 	var funcCalls = [];
+
+	console.log(ctx.assignment_factor());
 	
-	funcCalls = ctx.assignment_factor().expression().funccall_statement();
+	if(ctx.assignment_factor() != null) {
+		funcCalls = ctx.assignment_factor().expression().funccall_statement();
+	}
 
 	//Code below yung pangkuha ng context
 	//funcCall = ctx.assignment_factor().expression().var_func_expression().var_func_factor().funccall_statement();
