@@ -739,9 +739,15 @@ AssignmentListener.prototype.enterArr_assignment = function(ctx) {
 	if(ctx.INTEGER_LITERAL() != null)
 		indexVal = ctx.INTEGER_LITERAL().getText();
 	else {
-		var temp = s.get(ctx.VARIABLE_IDENTIFIER()[1].getText());
-		if(temp.getDataType() == "int")
-			indexVal = temp.getValue();
+		var express = ctx.VARIABLE_IDENTIFIER()[1].getText();
+		if(ctx.num_expression() != null)
+			express += ctx.num_expression()[0].getText()
+
+		var temp = identifierHandler.convertVarToVal(express, s, functionTable);
+		console.log(temp);
+		console.log(isNaN(temp));
+		if(!isNaN(temp))
+			indexVal = parseInt(temp);
 		else
 			console.log("Error in array index! Invalid data type!");
 	}
