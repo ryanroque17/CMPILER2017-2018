@@ -87,9 +87,10 @@ num_ope
 unary_ope					
 	: '+' | '-';
 num_factor					
-	: CHAR_LITERAL  
+	: CHAR_LITERAL 
 	| (unary_ope)? INTEGER_LITERAL
 	| (unary_ope)? FLOAT_LITERAL 
+	| VARIABLE_IDENTIFIER OPEN_BRACKET (INTEGER_LITERAL | VARIABLE_IDENTIFIER) CLOSE_BRACKET
 	;
 		/*** Added ***/
 var_func_expression			

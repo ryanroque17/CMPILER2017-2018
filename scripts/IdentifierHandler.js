@@ -62,17 +62,18 @@ function generateTokenList(input, s, f){
     	token = inputSplitted.slice(test[i].start, test[i].stop + 1).join("");
     	
     	type = symbolNames[test[i].type];
-    	
+    	console.log("CURRENT TYPE " + type);
     	console.log("CURRENT TOKEN " + token);
     	if(type.includes("VARIABLE_IDENTIFIER") && !hasFunction){
     		// s contains the token 
     		if(s.has(token)) {  	
         		console.log("TOKEN " + token);
         		console.log("TOKENVAL" + s.get(token).getValue());
+        		console.log("AFTER TOKEN: " + inputSplitted.slice(test[i].start + 1, test[i].stop + 2).join(""));
 
-    		
     			// if value is a variable then char after is '[' means its an array!
     			if(i != (tokens.getNumberOfOnChannelTokens() - 1) && inputSplitted.slice(test[i].start + 1, test[i].stop + 2).join("") == '[') {
+    				console.log("ARRAY!!!!");
     				searchArray = true;
     				tempArr += token;
     				var j = 1;
@@ -150,7 +151,7 @@ function generateTokenList(input, s, f){
     if(hasString){
     	console.log("buildInputString");
 		return buildInputString(tokenList);
-    }
+    }  
 	else {
     	console.log("evaluateExpression " +tokenList);
 		return evaluateExpression(tokenList);

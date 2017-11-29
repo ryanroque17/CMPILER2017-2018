@@ -138,17 +138,17 @@ AssignmentListener.prototype.enterAssignment_statement = function(ctx) {
 				varValue = s.get(varName).getValue() + "%" + ctx.getChild(2).getText();
 			}
 			
-			//loop thru lahat ng funcCall context tapos walk
-			if(funcCalls != null){
-				if(funcCalls.length > 0)
-					for(var i=0; i<funcCalls.length;i++){
-						antlr4.tree.ParseTreeWalker.DEFAULT.walk(this, funcCalls[i]);
-					}
-				else{
-					console.log(funcCalls.var_func_factor().funccall_statement());
-					antlr4.tree.ParseTreeWalker.DEFAULT.walk(this, funcCalls.var_func_factor().funccall_statement());
-				}
-			}
+			// //loop thru lahat ng funcCall context tapos walk
+			// if(funcCalls != null){
+			// 	if(funcCalls.length > 0)
+			// 		for(var i=0; i<funcCalls.length;i++){
+			// 			antlr4.tree.ParseTreeWalker.DEFAULT.walk(this, funcCalls[i]);
+			// 		}
+			// 	else{
+			// 		console.log(funcCalls.var_func_factor().funccall_statement());
+			// 		antlr4.tree.ParseTreeWalker.DEFAULT.walk(this, funcCalls.var_func_factor().funccall_statement());
+			// 	}
+			// }
 			
 			varValue = identifierHandler.convertVarToVal(varValue, s, functionTable);
 			
@@ -171,6 +171,7 @@ AssignmentListener.prototype.enterAssignment_statement = function(ctx) {
 };
 
 function evaluateBoolean(input) {
+	console.log("COMPARING EXPRESSION " + input);
 	var hasAnd = false;
 	var arr;
 	
@@ -187,12 +188,8 @@ function evaluateBoolean(input) {
 			if(poe.split("").includes("<")) {
 				// <=
 				var exp = arr[i].split("<=");
-				if(typeof(s.get(exp[0])) == "object") {
-					exp[0] = s.get(exp[0]).getValue();
-				}
-				if(typeof(s.get(exp[1])) == "object") {
-					exp[1] = s.get(exp[1]).getValue();
-				}
+				exp[0] = identifierHandler.convertVarToVal(exp[0], s, functionTable);
+				exp[1] = identifierHandler.convertVarToVal(exp[1], s, functionTable);
 				if(exp[0] <= exp[1]) {
 	    
 				} else {
@@ -201,12 +198,8 @@ function evaluateBoolean(input) {
 			} else if(poe.split("").includes(">")) {
 				// >=
 				var exp = arr[i].split(">=");
-				if(typeof(s.get(exp[0])) == "object") {
-					exp[0] = s.get(exp[0]).getValue();
-				}
-				if(typeof(s.get(exp[1])) == "object") {
-					exp[1] = s.get(exp[1]).getValue();
-				}
+				exp[0] = identifierHandler.convertVarToVal(exp[0], s, functionTable);
+				exp[1] = identifierHandler.convertVarToVal(exp[1], s, functionTable);
 				if(exp[0] >= exp[1]) {
 	    
 				} else {
@@ -215,12 +208,8 @@ function evaluateBoolean(input) {
 			} else if(poe.split("").includes("!")) {
 				// >=
 				var exp = arr[i].split("!=");
-				if(typeof(s.get(exp[0])) == "object") {
-					exp[0] = s.get(exp[0]).getValue();
-				}
-				if(typeof(s.get(exp[1])) == "object") {
-					exp[1] = s.get(exp[1]).getValue();
-				}
+				exp[0] = identifierHandler.convertVarToVal(exp[0], s, functionTable);
+				exp[1] = identifierHandler.convertVarToVal(exp[1], s, functionTable);
 				if(exp[0] != exp[1]) {
 	    
 				} else {
@@ -228,12 +217,8 @@ function evaluateBoolean(input) {
 				}
 			}else {
 				var exp = arr[i].split("==");
-				if(typeof(s.get(exp[0])) == "object") {
-					exp[0] = s.get(exp[0]).getValue();
-				}
-				if(typeof(s.get(exp[1])) == "object") {
-					exp[1] = s.get(exp[1]).getValue();
-				}
+				exp[0] = identifierHandler.convertVarToVal(exp[0], s, functionTable);
+			exp[1] = identifierHandler.convertVarToVal(exp[1], s, functionTable);
 			    if(exp[0] == exp[1]) {
 			     
 			    } else {
@@ -243,12 +228,8 @@ function evaluateBoolean(input) {
 		} else if(poe.split("").includes("<")) {
 			// <
 			var exp = arr[i].split("<");
-			if(typeof(s.get(exp[0])) == "object") {
-					exp[0] = s.get(exp[0]).getValue();
-				}
-				if(typeof(s.get(exp[1])) == "object") {
-					exp[1] = s.get(exp[1]).getValue();
-				}
+			exp[0] = identifierHandler.convertVarToVal(exp[0], s, functionTable);
+			exp[1] = identifierHandler.convertVarToVal(exp[1], s, functionTable);
 
 		    if(exp[0] < exp[1]) {
 		     
@@ -258,16 +239,14 @@ function evaluateBoolean(input) {
 		} else if(poe.split("").includes(">")) {
 			// >
 			var exp = arr[i].split(">");
-			if(typeof(s.get(exp[0])) == "object") {
-					exp[0] = s.get(exp[0]).getValue();
-				}
-				if(typeof(s.get(exp[1])) == "object") {
-					exp[1] = s.get(exp[1]).getValue();
-				}
+			exp[0] = identifierHandler.convertVarToVal(exp[0], s, functionTable);
+			exp[1] = identifierHandler.convertVarToVal(exp[1], s, functionTable);
 
+			console.log("COMPARING " + exp[0] + " ---- " + exp[1]);
 		    if(exp[0] > exp[1]) {
-		     
+
 		    } else {
+
 		        return false;
 		    }
 		}
@@ -329,37 +308,37 @@ var temporaryExpression;
 var holdCtx;
 
 AssignmentListener.prototype.enterWhile_statement = function(ctx) {
-	s.push();
 	holdCtx = ctx;
 
-
-	var codeBlock = ctx.code_block();
-	var expression = ctx.conditional_factor().getText();
-
-	if(codeBlock!=null){
+	var codeBlock;
+	if(ctx.code_block()!=null){
+		codeBlock = ctx.code_block()
 		temporaryWhileCodeBlock = codeBlock;
 	}
 	else{
 		codeBlock = temporaryWhileCodeBlock;
 	}	
-	console.log(codeBlock);
-	console.log("Expression: " + expression);
 
-	if(expression!=null){
+	var expression;
+	if(ctx.conditional_factor()!=null){
+		expression = ctx.conditional_factor().getText()
 		temporaryExpression = expression;
+		console.log(temporaryExpression);
 	}else{
 		expression = temporaryExpression;
+		console.log(expression);
 	}
+
 	ctx.removeLastChild();
 
 	while(evaluateBoolean(expression)){
+		console.log("COMPARING RESULT = " + evaluateBoolean(expression));
 		antlr4.tree.ParseTreeWalker.DEFAULT.walk(this, codeBlock);
 	}
 };
 
 // Exit a parse tree produced by QwertyParser#while_statement.
 AssignmentListener.prototype.exitWhile_statement = function(ctx) {
-	s.pop();
 };
 
 
@@ -740,7 +719,8 @@ AssignmentListener.prototype.enterArr_assignment = function(ctx) {
 		indexVal = ctx.INTEGER_LITERAL().getText();
 	else {
 		var express = ctx.VARIABLE_IDENTIFIER()[1].getText();
-		if(ctx.num_expression() != null)
+		console.log(ctx.num_expression());
+		if(ctx.num_expression()[0] != null)
 			express += ctx.num_expression()[0].getText()
 
 		var temp = identifierHandler.convertVarToVal(express, s, functionTable);
@@ -754,6 +734,8 @@ AssignmentListener.prototype.enterArr_assignment = function(ctx) {
 
 	var toBeAssigned = identifierHandler.convertVarToVal(ctx.var_assignment_statement().assignment_factor().getText(), s, functionTable);
 
+	console.log("VAR NAME IS : " + varName);
+	console.log(s.get(varName));
 	if(parseInt(indexVal) >= s.get(varName).getValue().length) {
 		console.log("Array index out of bounds!");
 	} else {
