@@ -62,21 +62,20 @@ main_function
 
 // Expression
 expression					
-	: string_expression (num_ope (string_expression | funccall_statement | num_expression))*
-	| funccall_statement (num_ope (string_expression | funccall_statement | num_expression))*
-	| num_expression (num_ope (string_expression | funccall_statement | num_expression))*
+	: string_expression 
+	| string_expression ADD expression
+	| var_func_expression ((relational_ope | num_ope) (string_expression| num_expression))*
+	| num_expression num_ope (num_expression | var_func_expression)
 	| bool_expression
 	;
 		/*** Added ***/						
 string_expression			
 	: OPEN_PAR string_expression CLOSE_PAR
-	| string_expression ADD string_expression
 	| STRING_LITERAL | VARIABLE_IDENTIFIER (OPEN_BRACKET (INTEGER_LITERAL | VARIABLE_IDENTIFIER) CLOSE_BRACKET)?
 	;
 		/*** 	   ***/
 num_expression				
 	: OPEN_PAR num_expression CLOSE_PAR
-	| num_expression num_ope num_expression
 	| num_factor
 	;
 num_ope						
@@ -95,7 +94,6 @@ num_factor
 		/*** Added ***/
 var_func_expression			
 	: OPEN_PAR var_func_expression CLOSE_PAR
-	| var_func_expression (relational_ope | num_ope) var_func_expression
 	| var_func_factor
 	| OPEN_PAR (OPEN_PAR)+ var_func_expression CLOSE_PAR {notifyErrorListeners ("Uneven Parenthesis. Remove extra '('. ");} 
 	| OPEN_PAR var_func_expression CLOSE_PAR (CLOSE_PAR)+ {notifyErrorListeners ("Uneven Parenthesis. Remove extra ')'. ");}

@@ -35,6 +35,7 @@ function convertArrToVal(input, s, f) {
 }
 
 function generateTokenList(input, s, f){
+	input = input.toString();
 	var chars = new antlr4.InputStream(input);
 	var lexer = new QwertyLexer.QwertyLexer(chars);
 	var tokens  = new antlr4.CommonTokenStream(lexer);
@@ -57,9 +58,12 @@ function generateTokenList(input, s, f){
     	type = symbolNames[test[i].type];
 
     	if(type.includes("VARIABLE_IDENTIFIER")){
-    	
     		// s contains the token 
     		if(s.has(token)) {  	
+        		console.log("TOKEN " + token);
+        		console.log("TOKENVAL" + s.get(token).getValue());
+
+    		
     			// if value is a variable then char after is '[' means its an array!
     			if(i != (tokens.getNumberOfOnChannelTokens() - 1) && inputSplitted.slice(test[i].start + 1, test[i].stop + 2).join("") == '[') {
     				searchArray = true;
@@ -155,9 +159,9 @@ IdentifierHandler.prototype.evaluatePrintExpression = function(input, s, f){
 	var expression;
 	var printStmt = "";
 	
-	
 	for(var i=0; i<printArgs.length; i++){
 		expression = generateTokenList(printArgs[i], s, f);
+		console.log("@evalprint" + expression);
 		printStmt = printStmt.concat(expression.toString());
 	}
 	//console.log("WWW" + printStmt);

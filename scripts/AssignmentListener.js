@@ -87,15 +87,17 @@ AssignmentListener.prototype.enterConst_statement = function(ctx) {
 // Enter a parse tree produced by QwertyParser#assignment_statement.
 AssignmentListener.prototype.enterAssignment_statement = function(ctx) {
 	// var input = ctx.assignment_factor().getText();
+	console.log(ctx);
 	var varName = ctx.VARIABLE_IDENTIFIER().getText();
 	var varValue;
 	var heightDiff;
 	var height;
 	var varHeight;
-	var funcCalls = [];
+	var funcCalls;
 	
 	if(ctx.assignment_factor() != null) {
-		funcCalls = ctx.assignment_factor().expression().funccall_statement();
+		funcCalls = ctx.assignment_factor().expression().var_func_expression();
+		console.log(funcCalls);
 	}
 
 	//Code below yung pangkuha ng context
@@ -137,17 +139,22 @@ AssignmentListener.prototype.enterAssignment_statement = function(ctx) {
 			}
 			
 			//loop thru lahat ng funcCall context tapos walk
-			if(funcCalls.length > 0){
-				for(var i=0; i<funcCalls.length;i++){
-				antlr4.tree.ParseTreeWalker.DEFAULT.walk(this, funcCalls[i]);
+			if(funcCalls != null){
+				
+				if(funcCalls.length > 0)
+					for(var i=0; i<funcCalls.length;i++){
+						antlr4.tree.ParseTreeWalker.DEFAULT.walk(this, funcCalls[i]);
+					}
+				else{
+					console.log(funcCalls.var_func_factor().funccall_statement());
+					antlr4.tree.ParseTreeWalker.DEFAULT.walk(this, funcCalls.var_func_factor().funccall_statement());
 				}
 			}
 			
-			console.log("varValue " + varValue);
 			varValue = identifierHandler.convertVarToVal(varValue, s, functionTable);
-			console.log("varValue after " + varValue);
-
+			
 			s.get(varName).setValue(varValue);
+			
 			//console.log(varValue);
 			//varValue = rpn(yard(varValue));
 			/*if(!isValidAssignment(s.get(varName).getDataType(), varValue)) {
@@ -159,11 +166,7 @@ AssignmentListener.prototype.enterAssignment_statement = function(ctx) {
 			}*/
 
 			//console.log("value and data type of " +varName+ ":" + s.get(varName).getValue() + " & " + typeof s.get(varName).getValue());
-			if(height != varHeight){
-				for(var i=0; i<heightDiff ;i++){
-					s.push();
-				}
-			}
+
 		}
 	}
 };
@@ -501,7 +504,7 @@ AssignmentListener.prototype.exitScan_statement = function(ctx) {
 
 // Enter a parse tree produced by QwertyParser#print_statement.
 AssignmentListener.prototype.enterPrint_statement = function(ctx) {
-	var statement = identifierHandler.evaluatePrintExpression(ctx.expression().getText(), s);
+	var statement = identifierHandler.evaluatePrintExpression(ctx.expression().getText(), s, functionTable);
 	var split = statement.split("+").join("").split('"').join("");
 	lastPrint = split;
 	//console.log(split);
@@ -525,6 +528,7 @@ function compareParameters(param1, param2){
 	var current_param;
 	var hasNull = false;
 	var value;
+	
 	if(param1 == null){
 		console.log("param1 is null");		
 	 	hasNull = true;
@@ -544,6 +548,10 @@ function compareParameters(param1, param2){
 		listParam2Arguments = param2.getText().split(",");
 	//	console.log("param2" + listParam2Arguments);
 	}
+	console.log(listParam2Arguments);
+	for(var i=0; i<listParam2Arguments.length; i++){
+		listParam2Arguments[i] = identifierHandler.convertVarToVal(listParam2Arguments[i].toString(), s, functionTable);
+	}
 	
 	if(hasNull){
 	 	if(param1 == null && param2 == null){
@@ -554,14 +562,14 @@ function compareParameters(param1, param2){
 			consoleBox.innerHTML += errorHtml;
 			return false;
 	 	}			
-	 }else if(param1Count != param2Count){
+	 }else if(listParam1Variables.length != listParam2Arguments.length){
 		 var errorHtml = "<tr><td>Number of parameters don't match!<td></td><td></td><td>Add/subtract parameters.</td></tr>";
 			consoleBox.innerHTML += errorHtml;
 			return false;
 	 }else{
 		for(var i=0; i<listParam1Variables.length; i++){
 		//	console.log(listParam1Variables[i] + " = " + listParam2Arguments[i]);
-			value = identifierHandler.convertVarToVal(listParam2Arguments[i], functionTable);
+			value = identifierHandler.convertVarToVal(listParam2Arguments[i], s, functionTable);
 			s.get(listParam1Variables[i]).setValue(value);
 		}
 	 	console.log("execute"); 
@@ -576,8 +584,8 @@ function compareParameters(param1, param2){
 //Enter a parse tree produced by QwertyParser#funccall_statement.
 AssignmentListener.prototype.enterFunccall_statement = function(ctx) {
 	s.push();
-	//console.log("enterfunccall")
-
+	console.log("enterfunccall")
+	
 	var functionName = ctx.FUNCTION_IDENTIFIER().getText();
 	var isValidParams;
 	var calledFunction = functionTable.get(functionName);
@@ -588,7 +596,10 @@ AssignmentListener.prototype.enterFunccall_statement = function(ctx) {
 	}
 	
 	if(calledFunction.getParameter()!=null){
+		console.log("EY");
+
 		antlr4.tree.ParseTreeWalker.DEFAULT.walk(this, calledFunction.getParameter());
+		console.log("EY2");
 
 		isValidParams = compareParameters(calledFunction.getParameter(), funcCallParams)
 		console.log("after");
@@ -597,6 +608,8 @@ AssignmentListener.prototype.enterFunccall_statement = function(ctx) {
 		
 	if(isValidParams){
 		antlr4.tree.ParseTreeWalker.DEFAULT.walk(this, calledFunction.getCodeBlock());
+		console.log(calledFunction.getCodeBlock());
+
 	}
 	
 	console.log("RETURN VALUE OF " + functionName + " is " + calledFunction.getReturnValue());
@@ -623,6 +636,7 @@ AssignmentListener.prototype.enterParameters = function(ctx) {
 //Enter a parse tree produced by QwertyParser#return_statement.
 AssignmentListener.prototype.enterReturn_statement = function(ctx) {
 	//console.log(ctx);
+	console.log("ENTER RETURN");
 	var returnValue = ctx.getChild(1).getText();
 	var functionParent = ctx.parentCtx.parentCtx.parentCtx.parentCtx;
 	
