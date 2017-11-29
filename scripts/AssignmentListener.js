@@ -142,8 +142,11 @@ AssignmentListener.prototype.enterAssignment_statement = function(ctx) {
 				antlr4.tree.ParseTreeWalker.DEFAULT.walk(this, funcCalls[i]);
 				}
 			}
-
+			
+			console.log("varValue " + varValue);
 			varValue = identifierHandler.convertVarToVal(varValue, s, functionTable);
+			console.log("varValue after " + varValue);
+
 			s.get(varName).setValue(varValue);
 			//console.log(varValue);
 			//varValue = rpn(yard(varValue));

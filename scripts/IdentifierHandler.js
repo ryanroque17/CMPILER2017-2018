@@ -10,11 +10,12 @@ var IdentifierHandler = function () {
 };
 
 IdentifierHandler.prototype.convertVarToVal = function(input, s, f){
-	var tokenList = generateTokenList(input, s, f);
+	return generateTokenList(input, s, f);
+	/*console.log("tokenList " + tokenList)
 	if(hasString) 
 		return buildInputString(tokenList);
 	else 
-		return evaluateExpression(tokenList);
+		return evaluateExpression(tokenList);*/
 }
 
 function convertArrToVal(input, s, f) {
@@ -56,6 +57,7 @@ function generateTokenList(input, s, f){
     	type = symbolNames[test[i].type];
 
     	if(type.includes("VARIABLE_IDENTIFIER")){
+    	
     		// s contains the token 
     		if(s.has(token)) {  	
     			// if value is a variable then char after is '[' means its an array!
@@ -84,6 +86,10 @@ function generateTokenList(input, s, f){
     			}
     			else
     				tokenList.push('"null"');
+    			
+    			if(s.get(token).getDataType().includes("string")){
+    				hasString=true;
+    			}
     		}
     		else{
     			//tokenList.push('"nullval"');
@@ -116,23 +122,31 @@ function generateTokenList(input, s, f){
     				hasFunction=false;
     		}
     	}
-    	if(type.includes("STRING_LITERAL"))
+    	if(type.includes("STRING_LITERAL")){
     		hasString = true;
+    	}
     }    
     //console.log(tokenList.toString())
   //  console.log(tokenList.length);
     //console.log("zz" + tokenList.toString());
-    return tokenList;
+    if(hasString){
+    	console.log("buildInputString");
+		return buildInputString(tokenList);
+    }
+	else {
+    	console.log("evaluateExpression");
+		return evaluateExpression(tokenList);
+	}
+    
+    return true;
 }
 
 
 function buildInputString(tokenList){
 	var input ="";
-	
 	for(var i=0; i<tokenList.length; i++){
 		input = input.concat(tokenList[i]);
 	}
-	
 	return input;
 }
 

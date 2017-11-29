@@ -18,6 +18,7 @@ QwertyValue.prototype.setValue = function (value) {
 	//console.log(typeof(value));
 	//console.log(value);
 	
+	//console.log(value);
 	if(typeof(value)=="object" && !value){
 		//console.log("yey");
 		this.value=null;
