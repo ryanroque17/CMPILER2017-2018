@@ -140,7 +140,6 @@ AssignmentListener.prototype.enterAssignment_statement = function(ctx) {
 			
 			//loop thru lahat ng funcCall context tapos walk
 			if(funcCalls != null){
-				
 				if(funcCalls.length > 0)
 					for(var i=0; i<funcCalls.length;i++){
 						antlr4.tree.ParseTreeWalker.DEFAULT.walk(this, funcCalls[i]);
@@ -428,7 +427,6 @@ AssignmentListener.prototype.enterFor_statement = function(ctx) {
 	}
 	antlr4.tree.ParseTreeWalker.DEFAULT.walk(this, declBlock);
 	
-	s.push();
 
 	// i++;
 	var assignBlock = ctx.assignment_statement();
@@ -464,11 +462,12 @@ AssignmentListener.prototype.enterFor_statement = function(ctx) {
 		antlr4.tree.ParseTreeWalker.DEFAULT.walk(this, assignBlock);
 	}
 
+	var unsetThisNow = declBlock.var_identifier_list().VARIABLE_IDENTIFIER().getText();
+	s.unset(unsetThisNow);
 };
 
 // Exit a parse tree produced by QwertyParser#for_statement.
 AssignmentListener.prototype.exitFor_statement = function(ctx) {
-	s.pop();
 };
 
 //Exit a parse tree produced by QwertyParser#program.
@@ -703,15 +702,25 @@ AssignmentListener.prototype.enterFunction_declaration = function(ctx) {
 AssignmentListener.prototype.exitFunction_declaration = function(ctx) {
 };
 
+
 // Enter a parse tree produced by QwertyParser#arr_decl.
 AssignmentListener.prototype.enterArr_decl = function(ctx) {
-	console.log(ctx);
 	var dataType = ctx.data_type().getText();
-	var varName = ctx.VARIABLE_IDENTIFIER()[0].getText();
-	var size = ctx.INTEGER_LITERAL().getText();
+	var varName
+	var size;
 
-	console.log(dataType);
-	console.log(varName);
+	if(ctx.INTEGER_LITERAL() != null) {
+		varName = ctx.VARIABLE_IDENTIFIER()[0].getText();
+		size = ctx.INTEGER_LITERAL().getText();
+	}
+	else {
+		varName = ctx.VARIABLE_IDENTIFIER()[1].getText();
+		var temp = s.get(ctx.VARIABLE_IDENTIFIER()[0].getText());
+		if(temp.getDataType() == "int")
+			size = temp.getValue();
+		else
+			console.log("Error in array index! Invalid data type!");
+	}
 
 	// create a new array of size -- 
 	var arr = new Array(parseInt(size));
@@ -742,11 +751,9 @@ AssignmentListener.prototype.enterArr_assignment = function(ctx) {
 	if(parseInt(indexVal) >= s.get(varName).getValue().length) {
 		console.log("Array index out of bounds!");
 	} else {
-		console.log(s.get(varName).getValue().length);
 		var getArr = s.get(varName).getValue();
-		getArr[parseInt(indexVal)] = parseInt(toBeAssigned);
+		getArr[parseInt(indexVal)] = toBeAssigned;
 		s.get(varName).setValue(getArr);
-		console.log(s.get(varName).getValue().length);
 	}
 };
 
