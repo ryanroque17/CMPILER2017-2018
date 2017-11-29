@@ -65,7 +65,7 @@ expression
 	: string_expression 
 	| string_expression ADD expression
 	| var_func_expression ((relational_ope | num_ope) (string_expression| num_expression))*
-	| num_expression num_ope (num_expression | var_func_expression)
+	| num_expression (num_ope (num_expression | var_func_expression)*)*	
 	| bool_expression
 	;
 		/*** Added ***/						

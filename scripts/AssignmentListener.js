@@ -607,8 +607,8 @@ AssignmentListener.prototype.enterFunccall_statement = function(ctx) {
 		isValidParams = compareParameters(null, funcCallParams)
 		
 	if(isValidParams){
-		antlr4.tree.ParseTreeWalker.DEFAULT.walk(this, calledFunction.getCodeBlock());
-		console.log(calledFunction.getCodeBlock());
+		if(calledFunction.getDataType() == "void")
+			antlr4.tree.ParseTreeWalker.DEFAULT.walk(this, calledFunction.getCodeBlock());
 
 	}
 	

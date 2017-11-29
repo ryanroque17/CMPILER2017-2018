@@ -4,12 +4,16 @@ var QwertyParser = require('../generated-parser/QwertyParser');
 var QwertyListener = require('../generated-parser/QwertyListener').QwertyListener;
 var QwertyValue = require('/scripts/QwertyValue');
 
+var AssignmentListener = require('/scripts/AssignmentListener');
+
+
 var hasString = false;
 var IdentifierHandler = function () {
 
 };
 
 IdentifierHandler.prototype.convertVarToVal = function(input, s, f){
+	console.log("INPUUUUUT " + input);
 	return generateTokenList(input, s, f);
 	/*console.log("tokenList " + tokenList)
 	if(hasString) 
@@ -35,6 +39,8 @@ function convertArrToVal(input, s, f) {
 }
 
 function generateTokenList(input, s, f){
+	var assignmentListener = new AssignmentListener.AssignmentListener();
+
 	input = input.toString();
 	var chars = new antlr4.InputStream(input);
 	var lexer = new QwertyLexer.QwertyLexer(chars);
@@ -54,10 +60,11 @@ function generateTokenList(input, s, f){
 	var hasFunction = false;
     for(var i=0; i<tokens.getNumberOfOnChannelTokens() - 1; i++) {
     	token = inputSplitted.slice(test[i].start, test[i].stop + 1).join("");
-
+    	
     	type = symbolNames[test[i].type];
-
-    	if(type.includes("VARIABLE_IDENTIFIER")){
+    	
+    	console.log("CURRENT TOKEN " + token);
+    	if(type.includes("VARIABLE_IDENTIFIER") && !hasFunction){
     		// s contains the token 
     		if(s.has(token)) {  	
         		console.log("TOKEN " + token);
@@ -104,9 +111,16 @@ function generateTokenList(input, s, f){
     		}
     	} 
 		else if(type.includes("FUNCTION_IDENTIFIER")){
+			
     		if(f.has(token)){
+    			console.log(f.get(token).getCodeBlock());
+    			console.log("f code block ^^");
+    			antlr4.tree.ParseTreeWalker.DEFAULT.walk(assignmentListener, f.get(token).getCodeBlock());
+    			console.log("VALUEEEEEEEEEEEEE " + f.get(token).getReturnValue());
     			if(f.get(token).getReturnValue() != null){
     				tokenList.push(f.get(token).getReturnValue());
+        			console.log("func ident " + f.get(token).getReturnValue());
+
     			}
     			else
     				tokenList.push('"null"');
@@ -138,7 +152,7 @@ function generateTokenList(input, s, f){
 		return buildInputString(tokenList);
     }
 	else {
-    	console.log("evaluateExpression");
+    	console.log("evaluateExpression " +tokenList);
 		return evaluateExpression(tokenList);
 	}
     
