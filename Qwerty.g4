@@ -6,23 +6,25 @@ program						: function_declaration* main_function EOF;
 statement					
 	: vardecl_list 
 	| const_statement END
-	| const_statement 			{notifyErrorListeners("Insert ';' to complete statement.");}
+	| const_statement 			{this.notifyErrorListeners("Insert ';' to complete statement.");}
 	| assignment_statement END
+	| assignment_statement 		{this.notifyErrorListeners("Insert ';' to complete statement.");}
 	| arr_assignment END
-	| funccall_statement END
+	| arr_assignment 			{this.notifyErrorListeners("Insert ';' to complete statement.");}
+	| funccall_statement END 
+	| funccall_statement		{this.notifyErrorListeners("Insert ';' to complete statement.");}
 	| if_statement
 	| while_statement
 	| do_while_statement
 	| for_statement
 	| return_statement END
 	| scan_statement END
-	| scan_statement 			{notifyErrorListeners("Insert ';' to complete statement.");}
+	| scan_statement 			{this.notifyErrorListeners("Insert ';' to complete statement.");}
 	| print_statement END
-	| print_statement 			{notifyErrorListeners("Insert ';' to complete statement.");}
+	| print_statement 			{this.notifyErrorListeners("Insert ';' to complete statement.");}
 	| COMMENT
 	| LINE_COMMENT
 	;
-
 
  // Variable Declaration       
 vardecl_list 				
@@ -65,7 +67,7 @@ expression
 	: string_expression 
 	| string_expression ADD expression
 	| var_func_expression ((relational_ope | num_ope) (var_func_expression | string_expression| num_expression))*
-	| num_expression (num_ope (num_expression | var_func_expression)*)*	
+	| num_expression (num_ope (num_expression | var_func_expression))*	
 	| bool_expression
 	;
 		/*** Added ***/						
@@ -100,8 +102,8 @@ var_func_expression
 	: OPEN_PAR var_func_expression CLOSE_PAR
 	| var_func_expression (relational_ope | num_ope) var_func_expression
 	| var_func_factor
-	| OPEN_PAR (OPEN_PAR)+ var_func_expression CLOSE_PAR {notifyErrorListeners ("Uneven Parenthesis. Remove extra '('. ");} 
-	| OPEN_PAR var_func_expression CLOSE_PAR (CLOSE_PAR)+ {notifyErrorListeners ("Uneven Parenthesis. Remove extra ')'. ");}
+	| OPEN_PAR (OPEN_PAR)+ var_func_expression CLOSE_PAR {this.notifyErrorListeners ("Uneven Parenthesis. Remove extra '('. ");} 
+	| OPEN_PAR var_func_expression CLOSE_PAR (CLOSE_PAR)+ {this.notifyErrorListeners ("Uneven Parenthesis. Remove extra ')'. ");}
 	;
 var_func_factor				
 	: VARIABLE_IDENTIFIER
@@ -141,6 +143,7 @@ assignment_statement
 	: VARIABLE_IDENTIFIER ASSIGN assignment_factor
 	| VARIABLE_IDENTIFIER (INC | DEC)
 	| VARIABLE_IDENTIFIER assignment_num_ope (expression | num_factor | STRING_LITERAL)
+	| VARIABLE_IDENTIFIER assignment_num_ope (expression | num_factor | STRING_LITERAL) ((expression | num_factor | STRING_LITERAL))? {this.notifyErrorListeners("Invalid expression! Should only one assignemnt operation.");} 
 	;
 assignment_num_ope
 	: ADD_ASSIGN
@@ -189,7 +192,7 @@ while_statement
 	
 do_while_statement			
 	: DO code_block WHILE OPEN_PAR conditional_factor CLOSE_PAR END
-	| DO code_block WHILE OPEN_PAR conditional_factor CLOSE_PAR {notifyErrorListeners("Insert ';' to complete statement'");} 
+	| DO code_block WHILE OPEN_PAR conditional_factor CLOSE_PAR {this.notifyErrorListeners("Insert ';' to complete statement'");} 
 	;
 for_statement				
 	: FOR OPEN_PAR 

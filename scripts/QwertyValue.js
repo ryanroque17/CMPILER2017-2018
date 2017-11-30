@@ -1,9 +1,8 @@
 var QwertyParser = require('../generated-parser/QwertyParser');
 
-
-var QwertyValue = function (dataType, value) {
+var QwertyValue = function (dataType, value, ctx) {
 	this.setDataType(dataType);
-	this.setValue(value);
+	this.setValue(value, ctx);
 };
 
 QwertyValue.prototype.setDataType = function (dataType) {
@@ -14,36 +13,65 @@ QwertyValue.prototype.getDataType = function () {
     return this.dataType
 };
 
-QwertyValue.prototype.setValue = function (value) {
-	//console.log(typeof(value));
-	//console.log(value);
+QwertyValue.prototype.setValue = function (value, ctx, arrayVal, arrayIndex) {
+	var chars = new antlr4.InputStream("");
+    var lexer = new QwertyLexer.QwertyLexer(chars);
+    var tokens  = new antlr4.CommonTokenStream(lexer);
+    var parser = new QwertyParser.QwertyParser(tokens);
+    var arrayValNull = false;
+	//console.log("dataType of var " +this.dataType);
+
+	//console.log("type of val " +typeof(value));
 	
-	//console.log(value);
-	if(typeof(value)=="object" && !value){
-		//console.log("yey");
-		this.value=null;
-	}else if(typeof(value)=="string" && value.includes("null")){
-		this.value=null;
-	}else if(isValidAssignment(this.dataType, value))
-		this.value = value;
-	else{
-		console.log("Invalid Assignment! Data type mismatch!");
-		this.value = null;
+	////console.log(value);
+	if(Array.isArray(value)){
+		if(isValidAssignment(this.dataType, value, arrayVal)){
+			//console.log("eyyy");
+
+			this.value = value;
+		}else{
+			if(arrayVal!=null)
+				this.dataType = this.dataType.split("[]")[0];
+			parser.notifyErrorListeners("Invalid assignment! Expecting " + this.dataType + " object.", ctx.start);
+			arrayValNull = true;
+			value = null;
+		}
+	}else{
+		if(typeof(value)=="object" && !value){
+			//console.log("yey");
+			value=null;
+		}else if(typeof(value)=="string" && (value.includes("null") || value == "")){
+			value=null;
+		}else if(isValidAssignment(this.dataType, value, arrayVal)){
+			//console.log("eyyy");
+
+			this.value = value;
+		}
+		else{
+			parser.notifyErrorListeners("Invalid assignment! Expecting " + this.dataType + " object.", ctx.start);
+			arrayVal = null;
+			value = null;
+		}
 	}
+	
 
 	if(this.dataType == "float" && typeof(value) == "number" && !value.toString().includes(".")){
-		console.log("data type: " +this.dataType + " value:" +value +" valtype:" + typeof value);
 		var string = value.toString().concat(".0");
-		console.log("test stirng is " +string);
 		value = parseFloat(value).toFixed(1);
-		console.log("value is " + value);
 	}
 
 	if(this.dataType =="int" && typeof(value) == "number") {
 		value = Math.round(value);
 	}
-
-	this.value = value;
+	
+	if(arrayVal==null)
+		this.value = value;
+	else{
+		if(arrayValNull)
+			arrayVal = true;
+		//console.log("ey" + this.value.length);
+		this.value[arrayIndex] = arrayVal;
+	}
 	
 };
 
@@ -51,14 +79,22 @@ QwertyValue.prototype.getValue = function () {
 	return this.value;
 };
 
-function isValidAssignment(dataType, input) {
-	//console.log(dataType);
-	//console.log(input);
-	//console.log(typeof(input));
-	//console.log(isNaN(input));
-	
+function isValidAssignment(dataType, input, arrayVal) {
+	////console.log("isvalid " + dataType);
+	//console.log("INPUT" + input);
+	////console.log(typeof(input));
+	//console.log("isnanINPUT" + isNaN(input));
+	var dataTypeSplit;
+
+	if(arrayVal!=null){
+		dataTypeSplit = dataType.split("[]");
+		dataType = dataTypeSplit[0];
+		input = arrayVal;
+		//console.log("data type array" + dataType);
+	}
+
 	if(dataType == "string") {
-		//console.log("yey");
+		////console.log("yey");
 		if(typeof(input) != "string") {
 			return false;
 		}
@@ -68,7 +104,13 @@ function isValidAssignment(dataType, input) {
 			return false;
 		}
 		return true;
-	} else if(!isNaN(input)){
+	} else if(dataType.includes("[]")){
+		//console.log("EY");
+		if(Array.isArray(input))
+			return true;
+		else
+			return false;
+	}else if(!isNaN(input)){
 		if(dataType == "int") {
 			if(typeof(input) != "number" || input.toString().includes(".")) {
 				return false;

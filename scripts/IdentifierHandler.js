@@ -12,10 +12,10 @@ var IdentifierHandler = function () {
 
 };
 
-IdentifierHandler.prototype.convertVarToVal = function(input, s, f){
-	console.log("INPUUUUUT " + input);
-	return generateTokenList(input, s, f);
-	/*console.log("tokenList " + tokenList)
+IdentifierHandler.prototype.convertVarToVal = function(input, s, f, ctx){
+	//console.log("INPUUUUUT " + input);
+	return generateTokenList(input, s, f, ctx);
+	/*//console.log("tokenList " + tokenList)
 	if(hasString) 
 		return buildInputString(tokenList);
 	else 
@@ -31,10 +31,16 @@ function convertArrToVal(input, s, f) {
 	if(typeof(s.get(index)) == "object") {
 		index = s.get(index).getValue();
 	}
-
+	
 	var arrValue = s.get(varName).getValue();
-	var returnThis = arrValue[parseInt(index)];
+	var returnThis;
 
+	if(arrValue != null)
+		returnThis = arrValue[parseInt(index)];
+	else 
+		returnThis = null;
+	
+	////console.log("RETURN THIS " +returnThis);
 	return returnThis;
 }
 
@@ -51,12 +57,12 @@ function moduloConverter(input, s, f) {
 
 	toEval += "%" + splitForVariable[1];
 
-	console.log("FOUND MODULO" + toEval);
+	//console.log("FOUND MODULO" + toEval);
 
 	return eval(toEval);
 }
 
-function generateTokenList(input, s, f){
+function generateTokenList(input, s, f, ctx){
 	var assignmentListener = new AssignmentListener.AssignmentListener();
 
 	input = input.toString();
@@ -80,23 +86,23 @@ function generateTokenList(input, s, f){
     	token = inputSplitted.slice(test[i].start, test[i].stop + 1).join("");
     	
     	type = symbolNames[test[i].type];
-    	//console.log("CURRENT TYPE " + type);
-    	//console.log("CURRENT TOKEN " + token);
+    	////console.log("CURRENT TYPE " + type);
+    	////console.log("CURRENT TOKEN " + token);
     	if(type.includes("VARIABLE_IDENTIFIER") && !hasFunction){
     		// s contains the token 
     		if(s.has(token)) {  	
 
     			// if value is a variable then char after is '[' means its an array!
     			if(i != (tokens.getNumberOfOnChannelTokens() - 1) && inputSplitted.slice(test[i].start + 1, test[i].stop + 2).join("") == '%') {
-    				//console.log("ARRAY!!!!");
-    				console.log("FOUND MODULO!!! " + input);
-    				console.log("FOUND MODULO!!!");
+    				////console.log("ARRAY!!!!");
+    				//console.log("FOUND MODULO!!! " + input);
+    				//console.log("FOUND MODULO!!!");
     				return moduloConverter(input, s, f);
     			}
 
     			// if value is a variable then char after is '[' means its an array!
     			if(i != (tokens.getNumberOfOnChannelTokens() - 1) && inputSplitted.slice(test[i].start + 1, test[i].stop + 2).join("") == '[') {
-    				//console.log("ARRAY!!!!");
+    				////console.log("ARRAY!!!!");
     				searchArray = true;
     				tempArr += token;
     				var j = 1;
@@ -106,6 +112,7 @@ function generateTokenList(input, s, f){
     				do {
     					tempArr += inputSplitted.slice(test[i].start + j, test[i].stop + (j+1)).join("");
     					if(inputSplitted.slice(test[i].start + j, test[i].stop + (j+1)).join("") == ']') {
+    						
     						tokenList.push(convertArrToVal(tempArr, s, f));
     						searchArray = false;
     						i += j;
@@ -130,20 +137,23 @@ function generateTokenList(input, s, f){
     			//tokenList.push('"nullval"');
     			if(token.includes("null")){
     				tokenList.push('"null"');
-    			}else
-    				console.log("Undeclared variable " + token + "!");
+    			}else{
+    				tokenList.push('"null"');
+
+    				parser.notifyErrorListeners("Undeclared variable " + token + "!", ctx.start);
+    			}
     		}
     	} 
 		else if(type.includes("FUNCTION_IDENTIFIER")){
 			
     		if(f.has(token)){
-    			//console.log(f.get(token).getCodeBlock());
-    			//console.log("f code block ^^");
+    			////console.log(f.get(token).getCodeBlock());
+    			////console.log("f code block ^^");
     			antlr4.tree.ParseTreeWalker.DEFAULT.walk(assignmentListener, f.get(token).getCodeBlock());
-    			//console.log("VALUEEEEEEEEEEEEE " + f.get(token).getReturnValue());
+    			////console.log("VALUEEEEEEEEEEEEE " + f.get(token).getReturnValue());
     			if(f.get(token).getReturnValue() != null){
     				tokenList.push(f.get(token).getReturnValue());
-        		//	console.log("func ident " + f.get(token).getReturnValue());
+        		//	//console.log("func ident " + f.get(token).getReturnValue());
 
     			}
     			else
@@ -152,8 +162,11 @@ function generateTokenList(input, s, f){
     		else{ 
     			if(token.includes("null")){
     				tokenList.push('"null"');
-    			}else
-    				console.log("Undeclared variable " + token + "!");
+    			}else{
+    				tokenList.push('"null"');
+
+    				parser.notifyErrorListeners("Undeclared function " + token + "!", ctx.start);
+    			}	
     		}
     		hasFunction=true;
     	}else{
@@ -168,15 +181,15 @@ function generateTokenList(input, s, f){
     		hasString = true;
     	}
     }    
-    //console.log(tokenList.toString())
-  //  console.log(tokenList.length);
-    //console.log("zz" + tokenList.toString());
+    ////console.log(tokenList.toString())
+  //  //console.log(tokenList.length);
+    ////console.log("zz" + tokenList.toString());
     if(hasString){
-    	console.log("buildInputString");
+    	////console.log("buildInputString");
 		return buildInputString(tokenList);
     }  
 	else {
-    	console.log("evaluateExpression " +tokenList);
+    	////console.log("evaluateExpression " +tokenList);
 		return evaluateExpression(tokenList);
 	}
     
@@ -189,30 +202,35 @@ function buildInputString(tokenList){
 	for(var i=0; i<tokenList.length; i++){
 		input = input.concat(tokenList[i]);
 	}
+	////console.log("buildInputString result " + input);
 	return input;
 }
 
-IdentifierHandler.prototype.evaluatePrintExpression = function(input, s, f){
+IdentifierHandler.prototype.evaluatePrintExpression = function(input, s, f, ctx){
 	var printArgs = input.split("+");
 	var expression;
 	var printStmt = "";
 	
 	for(var i=0; i<printArgs.length; i++){
-		expression = generateTokenList(printArgs[i], s, f);
-		//console.log("@evalprint" + expression);
-		printStmt = printStmt.concat(expression.toString());
+		expression = generateTokenList(printArgs[i], s, f, ctx);
+		////console.log("@evalprint" + expression);
+		if(expression == null){
+			printStmt = printStmt.concat("null");
+		}
+		else
+			printStmt = printStmt.concat(expression.toString());
 	}
-	//console.log("WWW" + printStmt);
+	////console.log("WWW" + printStmt);
 
 	printStmt = printStmt.split('"').join("");
-	//console.log(printStmt);
+	////console.log(printStmt);
 	
 	return printStmt;
 }
 
 function evaluateExpression (input){
     if(input.toString().includes("null")){
-    	console.log("AS");
+    	//console.log("AS");
     	return null;
     }else if(input.toString().includes("true") || input.toString().includes("false")){
     	return input;
@@ -232,7 +250,6 @@ let yard = (tokenList) => {
 	  for(var i=0; i<tokenList.length; i++){
 		  token = tokenList[i];
 		  if (!isNaN(parseFloat(token))) {
-			  console.log("isNAN token " + token);
 	        output.push(token);
 	      }
 
@@ -258,7 +275,6 @@ let yard = (tokenList) => {
 	  }
 	  let result = output.concat(stack.reverse()).join(' ')
 	  
-	  console.log("YARD" +result.toString());
 
 	  return result;
 };
@@ -276,7 +292,6 @@ let rpn = (ts, s = []) => {
 	}
 
 function changeNegative(tokenList){
-	console.log("CHANGE NEGATIVE");
 	var newTokenList = [];
 	var token;
 	//tokenList.toString();

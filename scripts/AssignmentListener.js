@@ -15,6 +15,11 @@ var consoleBox = document.getElementById("consoleBox");
 
 var lastPrint;
 
+var chars = new antlr4.InputStream("");
+var lexer = new QwertyLexer.QwertyLexer(chars);
+var tokens  = new antlr4.CommonTokenStream(lexer);
+var parser = new QwertyParser.QwertyParser(tokens);
+
 AssignmentListener = function(res) {
 	this.Res = res;
     QwertyListener.call(this);
@@ -48,15 +53,15 @@ AssignmentListener.prototype.enterVar_decl = function(ctx) {
 	var varName = ctx.var_identifier_list().start.text;
 	// variable value
 	if(ctx.getChild(1).getChildCount() == 1){ // ex. int i;
-		var varValue = new QwertyValue(typeName, "null");
+		var varValue = new QwertyValue(typeName, "null", ctx);
 	}
 	else{	// ex. int i = 1;	
-		var input = identifierHandler.convertVarToVal(ctx.var_identifier_list().getChild(1).getChild(1).getText(), s, functionTable);	
-		var varValue = new QwertyValue(typeName, input);
+		var input = identifierHandler.convertVarToVal(ctx.var_identifier_list().getChild(1).getChild(1).getText(), s, functionTable, ctx);	
+		var varValue = new QwertyValue(typeName, input, ctx);
 	}
 	
 	if(s.has(varName)) {
-		console.log("variable " + varName + " already in stack");
+		parser.notifyErrorListeners("Variable " + varName + " is already declared. Change variable name.", ctx.start);
 		var errorHtml = "<tr><td>Variable Already In Stack<td></td><td>" + varName + "</td><td>Change variable name.</td></tr>";
 		consoleBox.innerHTML += errorHtml;
 	} else {		
@@ -72,22 +77,22 @@ AssignmentListener.prototype.enterConst_statement = function(ctx) {
 	var varName = ctx.VARIABLE_IDENTIFIER().getText();
 	var value = ctx.var_assignment_statement().getText().split('=')[1];
 			
-	var varValue = new QwertyValue(typeName, value);
+	var varValue = new QwertyValue(typeName, value, ctx);
 	
 	if(s.has(varName)) {
-		console.log("variable " + varName + " already in stack");
+		parser.notifyErrorListeners("Variable " + varName + " is already declared. Change variable name.", ctx.start);
 		var errorHtml = "<tr><td>Variable Already In Stack<td></td><td>" + varName + "</td><td>Change variable name.</td></tr>";
 		consoleBox.innerHTML += errorHtml;
 	} else {		
 		s.set(varName, varValue);
-		//console.log("value and data type of " +varName+ ":" + s.get(varName).getValue() + " & " + typeof s.get(varName).getValue());
+		////console.log("value and data type of " +varName+ ":" + s.get(varName).getValue() + " & " + typeof s.get(varName).getValue());
 	}
 };
 
 // Enter a parse tree produced by QwertyParser#assignment_statement.
 AssignmentListener.prototype.enterAssignment_statement = function(ctx) {
 	// var input = ctx.assignment_factor().getText();
-	console.log(ctx);
+	//console.log(ctx);
 	var varName = ctx.VARIABLE_IDENTIFIER().getText();
 	var varValue;
 	var heightDiff;
@@ -97,16 +102,16 @@ AssignmentListener.prototype.enterAssignment_statement = function(ctx) {
 	
 	if(ctx.assignment_factor() != null) {
 		funcCalls = ctx.assignment_factor().expression().var_func_expression();
-		console.log(funcCalls);
+		//console.log(funcCalls);
 	}
 
 	//Code below yung pangkuha ng context
 	//funcCall = ctx.assignment_factor().expression().var_func_expression().var_func_factor().funccall_statement();
 	if(!s.has(varName)) {
-		console.log("variable " + varName + " NOT in stack!");
+		parser.notifyErrorListeners("variable " + varName + " NOT yet declared!", ctx.start);
 	}else{
 		if(s.get(varName).getDataType() == "constant") {
-			console.log("ERROR! Cannot re-assign constant");
+			parser.notifyErrorListeners("ERROR! Cannot re-assign constant. Change constant to data type", ctx.start);
 			var errorHtml = "<tr><td>Cannot change constant value<td></td><td>" + varName + "</td><td>Change constant to data type.</td></tr>";
 			consoleBox.innerHTML += errorHtml;
 		} else {
@@ -119,7 +124,7 @@ AssignmentListener.prototype.enterAssignment_statement = function(ctx) {
 					s.pop();
 				}
 			}
-			////console.log(ctx.getChild(ctx.getChildCount()-1).getRuleIndex() +" aaaa");
+			//////console.log(ctx.getChild(ctx.getChildCount()-1).getRuleIndex() +" aaaa");
 			if(ctx.getChild(1).getText() == "="){
 				varValue = ctx.getChild(2).getText();
 			}else if(ctx.getChild(1).getText() == "++"){
@@ -145,35 +150,35 @@ AssignmentListener.prototype.enterAssignment_statement = function(ctx) {
 			// 			antlr4.tree.ParseTreeWalker.DEFAULT.walk(this, funcCalls[i]);
 			// 		}
 			// 	else{
-			// 		console.log(funcCalls.var_func_factor().funccall_statement());
+			// 		//console.log(funcCalls.var_func_factor().funccall_statement());
 			// 		antlr4.tree.ParseTreeWalker.DEFAULT.walk(this, funcCalls.var_func_factor().funccall_statement());
 			// 	}
 			// }
 			
-			varValue = identifierHandler.convertVarToVal(varValue, s, functionTable);
+			varValue = identifierHandler.convertVarToVal(varValue, s, functionTable, ctx);
 
-			s.get(varName).setValue(varValue);
+			s.get(varName).setValue(varValue, ctx);
 			
 			
 			
-			//console.log(varValue);
+			////console.log(varValue);
 			//varValue = rpn(yard(varValue));
 			/*if(!isValidAssignment(s.get(varName).getDataType(), varValue)) {
-				console.log("Type Checking Error for variable " + varName);
+				//console.log("Type Checking Error for variable " + varName);
 				var errorHtml = "<tr><td>Type Check Error<td></td><td>" + varName + "</td><td>Change var type or change value.</td></tr>";
 				consoleBox.innerHTML += errorHtml;
 			} else {
 				s.get(varName).setValue(varValue);
 			}*/
 
-			//console.log("value and data type of " +varName+ ":" + s.get(varName).getValue() + " & " + typeof s.get(varName).getValue());
+			////console.log("value and data type of " +varName+ ":" + s.get(varName).getValue() + " & " + typeof s.get(varName).getValue());
 
 		}
 	}
 };
 
-function evaluateBoolean(input) {
-	console.log("IF CHECK " + input);
+function evaluateBoolean(input, ctx) {
+	//console.log("IF CHECK " + input);
 	var hasAnd = false;
 	var hasOr = false;
 	var arr;
@@ -188,7 +193,7 @@ function evaluateBoolean(input) {
 
 	if(input.split("").includes("@")) {
 	  arr = input.split("@@");
-	  console.log(arr);
+	  //console.log(arr);
 	  hasOr = true;
 	} else {
 		arr = [input];
@@ -200,8 +205,8 @@ function evaluateBoolean(input) {
 			if(poe.split("").includes("<")) {
 				// <=
 				var exp = arr[i].split("<=");
-				exp[0] = identifierHandler.convertVarToVal(exp[0], s, functionTable);
-				exp[1] = identifierHandler.convertVarToVal(exp[1], s, functionTable);
+				exp[0] = identifierHandler.convertVarToVal(exp[0], s, functionTable, ctx);
+				exp[1] = identifierHandler.convertVarToVal(exp[1], s, functionTable, ctx);
 				if(exp[0] <= exp[1]) {
 		    		if(hasOr)
 		    			return true;
@@ -215,8 +220,8 @@ function evaluateBoolean(input) {
 			} else if(poe.split("").includes(">")) {
 				// >=
 				var exp = arr[i].split(">=");
-				exp[0] = identifierHandler.convertVarToVal(exp[0], s, functionTable);
-				exp[1] = identifierHandler.convertVarToVal(exp[1], s, functionTable);
+				exp[0] = identifierHandler.convertVarToVal(exp[0], s, functionTable, ctx);
+				exp[1] = identifierHandler.convertVarToVal(exp[1], s, functionTable, ctx);
 				if(exp[0] >= exp[1]) {
 	    			if(hasOr)
 		    			return true;
@@ -230,8 +235,8 @@ function evaluateBoolean(input) {
 			} else if(poe.split("").includes("!")) {
 				// !=
 				var exp = arr[i].split("!=");
-				exp[0] = identifierHandler.convertVarToVal(exp[0], s, functionTable);
-				exp[1] = identifierHandler.convertVarToVal(exp[1], s, functionTable);
+				exp[0] = identifierHandler.convertVarToVal(exp[0], s, functionTable, ctx);
+				exp[1] = identifierHandler.convertVarToVal(exp[1], s, functionTable, ctx);
 
 
 				if(exp[0] == exp[1]) {
@@ -246,8 +251,8 @@ function evaluateBoolean(input) {
 				}
 			}else {
 				var exp = arr[i].split("==");
-				exp[0] = identifierHandler.convertVarToVal(exp[0], s, functionTable);
-			exp[1] = identifierHandler.convertVarToVal(exp[1], s, functionTable);
+				exp[0] = identifierHandler.convertVarToVal(exp[0], s, functionTable, ctx);
+			exp[1] = identifierHandler.convertVarToVal(exp[1], s, functionTable, ctx);
 			    if(exp[0] == exp[1]) {
 			     	if(hasOr)
 		    			return true;
@@ -262,8 +267,8 @@ function evaluateBoolean(input) {
 		} else if(poe.split("").includes("<")) {
 			// <
 			var exp = arr[i].split("<");
-			exp[0] = identifierHandler.convertVarToVal(exp[0], s, functionTable);
-			exp[1] = identifierHandler.convertVarToVal(exp[1], s, functionTable);
+			exp[0] = identifierHandler.convertVarToVal(exp[0], s, functionTable, ctx);
+			exp[1] = identifierHandler.convertVarToVal(exp[1], s, functionTable, ctx);
 
 		    if(exp[0] < exp[1]) {
 		    	if(hasOr)
@@ -278,10 +283,10 @@ function evaluateBoolean(input) {
 		} else if(poe.split("").includes(">")) {
 			// >
 			var exp = arr[i].split(">");
-			exp[0] = identifierHandler.convertVarToVal(exp[0], s, functionTable);
-			exp[1] = identifierHandler.convertVarToVal(exp[1], s, functionTable);
+			exp[0] = identifierHandler.convertVarToVal(exp[0], s, functionTable, ctx);
+			exp[1] = identifierHandler.convertVarToVal(exp[1], s, functionTable, ctx);
 
-			console.log("COMPARING " + exp[0] + " ---- " + exp[1]);
+			//console.log("COMPARING " + exp[0] + " ---- " + exp[1]);
 		    if(exp[0] > exp[1]) {
 		    	if(hasOr)
 		    		return true;
@@ -294,7 +299,7 @@ function evaluateBoolean(input) {
 		    }
 		}
 	}
-	console.log("exp[0]" + exp[0] + " exp[1]" + exp[1])
+	//console.log("exp[0]" + exp[0] + " exp[1]" + exp[1])
 	return true;
 };
 
@@ -323,7 +328,7 @@ AssignmentListener.prototype.enterIf_statement = function(ctx) {
 	}
 	
 	for(var i=0; i<conditions.length;i++){
-		if(evaluateBoolean(conditions[i].getText())){
+		if(evaluateBoolean(conditions[i].getText(), ctx)){
 			antlr4.tree.ParseTreeWalker.DEFAULT.walk(this, codeBlocks[i]);
 			
 			hasTrue = true;
@@ -343,7 +348,7 @@ AssignmentListener.prototype.exitIf_statement = function(ctx) {
 
 //Enter a parse tree produced by QwertyParser#code_block.
 AssignmentListener.prototype.enterCode_block = function(ctx) {
-	//console.log("CODE BLOC");
+	////console.log("CODE BLOC");
 };
 
 var temporaryWhileCodeBlock;
@@ -366,16 +371,16 @@ AssignmentListener.prototype.enterWhile_statement = function(ctx) {
 	if(ctx.conditional_factor()!=null){
 		expression = ctx.conditional_factor().getText()
 		temporaryExpression = expression;
-		console.log(temporaryExpression);
+		//console.log(temporaryExpression);
 	}else{
 		expression = temporaryExpression;
-		console.log(expression);
+		//console.log(expression);
 	}
 
 	ctx.removeLastChild();
 
-	while(evaluateBoolean(expression)){
-		console.log("COMPARING RESULT = " + evaluateBoolean(expression));
+	while(evaluateBoolean(expression,ctx)){
+		//console.log("COMPARING RESULT = " + evaluateBoolean(expression));
 		antlr4.tree.ParseTreeWalker.DEFAULT.walk(this, codeBlock);
 	}
 };
@@ -388,11 +393,11 @@ AssignmentListener.prototype.exitWhile_statement = function(ctx) {
 // Enter a parse tree produced by QwertyParser#do_while_statement.
 AssignmentListener.prototype.enterDo_while_statement = function(ctx) {
 	s.push();
-	//console.log("dowhile");
+	////console.log("dowhile");
 	var codeBlock = ctx.code_block();
 	var codeBlockHolder = ctx.code_block();
 	var expression = ctx.conditional_factor().getText();
-	console.log(evaluateBoolean(expression));
+	//console.log(evaluateBoolean(expression));
 	
 	var childCount = ctx.getChildCount();
 	
@@ -403,8 +408,8 @@ AssignmentListener.prototype.enterDo_while_statement = function(ctx) {
 	antlr4.tree.ParseTreeWalker.DEFAULT.walk(this, codeBlock);
 	codeBlock = codeBlockHolder;
 
-	while(evaluateBoolean(expression)){
-		console.log("ey1");
+	while(evaluateBoolean(expression,ctx)){
+		//console.log("ey1");
 		codeBlock = codeBlockHolder;
 
 		antlr4.tree.ParseTreeWalker.DEFAULT.walk(this, codeBlock);
@@ -479,7 +484,7 @@ AssignmentListener.prototype.enterFor_statement = function(ctx) {
 		ctx.removeLastChild();
 	}	
 
-	while(evaluateBoolean(boolBlock.getText())){
+	while(evaluateBoolean(boolBlock.getText(),ctx)){
 		antlr4.tree.ParseTreeWalker.DEFAULT.walk(this, codeBlock);
 		antlr4.tree.ParseTreeWalker.DEFAULT.walk(this, assignBlock);
 	}
@@ -499,19 +504,19 @@ AssignmentListener.prototype.exitProgram = function(ctx) {
 
 // Enter a parse tree produced by QwertyParser#scan_statement.
 AssignmentListener.prototype.enterScan_statement = function(ctx) {
-	//console.log(ctx);
+	////console.log(ctx);
 	var variable = ctx.VARIABLE_IDENTIFIER().getText();
 	var message = ctx.STRING_LITERAL().getText();
-	//console.log(variable);
-	//console.log(message);
+	////console.log(variable);
+	////console.log(message);
 	message = message.split('"').join("");
 	/*consoleBox.innerHTML += "<input type='text' id='" + variable + "' value='Patrick Gan'>";
 	wait(7)*/
 	var input = prompt(message);
 	
-	inputVal = identifierHandler.convertVarToVal(input, s, functionTable);
-	//console.log("TYPE: " + typeof(inputVal));
-	s.get(variable).setValue(inputVal);
+	inputVal = identifierHandler.convertVarToVal(input, s, functionTable, ctx);
+	////console.log("TYPE: " + typeof(inputVal));
+	s.get(variable).setValue(inputVal, ctx);
 };
 
 // Exit a parse tree produced by QwertyParser#scan_statement.
@@ -525,11 +530,12 @@ AssignmentListener.prototype.exitScan_statement = function(ctx) {
 
 // Enter a parse tree produced by QwertyParser#print_statement.
 AssignmentListener.prototype.enterPrint_statement = function(ctx) {
-	var statement = identifierHandler.evaluatePrintExpression(ctx.expression().getText(), s, functionTable);
+	console.log(ctx);
+	var statement = identifierHandler.evaluatePrintExpression(ctx.expression().getText(), s, functionTable, ctx);
 	var split = statement.split("+").join("").split('"').join("");
 	lastPrint = split;
-	//console.log(split);
-	console.log("enter print " + split);
+	////console.log(split);
+	//console.log("enter print " + split);
 
 	var errorHtml = "<tr><td>(NOT ERROR) Print<td></td><td></td><td>" + split + "</td></tr>";
 	consoleBox.innerHTML += errorHtml;
@@ -551,49 +557,51 @@ function compareParameters(param1, param2){
 	var value;
 	
 	if(param1 == null){
-		console.log("param1 is null");		
+		//console.log("param1 is null");		
 	 	hasNull = true;
 	}else{	 	
 		listFuncTypes = param1.data_type();
 		listParam1Variables = param1.VARIABLE_IDENTIFIER();
 		
-		//console.log("param1Types" +listFuncTypes.toString());
-		//console.log("param1Vars" +listParam1Variables.toString());
+		////console.log("param1Types" +listFuncTypes.toString());
+		////console.log("param1Vars" +listParam1Variables.toString());
 
 	}
 	
 	if(param2 == null){
-		console.log("param2 is null");
+		//console.log("param2 is null");
 	 	hasNull = true;
 	}else{
 		listParam2Arguments = param2.getText().split(",");
-	//	console.log("param2" + listParam2Arguments);
+	//	//console.log("param2" + listParam2Arguments);
 	}
-	console.log(listParam2Arguments);
+	//console.log(listParam2Arguments);
 	for(var i=0; i<listParam2Arguments.length; i++){
-		listParam2Arguments[i] = identifierHandler.convertVarToVal(listParam2Arguments[i].toString(), s, functionTable);
+		listParam2Arguments[i] = identifierHandler.convertVarToVal(listParam2Arguments[i].toString(), s, functionTable, ctx);
 	}
 	
 	if(hasNull){
 	 	if(param1 == null && param2 == null){
-	 		console.log("execute");
+	 		//console.log("execute");
 	 		return true;
 	 	}else{
+	 		parser.notifyErrorListeners("Number of parameters don't match! Add/subtract parameters", param2.start);
 	 		var errorHtml = "<tr><td>Number of parameters don't match!<td></td><td></td><td>Add/subtract parameters.</td></tr>";
 			consoleBox.innerHTML += errorHtml;
 			return false;
 	 	}			
 	 }else if(listParam1Variables.length != listParam2Arguments.length){
-		 var errorHtml = "<tr><td>Number of parameters don't match!<td></td><td></td><td>Add/subtract parameters.</td></tr>";
+	 		parser.notifyErrorListeners("Number of parameters don't match! Add/subtract parameters", param2.start);
+	 		var errorHtml = "<tr><td>Number of parameters don't match!<td></td><td></td><td>Add/subtract parameters.</td></tr>";
 			consoleBox.innerHTML += errorHtml;
 			return false;
 	 }else{
 		for(var i=0; i<listParam1Variables.length; i++){
-		//	console.log(listParam1Variables[i] + " = " + listParam2Arguments[i]);
-			value = identifierHandler.convertVarToVal(listParam2Arguments[i], s, functionTable);
-			s.get(listParam1Variables[i]).setValue(value);
+		//	//console.log(listParam1Variables[i] + " = " + listParam2Arguments[i]);
+			value = identifierHandler.convertVarToVal(listParam2Arguments[i], s, functionTable, ctx);
+			s.get(listParam1Variables[i]).setValue(value, ctx);
 		}
-	 	console.log("execute"); 
+	 	//console.log("execute"); 
 	 	return true;
 	 }
 
@@ -605,10 +613,10 @@ function compareParameters(param1, param2){
 //Enter a parse tree produced by QwertyParser#funccall_statement.
 AssignmentListener.prototype.enterFunccall_statement = function(ctx) {
 	s.push();
-	console.log("enterfunccall")
+	//console.log("enterfunccall")
 	
 	var functionName = ctx.FUNCTION_IDENTIFIER().getText();
-	var isValidParams;
+	var isValidParams = false;
 	var calledFunction = functionTable.get(functionName);
 	var funcCallParams;
 	
@@ -616,16 +624,18 @@ AssignmentListener.prototype.enterFunccall_statement = function(ctx) {
 		funcCallParams = ctx.actual_parameter_list().actual_params();
 	}
 	
-	if(calledFunction.getParameter()!=null){
-		console.log("EY");
-
-		antlr4.tree.ParseTreeWalker.DEFAULT.walk(this, calledFunction.getParameter());
-		console.log("EY2");
-
-		isValidParams = compareParameters(calledFunction.getParameter(), funcCallParams)
-		console.log("after");
-	} else
-		isValidParams = compareParameters(null, funcCallParams)
+	if(calledFunction!=null){
+		if(calledFunction.getParameter()!=null){
+			//console.log("EY");
+	
+			antlr4.tree.ParseTreeWalker.DEFAULT.walk(this, calledFunction.getParameter());
+			//console.log("EY2");
+	
+			isValidParams = compareParameters(calledFunction.getParameter(), funcCallParams)
+			//console.log("after");
+		} else
+			isValidParams = compareParameters(null, funcCallParams)
+	}
 		
 	if(isValidParams){
 		if(calledFunction.getDataType() == "void")
@@ -633,7 +643,7 @@ AssignmentListener.prototype.enterFunccall_statement = function(ctx) {
 
 	}
 	
-	console.log("RETURN VALUE OF " + functionName + " is " + calledFunction.getReturnValue());
+	//console.log("RETURN VALUE OF " + functionName + " is " + calledFunction.getReturnValue());
 };
 
 //Enter a parse tree produced by QwertyParser#parameters.
@@ -647,34 +657,45 @@ AssignmentListener.prototype.enterParameters = function(ctx) {
 		dataType = listDataTypes[i].getText();
 		varName = listVariables[i].getText();
 		
-		varValue = new QwertyValue(dataType, "null");
+		varValue = new QwertyValue(dataType, "null", ctx);
 
 		s.set(varName, varValue);
 	}	
 };
 
+function getFunctionParent(ctx){
+	while(ctx.constructor.name != "Function_returnContext"){
+		ctx = ctx.parentCtx;
+		if(ctx.constructor.name == "Function_returnContext"){
+			//console.log("ey");
+			return ctx;
+
+		}
+	}
+}
 
 //Enter a parse tree produced by QwertyParser#return_statement.
 AssignmentListener.prototype.enterReturn_statement = function(ctx) {
 	//console.log(ctx);
-	console.log("ENTER RETURN");
 	var returnValue = ctx.getChild(1).getText();
-	var functionParent = ctx.parentCtx.parentCtx.parentCtx.parentCtx;
 	
+	var functionParent = getFunctionParent(ctx);
+	//console.log(functionParent);
 	var functionDataType = functionParent.getChild(0).getText();
 	var functionName = functionParent.FUNCTION_IDENTIFIER().getText();
 
 	var returnDataType;
 	//returnValue = identifierHandler.convertVarToVal(returnValue, s);
 	if(functionDataType.includes("void")){
-		console.log("Remove return statement");
+		////console.log("ey");
+		//parser.notifyErrorListeners("Remove return statement!", ctx.start);
 	}else{
 		if(s.has(returnValue)){
 			returnDataType = s.get(returnValue).getDataType();
-			returnValue = identifierHandler.convertVarToVal(returnValue, s, functionTable);
+			returnValue = identifierHandler.convertVarToVal(returnValue, s, functionTable, ctx);
 
 		}else{
-			returnValue = identifierHandler.convertVarToVal(returnValue, s, functionTable);
+			returnValue = identifierHandler.convertVarToVal(returnValue, s, functionTable, ctx);
 			if(typeof returnValue == "number"){
 				if(returnValue.toString().includes("."))
 					returnDataType = "float";
@@ -682,7 +703,7 @@ AssignmentListener.prototype.enterReturn_statement = function(ctx) {
 					returnDataType = "int";
 			}else if(typeof returnValue == "object"){
 				if(!returnValue){
-					console.log("EY");
+					//console.log("EY");
 					returnDataType = functionDataType;
 				}
 				else
@@ -692,9 +713,10 @@ AssignmentListener.prototype.enterReturn_statement = function(ctx) {
 		}
 		if(functionDataType.includes(returnDataType)){
 			functionTable.get(functionName).setReturnValue(returnValue);
-			console.log("return accepted");
+			//console.log("return accepted");
 		}else
-			console.log("Return data type mismatch!");		
+			parser.notifyErrorListeners("Return data type mismatch!", ctx.start);	
+
 	}
 };
 
@@ -703,21 +725,43 @@ AssignmentListener.prototype.exitFunccall_statement = function(ctx) {
 	s.pop();
 };
 
+function checkIfHasReturn(functionCodeBlock){
+	var statements = functionCodeBlock.statement();
+	
+	for(var i=0; i< statements.length; i++){
+		if(statements[i].getChild(0).constructor.name == "Return_statementContext")
+			return true;
+	}
+	return false;
+}
 //Enter a parse tree produced by QwertyParser#function_declaration.
 AssignmentListener.prototype.enterFunction_declaration = function(ctx) {
-	
 	var dataType = ctx.getChild(0).getChild(0).getText();
 	var functionName = ctx.getChild(0).getChild(1).getText();
 	var parameters = ctx.getChild(0).function_block().parameters();
 	var functionCodeBlock = ctx.getChild(0).function_block().code_block();
+	//console.log(functionCodeBlock);
+	
+	if(functionTable.has(functionName)){
+		parser.notifyErrorListeners("Function name have already been used. Change the name.", ctx.start);
+	}else
+		functionTable.set(functionName, new QwertyFunction(dataType, parameters, functionCodeBlock))
+
+	if(!checkIfHasReturn(functionCodeBlock)){
+		////console.log(this.getCurrentToken());
+		if(dataType!="void")
+		parser.notifyErrorListeners("Missing return statement!", ctx.stop);
+	}else{
+		if(dataType=="void")
+			parser.notifyErrorListeners("Remove return statement!", ctx.stop);
+	}
 	
 	ctx.removeLastChild();
 	ctx.removeLastChild();
 
 
-	//console.log(functionName);
-	//console.log("YEEEWW" +parameters.VARIABLE_IDENTIFIER().getText());
-	functionTable.set(functionName, new QwertyFunction(dataType, parameters, functionCodeBlock))
+	////console.log(functionName);
+	////console.log("YEEEWW" +parameters.VARIABLE_IDENTIFIER().getText());
 };
 
 // Exit a parse tree produced by QwertyParser#function_declaration.
@@ -727,10 +771,10 @@ AssignmentListener.prototype.exitFunction_declaration = function(ctx) {
 
 // Enter a parse tree produced by QwertyParser#arr_decl.
 AssignmentListener.prototype.enterArr_decl = function(ctx) {
-	var dataType = ctx.data_type().getText();
+	var dataType = ctx.data_type().getText().concat("[]");
 	var varName
 	var size;
-
+	
 	if(ctx.INTEGER_LITERAL() != null) {
 		varName = ctx.VARIABLE_IDENTIFIER()[0].getText();
 		size = ctx.INTEGER_LITERAL().getText();
@@ -741,19 +785,20 @@ AssignmentListener.prototype.enterArr_decl = function(ctx) {
 		if(temp.getDataType() == "int")
 			size = temp.getValue();
 		else
-			console.log("Error in array index! Invalid data type!");
+			parser.notifyErrorListeners("Error in array index! Invalid data type!", ctx.start);
 	}
 
 	// create a new array of size -- 
 	var arr = new Array(parseInt(size));
-	console.log(arr.length);
+	//console.log(arr.length);
 
-	var varValue = new QwertyValue(dataType, arr);
+	var varValue = new QwertyValue(dataType, arr, ctx);
 	s.set(varName, varValue);
 };
 
 // Enter a parse tree produced by QwertyParser#arr_assignment.
 AssignmentListener.prototype.enterArr_assignment = function(ctx) {
+	//console.log("ARR ASSIGN");
 	// 0 will ALWAYS be varName then 1 could be either the index or whatever
 	var varName = ctx.VARIABLE_IDENTIFIER()[0].getText();
 	var indexVal;
@@ -762,29 +807,31 @@ AssignmentListener.prototype.enterArr_assignment = function(ctx) {
 		indexVal = ctx.INTEGER_LITERAL().getText();
 	else {
 		var express = ctx.VARIABLE_IDENTIFIER()[1].getText();
-		console.log(ctx.num_expression());
+		//console.log(ctx.num_expression());
 		if(ctx.num_expression()[0] != null)
 			express += ctx.num_expression()[0].getText()
 
-		var temp = identifierHandler.convertVarToVal(express, s, functionTable);
-		console.log(temp);
-		console.log(isNaN(temp));
+		var temp = identifierHandler.convertVarToVal(express, s, functionTable, ctx);
+		//console.log("TEMP" +temp);
+		//console.log(isNaN(temp));
 		if(!isNaN(temp))
 			indexVal = parseInt(temp);
 		else
-			console.log("Error in array index! Invalid data type!");
+			parser.notifyErrorListeners("Error in array index! Invalid data type!", ctx);
 	}
 
-	var toBeAssigned = identifierHandler.convertVarToVal(ctx.var_assignment_statement().assignment_factor().getText(), s, functionTable);
+	var toBeAssigned = identifierHandler.convertVarToVal(ctx.var_assignment_statement().assignment_factor().getText(), s, functionTable, ctx);
+	
+	//console.log("VAR NAME IS : " + varName);
+	//console.log("to be ass IS : " + toBeAssigned);
 
-	console.log("VAR NAME IS : " + varName);
-	console.log(s.get(varName));
+	//console.log(s.get(varName));
 	if(parseInt(indexVal) >= s.get(varName).getValue().length) {
-		console.log("Array index out of bounds!");
+		parser.notifyErrorListeners("Array index out of bounds!", ctx);
 	} else {
 		var getArr = s.get(varName).getValue();
 		getArr[parseInt(indexVal)] = toBeAssigned;
-		s.get(varName).setValue(getArr);
+		s.get(varName).setValue(getArr, ctx, toBeAssigned, parseInt(indexVal));
 	}
 };
 
