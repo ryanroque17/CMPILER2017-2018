@@ -111,7 +111,7 @@ var_func_factor
 bool_expression				
 	: (NOT)? OPEN_PAR bool_expression CLOSE_PAR
 	| bool_expression logical_ope bool_expression
-	| num_expression relational_ope num_expression 
+	| num_expression ((relational_ope | logical_ope) num_expression)* 
 	| string_expression (EQUAL | NOTEQUAL) string_expression
 	| var_func_expression relational_ope var_func_expression
 	| BOOLEAN_LITERAL
@@ -271,7 +271,7 @@ INC							: '++';
 DEC   						: '--';
 ASSIGN						: '='; 
 AND							: '&&';
-OR							: '||';
+OR							: '@@';
 NOT							: '!';
 
 CONSTANT_KEYWORD			: 'constant';

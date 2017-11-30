@@ -173,11 +173,19 @@ AssignmentListener.prototype.enterAssignment_statement = function(ctx) {
 function evaluateBoolean(input) {
 	console.log("COMPARING EXPRESSION " + input);
 	var hasAnd = false;
+	var hasOr = false;
 	var arr;
 	
 	if(input.split("").includes("&")) {
 	  arr = input.split("&&");
 	  hasAnd = true;
+	} else {
+		arr = [input];
+	}
+
+	if(input.split("").includes("@@")) {
+	  arr = input.split("@@");
+	  hasOr = true;
 	} else {
 		arr = [input];
 	}
@@ -191,7 +199,8 @@ function evaluateBoolean(input) {
 				exp[0] = identifierHandler.convertVarToVal(exp[0], s, functionTable);
 				exp[1] = identifierHandler.convertVarToVal(exp[1], s, functionTable);
 				if(exp[0] <= exp[1]) {
-	    
+		    		if(hasOr)
+		    			return true;
 				} else {
 				    return false;
 				}
@@ -201,7 +210,8 @@ function evaluateBoolean(input) {
 				exp[0] = identifierHandler.convertVarToVal(exp[0], s, functionTable);
 				exp[1] = identifierHandler.convertVarToVal(exp[1], s, functionTable);
 				if(exp[0] >= exp[1]) {
-	    
+	    			if(hasOr)
+		    			return true;
 				} else {
 				    return false;
 				}
@@ -211,7 +221,8 @@ function evaluateBoolean(input) {
 				exp[0] = identifierHandler.convertVarToVal(exp[0], s, functionTable);
 				exp[1] = identifierHandler.convertVarToVal(exp[1], s, functionTable);
 				if(exp[0] != exp[1]) {
-	    
+	    			if(hasOr)
+		    			return true;
 				} else {
 				    return false;
 				}
@@ -220,7 +231,8 @@ function evaluateBoolean(input) {
 				exp[0] = identifierHandler.convertVarToVal(exp[0], s, functionTable);
 			exp[1] = identifierHandler.convertVarToVal(exp[1], s, functionTable);
 			    if(exp[0] == exp[1]) {
-			     
+			     	if(hasOr)
+		    			return true;
 			    } else {
 			        return false;
 			    }
@@ -232,7 +244,8 @@ function evaluateBoolean(input) {
 			exp[1] = identifierHandler.convertVarToVal(exp[1], s, functionTable);
 
 		    if(exp[0] < exp[1]) {
-		     
+		    	if(hasOr)
+		    			return true; 
 		    } else {
 		        return false;
 		    }
@@ -244,7 +257,8 @@ function evaluateBoolean(input) {
 
 			console.log("COMPARING " + exp[0] + " ---- " + exp[1]);
 		    if(exp[0] > exp[1]) {
-
+		    	if(hasOr)
+		    		return true;
 		    } else {
 
 		        return false;
@@ -259,7 +273,7 @@ var temporaryIfCodeBlocks;
 var temporaryIfConditions;
 // Enter a parse tree produced by QwertyParser#if_statement.
 AssignmentListener.prototype.enterIf_statement = function(ctx) {
-	s.push();
+
 	var ctxChildCount = ctx.getChildCount();
 
 	var codeBlocks = ctx.code_block();
@@ -295,7 +309,7 @@ AssignmentListener.prototype.enterIf_statement = function(ctx) {
 
 // Exit a parse tree produced by QwertyParser#if_statement.
 AssignmentListener.prototype.exitIf_statement = function(ctx) {
-	s.pop();
+
 };
 
 //Enter a parse tree produced by QwertyParser#code_block.
