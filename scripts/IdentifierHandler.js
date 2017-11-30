@@ -62,18 +62,18 @@ function generateTokenList(input, s, f){
     	token = inputSplitted.slice(test[i].start, test[i].stop + 1).join("");
     	
     	type = symbolNames[test[i].type];
-    	console.log("CURRENT TYPE " + type);
-    	console.log("CURRENT TOKEN " + token);
+    	//console.log("CURRENT TYPE " + type);
+    	//console.log("CURRENT TOKEN " + token);
     	if(type.includes("VARIABLE_IDENTIFIER") && !hasFunction){
     		// s contains the token 
     		if(s.has(token)) {  	
-        		console.log("TOKEN " + token);
-        		console.log("TOKENVAL" + s.get(token).getValue());
-        		console.log("AFTER TOKEN: " + inputSplitted.slice(test[i].start + 1, test[i].stop + 2).join(""));
+        	//	console.log("TOKEN " + token);
+        		//console.log("TOKENVAL" + s.get(token).getValue());
+        		//console.log("AFTER TOKEN: " + inputSplitted.slice(test[i].start + 1, test[i].stop + 2).join(""));
 
     			// if value is a variable then char after is '[' means its an array!
     			if(i != (tokens.getNumberOfOnChannelTokens() - 1) && inputSplitted.slice(test[i].start + 1, test[i].stop + 2).join("") == '[') {
-    				console.log("ARRAY!!!!");
+    				//console.log("ARRAY!!!!");
     				searchArray = true;
     				tempArr += token;
     				var j = 1;
@@ -114,13 +114,13 @@ function generateTokenList(input, s, f){
 		else if(type.includes("FUNCTION_IDENTIFIER")){
 			
     		if(f.has(token)){
-    			console.log(f.get(token).getCodeBlock());
-    			console.log("f code block ^^");
+    			//console.log(f.get(token).getCodeBlock());
+    			//console.log("f code block ^^");
     			antlr4.tree.ParseTreeWalker.DEFAULT.walk(assignmentListener, f.get(token).getCodeBlock());
-    			console.log("VALUEEEEEEEEEEEEE " + f.get(token).getReturnValue());
+    			//console.log("VALUEEEEEEEEEEEEE " + f.get(token).getReturnValue());
     			if(f.get(token).getReturnValue() != null){
     				tokenList.push(f.get(token).getReturnValue());
-        			console.log("func ident " + f.get(token).getReturnValue());
+        		//	console.log("func ident " + f.get(token).getReturnValue());
 
     			}
     			else
@@ -176,7 +176,7 @@ IdentifierHandler.prototype.evaluatePrintExpression = function(input, s, f){
 	
 	for(var i=0; i<printArgs.length; i++){
 		expression = generateTokenList(printArgs[i], s, f);
-		console.log("@evalprint" + expression);
+		//console.log("@evalprint" + expression);
 		printStmt = printStmt.concat(expression.toString());
 	}
 	//console.log("WWW" + printStmt);
@@ -205,12 +205,11 @@ let yard = (tokenList) => {
 	  let stack = [];
 	  let output = [];
 	  let token;
-	 // console.log(tokenList.toString());
 	  tokenList = changeNegative(tokenList);
 	  for(var i=0; i<tokenList.length; i++){
 		  token = tokenList[i];
 		  if (!isNaN(parseFloat(token))) {
-
+			  console.log("isNAN token " + token);
 	        output.push(token);
 	      }
 
@@ -235,6 +234,8 @@ let yard = (tokenList) => {
 	      }
 	  }
 	  let result = output.concat(stack.reverse()).join(' ')
+	  
+	  console.log("YARD" +result.toString());
 
 	  return result;
 };
@@ -252,12 +253,13 @@ let rpn = (ts, s = []) => {
 	}
 
 function changeNegative(tokenList){
+	console.log("CHANGE NEGATIVE");
 	var newTokenList = [];
 	var token;
 	//tokenList.toString();
 	for(var i=0; i<tokenList.length; i++){
 		token = tokenList[i];
-		if(token == '-' && !(tokenList[i-1]>=0)){
+		if(token == '-' && !(tokenList[i-1]>=0) && tokenList[i-1] != ')'){
 			newTokenList.push("(");
 			newTokenList.push("0");
 			newTokenList.push("-");
