@@ -94,11 +94,12 @@ num_factor
 	| (unary_ope)? FLOAT_LITERAL
 	| VARIABLE_IDENTIFIER 
 	| VARIABLE_IDENTIFIER OPEN_BRACKET (INTEGER_LITERAL | VARIABLE_IDENTIFIER) CLOSE_BRACKET
-	;
+	; 
 		/*** Added ***/
 var_func_expression			
 	: OPEN_PAR var_func_expression CLOSE_PAR
 	| var_func_expression (relational_ope | num_ope) var_func_expression
+	| var_func_factor
 	| OPEN_PAR (OPEN_PAR)+ var_func_expression CLOSE_PAR {notifyErrorListeners ("Uneven Parenthesis. Remove extra '('. ");} 
 	| OPEN_PAR var_func_expression CLOSE_PAR (CLOSE_PAR)+ {notifyErrorListeners ("Uneven Parenthesis. Remove extra ')'. ");}
 	;

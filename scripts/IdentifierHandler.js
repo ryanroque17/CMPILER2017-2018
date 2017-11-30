@@ -38,6 +38,24 @@ function convertArrToVal(input, s, f) {
 	return returnThis;
 }
 
+function moduloConverter(input, s, f) {
+	var toEval = "";
+
+	var splitForVariable = input.split("%");
+	var varName = splitForVariable[0];
+
+
+	if(typeof(s.get(varName)) == "object") {
+		toEval += s.get(varName).getValue();
+	}
+
+	toEval += "%" + splitForVariable[1];
+
+	console.log("FOUND MODULO" + toEval);
+
+	return eval(toEval);
+}
+
 function generateTokenList(input, s, f){
 	var assignmentListener = new AssignmentListener.AssignmentListener();
 
@@ -67,9 +85,14 @@ function generateTokenList(input, s, f){
     	if(type.includes("VARIABLE_IDENTIFIER") && !hasFunction){
     		// s contains the token 
     		if(s.has(token)) {  	
-        	//	console.log("TOKEN " + token);
-        		//console.log("TOKENVAL" + s.get(token).getValue());
-        		//console.log("AFTER TOKEN: " + inputSplitted.slice(test[i].start + 1, test[i].stop + 2).join(""));
+
+    			// if value is a variable then char after is '[' means its an array!
+    			if(i != (tokens.getNumberOfOnChannelTokens() - 1) && inputSplitted.slice(test[i].start + 1, test[i].stop + 2).join("") == '%') {
+    				//console.log("ARRAY!!!!");
+    				console.log("FOUND MODULO!!! " + input);
+    				console.log("FOUND MODULO!!!");
+    				return moduloConverter(input, s, f);
+    			}
 
     			// if value is a variable then char after is '[' means its an array!
     			if(i != (tokens.getNumberOfOnChannelTokens() - 1) && inputSplitted.slice(test[i].start + 1, test[i].stop + 2).join("") == '[') {
