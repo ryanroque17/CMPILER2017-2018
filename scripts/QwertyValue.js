@@ -37,6 +37,9 @@ QwertyValue.prototype.setValue = function (value) {
 		value = parseFloat(value).toFixed(1);
 		console.log("value is " + value);
 	}
+	if(this.dataType == "int") {
+		value = Math.round(value);
+	}
 	this.value = value;
 	
 };

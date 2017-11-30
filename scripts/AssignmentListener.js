@@ -171,10 +171,11 @@ AssignmentListener.prototype.enterAssignment_statement = function(ctx) {
 };
 
 function evaluateBoolean(input) {
-	console.log("COMPARING EXPRESSION " + input);
+	console.log("IF CHECK " + input);
 	var hasAnd = false;
 	var hasOr = false;
 	var arr;
+	var len = 1; 
 	
 	if(input.split("").includes("&")) {
 	  arr = input.split("&&");
@@ -183,8 +184,9 @@ function evaluateBoolean(input) {
 		arr = [input];
 	}
 
-	if(input.split("").includes("@@")) {
+	if(input.split("").includes("@")) {
 	  arr = input.split("@@");
+	  console.log(arr);
 	  hasOr = true;
 	} else {
 		arr = [input];
@@ -192,6 +194,7 @@ function evaluateBoolean(input) {
 	  
 	for(var i=0; i<arr.length; i++) {
 		var poe = arr[i];
+		console.log("IF CHECK " + arr[i]);
 		if(poe.split("").includes("=")) {
 			if(poe.split("").includes("<")) {
 				// <=
@@ -202,7 +205,11 @@ function evaluateBoolean(input) {
 		    		if(hasOr)
 		    			return true;
 				} else {
-				    return false;
+				    if(hasOr && len < arr.length) {
+			    		len++
+			    	} else {
+			    		return false;
+			    	}
 				}
 			} else if(poe.split("").includes(">")) {
 				// >=
@@ -213,18 +220,30 @@ function evaluateBoolean(input) {
 	    			if(hasOr)
 		    			return true;
 				} else {
-				    return false;
+				    if(hasOr && len < arr.length) {
+		    			len++
+			    	} else {
+			    		return false;
+			    	}
 				}
 			} else if(poe.split("").includes("!")) {
-				// >=
+				console.log("IF CHECK not equal");
+				// !=
 				var exp = arr[i].split("!=");
 				exp[0] = identifierHandler.convertVarToVal(exp[0], s, functionTable);
 				exp[1] = identifierHandler.convertVarToVal(exp[1], s, functionTable);
-				if(exp[0] != exp[1]) {
+				console.log("IF CHECK arr: " + exp[0] + " and " + exp[1]);
+
+				if(exp[0] == exp[1]) {
 	    			if(hasOr)
 		    			return true;
 				} else {
-				    return false;
+				    if(hasOr && len < arr.length) {
+				    	console.log("IF CHECK adding");
+		    			len++
+			    	} else {
+			    		return false;
+			    	}
 				}
 			}else {
 				var exp = arr[i].split("==");
@@ -234,7 +253,11 @@ function evaluateBoolean(input) {
 			     	if(hasOr)
 		    			return true;
 			    } else {
-			        return false;
+			        if(hasOr && len < arr.length) {
+			    		len++
+			    	} else {
+			    		return false;
+			    	}
 			    }
 			}	
 		} else if(poe.split("").includes("<")) {
@@ -247,7 +270,11 @@ function evaluateBoolean(input) {
 		    	if(hasOr)
 		    			return true; 
 		    } else {
-		        return false;
+		        if(hasOr && len < arr.length) {
+		    		len++
+		    	} else {
+		    		return false;
+		    	}
 		    }
 		} else if(poe.split("").includes(">")) {
 			// >
@@ -260,8 +287,11 @@ function evaluateBoolean(input) {
 		    	if(hasOr)
 		    		return true;
 		    } else {
-
-		        return false;
+		    	if(hasOr && len < arr.length) {
+		    		len++
+		    	} else {
+		    		return false;
+		    	}
 		    }
 		}
 	}
