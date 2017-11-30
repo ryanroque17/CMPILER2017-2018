@@ -143,19 +143,19 @@ AssignmentListener.prototype.enterAssignment_statement = function(ctx) {
 			}
 			
 			// //loop thru lahat ng funcCall context tapos walk
-			 if(funcCalls != null){
-			 	if(funcCalls.length > 0)
-			 		for(var i=0; i<funcCalls.length;i++){
-			 			console.log("walking funcCall["+i+"]");
-			 			antlr4.tree.ParseTreeWalker.DEFAULT.walk(this, funcCalls[i]);
-			 		}
-			 	else{
-		 			console.log("walking funcCalls");
+			 // if(funcCalls != null){
+			 // 	if(funcCalls.length > 0)
+			 // 		for(var i=0; i<funcCalls.length;i++){
+			 // 			console.log("walking funcCall["+i+"]");
+			 // 			antlr4.tree.ParseTreeWalker.DEFAULT.walk(this, funcCalls[i]);
+			 // 		}
+			 // 	else{
+		 	// 		console.log("walking funcCalls");
 
-			 		//console.log(funcCalls.var_func_factor().funccall_statement());
-			 		antlr4.tree.ParseTreeWalker.DEFAULT.walk(this, funcCalls.var_func_factor().funccall_statement());
-			 	}
-			 }
+			 // 		//console.log(funcCalls.var_func_factor().funccall_statement());
+			 // 		antlr4.tree.ParseTreeWalker.DEFAULT.walk(this, funcCalls.var_func_factor().funccall_statement());
+			 // 	}
+			 // }
 			
 			varValue = identifierHandler.convertVarToVal(varValue, s, functionTable, ctx);
 
@@ -185,22 +185,21 @@ function evaluateBoolean(input, ctx) {
 	var hasOr = false;
 	var arr;
 	var len = 1; 
+	arr = [input];
 	
 	if(input.split("").includes("&")) {
 	  arr = input.split("&&");
 	  hasAnd = true;
-	} else {
-		arr = [input];
 	}
 
 	if(input.split("").includes("@")) {
 	  arr = input.split("@@");
 	  //console.log(arr);
 	  hasOr = true;
-	} else {
-		arr = [input];
-	}
+	} 
 	  
+
+	console.log("CHECKME " + hasOr);  
 	for(var i=0; i<arr.length; i++) {
 		var poe = arr[i];
 		if(poe.split("").includes("=")) {
@@ -210,8 +209,9 @@ function evaluateBoolean(input, ctx) {
 				exp[0] = identifierHandler.convertVarToVal(exp[0], s, functionTable, ctx);
 				exp[1] = identifierHandler.convertVarToVal(exp[1], s, functionTable, ctx);
 				if(exp[0] <= exp[1]) {
-		    		if(hasOr)
+		    		if(hasOr) {
 		    			return true;
+		    		}
 				} else {
 				    if(hasOr && len < arr.length) {
 			    		len++
@@ -225,8 +225,9 @@ function evaluateBoolean(input, ctx) {
 				exp[0] = identifierHandler.convertVarToVal(exp[0], s, functionTable, ctx);
 				exp[1] = identifierHandler.convertVarToVal(exp[1], s, functionTable, ctx);
 				if(exp[0] >= exp[1]) {
-	    			if(hasOr)
+	    			if(hasOr) {
 		    			return true;
+		    		}
 				} else {
 				    if(hasOr && len < arr.length) {
 		    			len++
@@ -241,9 +242,10 @@ function evaluateBoolean(input, ctx) {
 				exp[1] = identifierHandler.convertVarToVal(exp[1], s, functionTable, ctx);
 
 
-				if(exp[0] == exp[1]) {
-	    			if(hasOr)
+				if(exp[0] != exp[1]) {
+	    			if(hasOr) {
 		    			return true;
+		    		}
 				} else {
 				    if(hasOr && len < arr.length) {
 		    			len++
@@ -256,8 +258,9 @@ function evaluateBoolean(input, ctx) {
 				exp[0] = identifierHandler.convertVarToVal(exp[0], s, functionTable, ctx);
 			exp[1] = identifierHandler.convertVarToVal(exp[1], s, functionTable, ctx);
 			    if(exp[0] == exp[1]) {
-			     	if(hasOr)
+			     	if(hasOr) {
 		    			return true;
+		    		}
 			    } else {
 			        if(hasOr && len < arr.length) {
 			    		len++
@@ -273,8 +276,9 @@ function evaluateBoolean(input, ctx) {
 			exp[1] = identifierHandler.convertVarToVal(exp[1], s, functionTable, ctx);
 
 		    if(exp[0] < exp[1]) {
-		    	if(hasOr)
+		    	if(hasOr) {
 		    			return true; 
+		    		}
 		    } else {
 		        if(hasOr && len < arr.length) {
 		    		len++
@@ -284,14 +288,17 @@ function evaluateBoolean(input, ctx) {
 		    }
 		} else if(poe.split("").includes(">")) {
 			// >
+			console.log(">>>>>>>>>>>>>>")
 			var exp = arr[i].split(">");
 			exp[0] = identifierHandler.convertVarToVal(exp[0], s, functionTable, ctx);
 			exp[1] = identifierHandler.convertVarToVal(exp[1], s, functionTable, ctx);
 
-			//console.log("COMPARING " + exp[0] + " ---- " + exp[1]);
+			console.log("COMPARING " + exp[0] + " ---- " + exp[1]);
 		    if(exp[0] > exp[1]) {
-		    	if(hasOr)
+		    	if(hasOr) {
+		    		console.log("COMPARING " + exp[0] + " ---- " + exp[1]);
 		    		return true;
+		    	}
 		    } else {
 		    	if(hasOr && len < arr.length) {
 		    		len++
@@ -715,6 +722,7 @@ AssignmentListener.prototype.enterReturn_statement = function(ctx) {
 				returnDataType = "string"
 		}
 		if(functionDataType.includes(returnDataType)){
+			console.log("abcdefg FUNCTION RETURN VALUE IS = " + returnValue);
 			functionTable.get(functionName).setReturnValue(returnValue);
 		}else
 			parser.notifyErrorListeners("Return data type mismatch!", ctx.start);	
