@@ -64,9 +64,9 @@ function moduloConverter(input, s, f) {
 
 function generateTokenList(input, s, f, ctx){
 	var assignmentListener = new AssignmentListener.AssignmentListener();
-
-	input = input.toString();
-	var chars = new antlr4.InputStream(input);
+	if(input != null)
+		input = input.toString();
+	var chars = new antlr4.InputStream("");
 	var lexer = new QwertyLexer.QwertyLexer(chars);
 	var tokens  = new antlr4.CommonTokenStream(lexer);
 	var parser = new QwertyParser.QwertyParser(tokens);
