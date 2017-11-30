@@ -19,9 +19,9 @@ QwertyValue.prototype.setValue = function (value, ctx, arrayVal, arrayIndex) {
     var tokens  = new antlr4.CommonTokenStream(lexer);
     var parser = new QwertyParser.QwertyParser(tokens);
     var arrayValNull = false;
-	//console.log("dataType of var " +this.dataType);
-
-	//console.log("type of val " +typeof(value));
+    console.log("value of var: " + value);
+	console.log("dataType of var " +this.dataType);
+	console.log("type of val " +typeof(value));
 	
 	////console.log(value);
 	if(Array.isArray(value)){
@@ -43,8 +43,10 @@ QwertyValue.prototype.setValue = function (value, ctx, arrayVal, arrayIndex) {
 		}else if(typeof(value)=="string" && (value.includes("null") || value == "")){
 			value=null;
 		}else if(isValidAssignment(this.dataType, value, arrayVal)){
-
 			this.value = value;
+		}
+		else if(this.dataType =="int" && typeof(value) == "number") {
+			value = Math.floor(value);
 		}
 		else{
 			parser.notifyErrorListeners("Invalid assignment! Expecting " + this.dataType + " object.", ctx.start);
@@ -52,7 +54,6 @@ QwertyValue.prototype.setValue = function (value, ctx, arrayVal, arrayIndex) {
 			value = null;
 		}
 	}
-	
 
 	if(this.dataType == "float" && typeof(value) == "number" && !value.toString().includes(".")){
 		var string = value.toString().concat(".0");
@@ -111,7 +112,7 @@ function isValidAssignment(dataType, input, arrayVal) {
 			return false;
 	}else if(!isNaN(input)){
 		if(dataType == "int") {
-			if(typeof(input) != "number" || input.toString().includes(".")) {
+			if(input.toString().includes(".")) {
 				return false;
 			}
 		} else if(dataType == "float") {
