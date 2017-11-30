@@ -43,7 +43,6 @@ QwertyValue.prototype.setValue = function (value, ctx, arrayVal, arrayIndex) {
 		}else if(typeof(value)=="string" && (value.includes("null") || value == "")){
 			value=null;
 		}else if(isValidAssignment(this.dataType, value, arrayVal)){
-			//console.log("eyyy");
 
 			this.value = value;
 		}

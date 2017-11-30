@@ -148,8 +148,10 @@ function generateTokenList(input, s, f, ctx){
 			
     		if(f.has(token)){
     			////console.log(f.get(token).getCodeBlock());
-    			////console.log("f code block ^^");
-    			antlr4.tree.ParseTreeWalker.DEFAULT.walk(assignmentListener, f.get(token).getCodeBlock());
+    			//console.log("f token " + token);
+
+    			//console.log("f ret valu" + f.get(token).getReturnValue());
+    			//antlr4.tree.ParseTreeWalker.DEFAULT.walk(assignmentListener, f.get(token).getCodeBlock());
     			////console.log("VALUEEEEEEEEEEEEE " + f.get(token).getReturnValue());
     			if(f.get(token).getReturnValue() != null){
     				tokenList.push(f.get(token).getReturnValue());
