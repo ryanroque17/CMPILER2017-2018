@@ -64,15 +64,24 @@ function moduloConverter(input, s, f) {
 
 function generateTokenList(input, s, f, ctx){
 	var assignmentListener = new AssignmentListener.AssignmentListener();
-	if(input != null)
-		input = input.toString();
-	var chars = new antlr4.InputStream("");
+	
+	var chars;
+	var inputSplitted;
+	//console.log(input);
+	if(input != null){
+		chars = new antlr4.InputStream(input.toString());
+	}
+	else{
+		input = "null";
+		chars = new antlr4.InputStream(input);
+	}
+
 	var lexer = new QwertyLexer.QwertyLexer(chars);
 	var tokens  = new antlr4.CommonTokenStream(lexer);
 	var parser = new QwertyParser.QwertyParser(tokens);
 	var symbolNames = parser.symbolicNames;
-	var inputSplitted = input.split("");
 	var test = tokens.getTokens(0, tokens.getNumberOfOnChannelTokens());
+	inputSplitted = input.toString().split("");
 
 	var searchArray = false;
 	var tempArr = "";
