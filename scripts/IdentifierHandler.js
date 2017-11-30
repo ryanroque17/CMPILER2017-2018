@@ -249,7 +249,7 @@ let rpn = (ts, s = []) => {
 
 	  s.push(t == +t ? t : eval(s.splice(-2,1)[0] + t + s.pop())));
 	 
-	  return parseFloat(s[0]);
+	  return s[0];
 	}
 
 function changeNegative(tokenList){

@@ -30,6 +30,7 @@ QwertyValue.prototype.setValue = function (value) {
 		console.log("Invalid Assignment! Data type mismatch!");
 		this.value = null;
 	}
+
 	if(this.dataType == "float" && typeof(value) == "number" && !value.toString().includes(".")){
 		console.log("data type: " +this.dataType + " value:" +value +" valtype:" + typeof value);
 		var string = value.toString().concat(".0");
@@ -37,9 +38,11 @@ QwertyValue.prototype.setValue = function (value) {
 		value = parseFloat(value).toFixed(1);
 		console.log("value is " + value);
 	}
-	if(this.dataType == "int" & typeof(this.value) != "object" ) {
+
+	if(this.dataType =="int" && typeof(value) == "number") {
 		value = Math.round(value);
 	}
+
 	this.value = value;
 	
 };

@@ -151,8 +151,10 @@ AssignmentListener.prototype.enterAssignment_statement = function(ctx) {
 			// }
 			
 			varValue = identifierHandler.convertVarToVal(varValue, s, functionTable);
-			
+
 			s.get(varName).setValue(varValue);
+			
+			
 			
 			//console.log(varValue);
 			//varValue = rpn(yard(varValue));
@@ -194,7 +196,6 @@ function evaluateBoolean(input) {
 	  
 	for(var i=0; i<arr.length; i++) {
 		var poe = arr[i];
-		console.log("IF CHECK " + arr[i]);
 		if(poe.split("").includes("=")) {
 			if(poe.split("").includes("<")) {
 				// <=
@@ -227,19 +228,17 @@ function evaluateBoolean(input) {
 			    	}
 				}
 			} else if(poe.split("").includes("!")) {
-				console.log("IF CHECK not equal");
 				// !=
 				var exp = arr[i].split("!=");
 				exp[0] = identifierHandler.convertVarToVal(exp[0], s, functionTable);
 				exp[1] = identifierHandler.convertVarToVal(exp[1], s, functionTable);
-				console.log("IF CHECK arr: " + exp[0] + " and " + exp[1]);
+
 
 				if(exp[0] == exp[1]) {
 	    			if(hasOr)
 		    			return true;
 				} else {
 				    if(hasOr && len < arr.length) {
-				    	console.log("IF CHECK adding");
 		    			len++
 			    	} else {
 			    		return false;
