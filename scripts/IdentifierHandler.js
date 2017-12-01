@@ -110,11 +110,11 @@ function generateTokenList(input, s, f, ctx){
     			}
 
     			// if value is a variable then char after is '[' means its an array!
-    			if(i != (tokens.getNumberOfOnChannelTokens() - 1) && inputSplitted.slice(token.length, token.length+1).join("") == '[') {
+    			if(i != (tokens.getNumberOfOnChannelTokens() - 1) && inputSplitted.slice(test[i].start + 1, test[i].stop + 2).join("") == '[') {
     				////console.log("ARRAY!!!!");
     				searchArray = true;
     				tempArr += token;
-    				var j = token.length;
+    				var j = 1;
     				// loop through the tokens until you reach a ']' 
     				// once you reach that, add into 'i' how many times you looped so you don't have to revisit them in the token list
     				// continue -- so you continue AFTER the ']'
@@ -257,7 +257,6 @@ let yard = (tokenList) => {
 	  let stack = [];
 	  let output = [];
 	  let token;
-	  
 	  tokenList = changeNegative(tokenList);
 	  for(var i=0; i<tokenList.length; i++){
 		  token = tokenList[i];

@@ -22,8 +22,6 @@ statement
 	| scan_statement 			{this.notifyErrorListeners("Insert ';' to complete statement.");}
 	| print_statement END
 	| print_statement 			{this.notifyErrorListeners("Insert ';' to complete statement.");}
-	| expression END
-	| expression 				{this.notifyErrorListeners("Insert ';' to complete statement.");}
 	| COMMENT
 	| LINE_COMMENT
 	;
@@ -66,12 +64,11 @@ main_function
 
 // Expression
 expression					
-	:  var_func_expression ((relational_ope | num_ope) (var_func_expression | string_expression| num_expression))*
+	: string_expression 
+	| string_expression ADD expression
+	| var_func_expression ((relational_ope | num_ope) (var_func_expression | string_expression| num_expression))*
 	| num_expression (num_ope (num_expression | var_func_expression))*	
 	| bool_expression
-	| string_expression 
-	| string_expression ADD expression
-
 	;
 		/*** Added ***/						
 string_expression			
@@ -83,8 +80,6 @@ string_expression
 num_expression				
 	: OPEN_PAR num_expression CLOSE_PAR
 	| num_expression num_ope num_expression
-	| num_expression num_ope (num_ope)+ num_expression {this.notifyErrorListeners ("Invalid operation! Expecting '+', '-', '*', '/', '%'");} 
-	| num_expression (INC | DEC) num_expression {this.notifyErrorListeners ("Invalid operation '++' or '--'. Expecting '+', '-', '*', '/', '%'.");} 
 	| num_factor
 	;
 num_ope						
@@ -108,7 +103,6 @@ var_func_expression
 	| var_func_expression (relational_ope | num_ope) var_func_expression
 	| var_func_factor
 	| OPEN_PAR (OPEN_PAR)+ var_func_expression CLOSE_PAR {this.notifyErrorListeners ("Uneven Parenthesis. Remove extra '('. ");} 
-	| OPEN_PAR var_func_expression CLOSE_PAR (CLOSE_PAR)+ {this.notifyErrorListeners ("Uneven Parenthesis. Remove extra ')'. ");}
 	| OPEN_PAR var_func_expression CLOSE_PAR (CLOSE_PAR)+ {this.notifyErrorListeners ("Uneven Parenthesis. Remove extra ')'. ");}
 	;
 var_func_factor				
@@ -148,13 +142,8 @@ var_assignment_statement
 assignment_statement		
 	: VARIABLE_IDENTIFIER ASSIGN assignment_factor
 	| VARIABLE_IDENTIFIER (INC | DEC)
-	| VARIABLE_IDENTIFIER INC (ADD)+ {this.notifyErrorListeners ("Extraneous input '+'. Remove extra '+'. ");} 
-	| VARIABLE_IDENTIFIER DEC (SUB)+ {this.notifyErrorListeners ("Extraneous input '-'. Remove extra '-'. ");} 	
 	| VARIABLE_IDENTIFIER assignment_num_ope (expression | num_factor | STRING_LITERAL)
 	| VARIABLE_IDENTIFIER assignment_num_ope (expression | num_factor | STRING_LITERAL) ((expression | num_factor | STRING_LITERAL))? {this.notifyErrorListeners("Invalid expression! Should only one assignemnt operation.");} 
-	| VARIABLE_IDENTIFIER ASSIGN assignment_factor ((ASSIGN | assignment_num_ope) assignment_factor)+ {this.notifyErrorListeners("Duplicate assignment statement.");} 
-	| VARIABLE_IDENTIFIER assignment_num_ope assignment_factor ((ASSIGN | assignment_num_ope) assignment_factor)+ {this.notifyErrorListeners("Duplicate assignment statement.");} 
-	
 	;
 assignment_num_ope
 	: ADD_ASSIGN
@@ -170,11 +159,7 @@ assignment_factor
 	| BOOLEAN_LITERAL
 	;
 funccall_statement       	
-	: FUNCTION_IDENTIFIER OPEN_PAR (actual_parameter_list)? CLOSE_PAR
-	| FUNCTION_IDENTIFIER OPEN_PAR (OPEN_PAR)+ (actual_parameter_list)? CLOSE_PAR {this.notifyErrorListeners ("Uneven Parenthesis. Remove extra '('. ");} 
-	| FUNCTION_IDENTIFIER OPEN_PAR (actual_parameter_list)? CLOSE_PAR (CLOSE_PAR)+ {this.notifyErrorListeners ("Uneven Parenthesis. Remove extra '('. ");} 
-	| FUNCTION_IDENTIFIER OPEN_PAR (actual_parameter_list)? CLOSE_PAR (OPEN_PAR (actual_parameter_list)? CLOSE_PAR)+ {this.notifyErrorListeners ("Invalid function call. Remove other ()");} 
-	;
+	: FUNCTION_IDENTIFIER OPEN_PAR (actual_parameter_list)? CLOSE_PAR;
 actual_parameter_list    	
 	: actual_params;
 actual_params	         	
@@ -196,15 +181,10 @@ if_statement
 
 conditional_block			
 	: OPEN_PAR conditional_factor CLOSE_PAR
-	  OPEN_BRACE (statement)* CLOSE_BRACE 
+	  OPEN_BRACE (statement)* CLOSE_BRACE
 	;
 code_block					
-	: OPEN_BRACE (statement)* CLOSE_BRACE
-	| OPEN_BRACE (statement)* 								{this.notifyErrorListeners ("Missing '}'. ");}
-	| (statement)* CLOSE_BRACE								{this.notifyErrorListeners ("Missing '{'. ");}
-	| OPEN_BRACE (OPEN_BRACE)+ (statement)* CLOSE_BRACE		{this.notifyErrorListeners ("Uneven brace. Remove extra '{'. ");}
-	| OPEN_BRACE (statement)* CLOSE_BRACE (CLOSE_BRACE)+ 	{this.notifyErrorListeners ("Uneven brace. Remove extra '}'. ");}
-	;
+	: OPEN_BRACE (statement)* CLOSE_BRACE;
 	
 	
 while_statement				
@@ -229,11 +209,11 @@ print_statement
 
 // Arrays
 arr_decl
-	: data_type OPEN_BRACKET (INTEGER_LITERAL | VARIABLE_IDENTIFIER | FLOAT_LITERAL) CLOSE_BRACKET VARIABLE_IDENTIFIER;
+	: data_type OPEN_BRACKET (INTEGER_LITERAL | VARIABLE_IDENTIFIER) CLOSE_BRACKET VARIABLE_IDENTIFIER;
 arr_assignment
-	: VARIABLE_IDENTIFIER OPEN_BRACKET ((INTEGER_LITERAL | VARIABLE_IDENTIFIER | FLOAT_LITERAL) (num_expression)*) CLOSE_BRACKET var_assignment_statement;
+	: VARIABLE_IDENTIFIER OPEN_BRACKET ((INTEGER_LITERAL | VARIABLE_IDENTIFIER) (num_expression)*) CLOSE_BRACKET var_assignment_statement;
 arr_expression
-	: VARIABLE_IDENTIFIER OPEN_BRACKET (INTEGER_LITERAL | VARIABLE_IDENTIFIER | FLOAT_LITERAL) CLOSE_BRACKET;
+	: VARIABLE_IDENTIFIER OPEN_BRACKET (INTEGER_LITERAL | VARIABLE_IDENTIFIER) CLOSE_BRACKET;
 
 
 
@@ -306,9 +286,7 @@ VOID						: 'void';
 INTEGER_LITERAL				: [0-9]+;
 FLOAT_LITERAL				: INTEGER_LITERAL? '.' [0-9]+;
 CHAR_LITERAL				: '\'' . '\'';
-STRING_LITERAL				: '"' .*? '"'
-							| '"' .*?  			{this.notifyErrorListeners("Insert ';' to complete statement.");}
-							;
+STRING_LITERAL				: '"' .*? '"';
 BOOLEAN_LITERAL				: 'true' | 'false' ; 
 VARIABLE_IDENTIFIER			: [a-z]+[0-9]*;
 FUNCTION_IDENTIFIER			: [A-Z]+[0-9]*;
