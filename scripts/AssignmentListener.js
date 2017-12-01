@@ -214,8 +214,8 @@ function evaluateBoolean(input, ctx) {
 			if(poe.split("").includes("<")) {
 				// <=
 				var exp = arr[i].split("<=");
-				exp[0] = identifierHandler.convertVarToVal(exp[0], s, functionTable, ctx);
-				exp[1] = identifierHandler.convertVarToVal(exp[1], s, functionTable, ctx);
+				exp[0] = parseInt(identifierHandler.convertVarToVal(exp[0], s, functionTable, ctx));
+				exp[1] = parseInt(identifierHandler.convertVarToVal(exp[1], s, functionTable, ctx));
 				if(exp[0] <= exp[1]) {
 		    		if(hasOr) {
 		    			return true;
@@ -230,8 +230,9 @@ function evaluateBoolean(input, ctx) {
 			} else if(poe.split("").includes(">")) {
 				// >=
 				var exp = arr[i].split(">=");
-				exp[0] = identifierHandler.convertVarToVal(exp[0], s, functionTable, ctx);
-				exp[1] = identifierHandler.convertVarToVal(exp[1], s, functionTable, ctx);
+				exp[0] = parseInt(identifierHandler.convertVarToVal(exp[0], s, functionTable, ctx));
+				exp[1] = parseInt(identifierHandler.convertVarToVal(exp[1], s, functionTable, ctx));
+				
 				if(exp[0] >= exp[1]) {
 	    			if(hasOr) {
 		    			return true;
@@ -246,8 +247,8 @@ function evaluateBoolean(input, ctx) {
 			} else if(poe.split("").includes("!")) {
 				// !=
 				var exp = arr[i].split("!=");
-				exp[0] = identifierHandler.convertVarToVal(exp[0], s, functionTable, ctx);
-				exp[1] = identifierHandler.convertVarToVal(exp[1], s, functionTable, ctx);
+				exp[0] = parseInt(identifierHandler.convertVarToVal(exp[0], s, functionTable, ctx));
+				exp[1] = parseInt(identifierHandler.convertVarToVal(exp[1], s, functionTable, ctx));
 
 
 				if(exp[0] != exp[1]) {
@@ -263,8 +264,8 @@ function evaluateBoolean(input, ctx) {
 				}
 			}else {
 				var exp = arr[i].split("==");
-				exp[0] = identifierHandler.convertVarToVal(exp[0], s, functionTable, ctx);
-			exp[1] = identifierHandler.convertVarToVal(exp[1], s, functionTable, ctx);
+				exp[0] = parseInt(identifierHandler.convertVarToVal(exp[0], s, functionTable, ctx));
+			exp[1] = parseInt(identifierHandler.convertVarToVal(exp[1], s, functionTable, ctx));
 			    if(exp[0] == exp[1]) {
 			     	if(hasOr) {
 		    			return true;
@@ -280,8 +281,8 @@ function evaluateBoolean(input, ctx) {
 		} else if(poe.split("").includes("<")) {
 			// <
 			var exp = arr[i].split("<");
-			exp[0] = identifierHandler.convertVarToVal(exp[0], s, functionTable, ctx);
-			exp[1] = identifierHandler.convertVarToVal(exp[1], s, functionTable, ctx);
+			exp[0] = parseInt(identifierHandler.convertVarToVal(exp[0], s, functionTable, ctx));
+			exp[1] = parseInt(identifierHandler.convertVarToVal(exp[1], s, functionTable, ctx));
 
 		    if(exp[0] < exp[1]) {
 		    	if(hasOr) {
@@ -298,16 +299,18 @@ function evaluateBoolean(input, ctx) {
 			// >
 			console.log(">>>>>>>>>>>>>>")
 			var exp = arr[i].split(">");
-			exp[0] = identifierHandler.convertVarToVal(exp[0], s, functionTable, ctx);
-			exp[1] = identifierHandler.convertVarToVal(exp[1], s, functionTable, ctx);
+			exp[0] = parseInt(identifierHandler.convertVarToVal(exp[0], s, functionTable, ctx));
+			exp[1] = parseInt(identifierHandler.convertVarToVal(exp[1], s, functionTable, ctx));
 
-			console.log("COMPARING " + exp[0] + " ---- " + exp[1]);
+			console.log("COMPARING " + exp[0] + " AND " + exp[1]);
+			// console.log("COMPARING " + (exp[0] > exp[1]));
 		    if(exp[0] > exp[1]) {
+		    	console.log("COMPARING IT IS GREATER THAN!");
 		    	if(hasOr) {
-		    		console.log("COMPARING " + exp[0] + " ---- " + exp[1]);
 		    		return true;
 		    	}
 		    } else {
+		    	console.log("COMPARING IT IS NOT!!!! GREATER THAN!");
 		    	if(hasOr && len < arr.length) {
 		    		len++
 		    	} else {
