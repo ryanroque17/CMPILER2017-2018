@@ -99,9 +99,14 @@ AssignmentListener.prototype.enterAssignment_statement = function(ctx) {
 	var height;
 	var varHeight;
 	var funcCalls;
+
+	var hasFunctions = false;
 	
 	if(ctx.assignment_factor() != null) {
-		funcCalls = ctx.assignment_factor().expression().var_func_expression();
+		if(ctx.assignment_factor().expression().var_func_expression().length > 0) {
+			funcCalls = ctx.assignment_factor().expression().var_func_expression();
+			hasFunctions = true;
+		}
 	}
 
 	//Code below yung pangkuha ng context
@@ -142,20 +147,23 @@ AssignmentListener.prototype.enterAssignment_statement = function(ctx) {
 				varValue = s.get(varName).getValue() + "%" + ctx.getChild(2).getText();
 			}
 			
-			// //loop thru lahat ng funcCall context tapos walk
-			 // if(funcCalls != null){
-			 // 	if(funcCalls.length > 0)
-			 // 		for(var i=0; i<funcCalls.length;i++){
-			 // 			console.log("walking funcCall["+i+"]");
-			 // 			antlr4.tree.ParseTreeWalker.DEFAULT.walk(this, funcCalls[i]);
-			 // 		}
-			 // 	else{
-		 	// 		console.log("walking funcCalls");
-
-			 // 		//console.log(funcCalls.var_func_factor().funccall_statement());
-			 // 		antlr4.tree.ParseTreeWalker.DEFAULT.walk(this, funcCalls.var_func_factor().funccall_statement());
-			 // 	}
-			 // }
+			//loop thru lahat ng funcCall context tapos walk
+			if(hasFunctions) {
+				if(funcCalls != null){
+				 	if(funcCalls.length > 0)
+				 		for(var i=0; i<funcCalls.length;i++){
+				 			console.log("walking funcCall["+i+"]");
+				 			console.log(funcCalls[i]);
+				 			antlr4.tree.ParseTreeWalker.DEFAULT.walk(this, funcCalls[i]);
+				 		}
+				 	else{
+			 			console.log("walking funcCalls");
+				 		//console.log(funcCalls.var_func_factor().funccall_statement());
+				 		antlr4.tree.ParseTreeWalker.DEFAULT.walk(this, funcCalls.var_func_factor().funccall_statement());
+				 	}
+				 }
+			}
+			 
 			
 			varValue = identifierHandler.convertVarToVal(varValue, s, functionTable, ctx);
 
@@ -771,7 +779,6 @@ AssignmentListener.prototype.enterFunction_declaration = function(ctx) {
 	
 	ctx.removeLastChild();
 	ctx.removeLastChild();
-
 
 	////console.log(functionName);
 	////console.log("YEEEWW" +parameters.VARIABLE_IDENTIFIER().getText());

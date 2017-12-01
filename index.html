@@ -31,17 +31,9 @@
 <div class="container">
   <!-- Ace Editor -->
   <div class="row">
-          <div id="editor">int ADDTWO(int z) {
-    print("Z IS" + z);
-    z++;
-    
-    return z;
-}
-
-int ADDONE(int k){
+          <div id="editor">int ADDONE(int k){
     print("K IS" + k);
-    k = ADDTWO(k);
-    print("K IS NOW " + k);
+    k++;
     return k;
 }
 
@@ -51,6 +43,7 @@ void main() {
     i = 2 + ADDONE(j);
     print(i);
 }
+
 </div>
   </div>
   

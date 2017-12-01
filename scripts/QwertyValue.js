@@ -19,9 +19,9 @@ QwertyValue.prototype.setValue = function (value, ctx, arrayVal, arrayIndex) {
     var tokens  = new antlr4.CommonTokenStream(lexer);
     var parser = new QwertyParser.QwertyParser(tokens);
     var arrayValNull = false;
-    console.log("value of var: " + value);
-	console.log("dataType of var " +this.dataType);
-	console.log("type of val " +typeof(value));
+    //console.log("value of var: " + value);
+	//console.log("dataType of var " +this.dataType);
+	//console.log("type of val " +typeof(value));
 	
 	////console.log(value);
 	if(Array.isArray(value)){
