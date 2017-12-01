@@ -605,13 +605,13 @@ function compareParameters(param1, param2, ctx){
 	 		//console.log("execute");
 	 		return true;
 	 	}else{
-	 		parser.notifyErrorListeners("Number of parameters don't match! Add/subtract parameters", param2.start, ctx);
+	 		parser.notifyErrorListeners("Number of parameters don't match! Add/subtract parameters", param2.start);
 	 		var errorHtml = "<tr><td>Number of parameters don't match!<td></td><td></td><td>Add/subtract parameters.</td></tr>";
 			consoleBox.innerHTML += errorHtml;
 			return false;
 	 	}			
 	 }else if(listParam1Variables.length != listParam2Arguments.length){
-	 		parser.notifyErrorListeners("Number of parameters don't match! Add/subtract parameters", param2.start, ctx);
+	 		parser.notifyErrorListeners("Number of parameters don't match! Add/subtract parameters", param2.start);
 	 		var errorHtml = "<tr><td>Number of parameters don't match!<td></td><td></td><td>Add/subtract parameters.</td></tr>";
 			consoleBox.innerHTML += errorHtml;
 			return false;
@@ -797,18 +797,23 @@ AssignmentListener.prototype.enterArr_decl = function(ctx) {
 	var dataType = ctx.data_type().getText().concat("[]");
 	var varName
 	var size;
-	
+	var invalid = false;
 	if(ctx.INTEGER_LITERAL() != null) {
 		varName = ctx.VARIABLE_IDENTIFIER()[0].getText();
 		size = ctx.INTEGER_LITERAL().getText();
 	}
 	else {
-		varName = ctx.VARIABLE_IDENTIFIER()[1].getText();
-		var temp = s.get(ctx.VARIABLE_IDENTIFIER()[0].getText());
-		if(temp.getDataType() == "int")
-			size = temp.getValue();
-		else
-			parser.notifyErrorListeners("Error in array index! Invalid data type!", ctx.start);
+		if(ctx.FLOAT_LITERAL() != null){
+			parser.notifyErrorListeners("Error in array index! Expected int data type!", ctx.start);
+			invalid = true;
+		}else{
+			varName = ctx.VARIABLE_IDENTIFIER()[1].getText();
+			var temp = s.get(ctx.VARIABLE_IDENTIFIER()[0].getText());
+			if(temp.getDataType() == "int")
+				size = temp.getValue();
+			else
+				parser.notifyErrorListeners("Error in array index! Expected int data type!", ctx.start);
+		}
 	}
 
 	// create a new array of size -- 
@@ -850,7 +855,7 @@ AssignmentListener.prototype.enterArr_assignment = function(ctx) {
 
 	//console.log(s.get(varName));
 	if(parseInt(indexVal) >= s.get(varName).getValue().length) {
-		parser.notifyErrorListeners("Array index out of bounds!", ctx);
+		parser.notifyErrorListeners("Array index out of bounds!", ctx.start);
 	} else {
 		var getArr = s.get(varName).getValue();
 		getArr[parseInt(indexVal)] = toBeAssigned;
@@ -858,6 +863,16 @@ AssignmentListener.prototype.enterArr_assignment = function(ctx) {
 	}
 };
 
-// Enter a parse tree produced by QwertyParser#arr_expression.
-AssignmentListener.prototype.enterArr_expression = function(ctx) {
+//Enter a parse tree produced by QwertyParser#expression.
+QwertyListener.prototype.enterExpression = function(ctx) {
+	console.log(ctx);
+	//if(ctx.parentCtx.constructor.name == "Return_statementContext" || ctx.parentCtx.constructor.name == "Actual_paramsContext" || ctx.parentCtx.constructor.name == "Assignment_factorContext" || ctx.parentCtx.constructor.name == "Print_statementContext"){
+	if(ctx.parentCtx.constructor.name == "StatementContext")
+		parser.notifyErrorListeners("Missing assignment statement ", ctx.start);
+
+
+
+
+
+
 };
