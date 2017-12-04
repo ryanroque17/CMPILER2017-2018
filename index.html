@@ -9,13 +9,13 @@
   
   <!-- Scripts -->
   <script src="/scripts/require.js"></script>
+  <script src="/scripts/jquery.js"></script>
 
   <!-- ANTLR Editor -->
   <script type="application/javascript">
     var antlr4 = require('antlr4/index');
     var antlr4_require = require;
   </script>
-
   <!-- ACE Editor -->
   <script src="ace_components/ace-builds/src-noconflict/ace.js"></script>
   <script>
@@ -31,19 +31,29 @@
 <div class="container">
   <!-- Ace Editor -->
   <div class="row">
-          <div id="editor">int ADDONE(int k){
-    print("K IS" + k);
-    k++;
-    return k;
+          <div id="editor">int COUNT(int n) {
+  if (n < 1) {
+    return 0;
+  }
+  if (n % 10 == 7) {
+    return 1 + COUNT(n/10);
+  }
+  else {
+    return COUNT(n/10);
+  }
+  
+    return 0;
 }
 
 void main() {
-    int i; 
-    int j = 6;
-    i = 2 + ADDONE(j);
-    print(i);
+    int z;
+    int number;
+    scan("Enter number:", number);
+    
+    int result;
+    result = COUNT(number);
+    print(result);
 }
-
 </div>
   </div>
   

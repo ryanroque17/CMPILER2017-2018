@@ -74,7 +74,15 @@ ConsoleErrorListener.INSTANCE = new ConsoleErrorListener();
 // </pre>
 //
 ConsoleErrorListener.prototype.syntaxError = function(recognizer, offendingSymbol, line, column, msg, e) {
-    console.error("line " + line + ":" + column + " " + msg);
+	console.error(msg + " at line " + line);
+    
+    var offSymbol = recognizer.literalNames[offendingSymbol.type];
+    if(offSymbol == null) {
+    	offSymbol = "N/A"
+    }
+    var errorHtml = "<tr><td>Error<td>" + parseInt(line) + "</td><td>" + offSymbol + "</td><td>" + msg + "</td></tr>";
+
+    consoleBox.innerHTML += errorHtml;
 };
 
 function ProxyErrorListener(delegates) {

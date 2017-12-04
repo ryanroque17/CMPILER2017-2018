@@ -159,7 +159,11 @@ assignment_factor
 	| BOOLEAN_LITERAL
 	;
 funccall_statement       	
-	: FUNCTION_IDENTIFIER OPEN_PAR (actual_parameter_list)? CLOSE_PAR;
+	: FUNCTION_IDENTIFIER OPEN_PAR (actual_parameter_list)? CLOSE_PAR
+	| FUNCTION_IDENTIFIER OPEN_PAR (OPEN_PAR)+ (actual_parameter_list)? CLOSE_PAR {this.notifyErrorListeners ("Uneven Parenthesis. Remove extra '('. ");} 
+	| FUNCTION_IDENTIFIER OPEN_PAR (actual_parameter_list)? CLOSE_PAR (CLOSE_PAR)+ {this.notifyErrorListeners ("Uneven Parenthesis. Remove extra '('. ");} 
+	| FUNCTION_IDENTIFIER OPEN_PAR (actual_parameter_list)? CLOSE_PAR (OPEN_PAR (actual_parameter_list)? CLOSE_PAR)+ {this.notifyErrorListeners ("Invalid function call. Remove other ()");} 
+	;
 actual_parameter_list    	
 	: actual_params;
 actual_params	         	
@@ -209,7 +213,7 @@ print_statement
 
 // Arrays
 arr_decl
-	: data_type OPEN_BRACKET (INTEGER_LITERAL | VARIABLE_IDENTIFIER) CLOSE_BRACKET VARIABLE_IDENTIFIER;
+	: data_type OPEN_BRACKET (INTEGER_LITERAL | VARIABLE_IDENTIFIER | FLOAT_LITERAL | STRING_LITERAL) CLOSE_BRACKET VARIABLE_IDENTIFIER;
 arr_assignment
 	: VARIABLE_IDENTIFIER OPEN_BRACKET ((INTEGER_LITERAL | VARIABLE_IDENTIFIER) (num_expression)*) CLOSE_BRACKET var_assignment_statement;
 arr_expression

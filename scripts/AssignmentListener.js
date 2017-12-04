@@ -14,6 +14,7 @@ var identifierHandler = new IdentifierHandler();
 var consoleBox = document.getElementById("consoleBox");
 
 var lastPrint;
+var hasExecute = true;
 
 var chars = new antlr4.InputStream("");
 var lexer = new QwertyLexer.QwertyLexer(chars);
@@ -62,8 +63,8 @@ AssignmentListener.prototype.enterVar_decl = function(ctx) {
 	
 	if(s.has(varName)) {
 		parser.notifyErrorListeners("Variable " + varName + " is already declared. Change variable name.", ctx.start);
-		var errorHtml = "<tr><td>Variable Already In Stack<td></td><td>" + varName + "</td><td>Change variable name.</td></tr>";
-		consoleBox.innerHTML += errorHtml;
+
+		
 	} else {		
 		s.set(varName, varValue);
 	}
@@ -81,8 +82,8 @@ AssignmentListener.prototype.enterConst_statement = function(ctx) {
 	
 	if(s.has(varName)) {
 		parser.notifyErrorListeners("Variable " + varName + " is already declared. Change variable name.", ctx.start);
-		var errorHtml = "<tr><td>Variable Already In Stack<td></td><td>" + varName + "</td><td>Change variable name.</td></tr>";
-		consoleBox.innerHTML += errorHtml;
+
+		
 	} else {		
 		s.set(varName, varValue);
 		////console.log("value and data type of " +varName+ ":" + s.get(varName).getValue() + " & " + typeof s.get(varName).getValue());
@@ -116,8 +117,8 @@ AssignmentListener.prototype.enterAssignment_statement = function(ctx) {
 	}else{
 		if(s.get(varName).getDataType() == "constant") {
 			parser.notifyErrorListeners("ERROR! Cannot re-assign constant. Change constant to data type", ctx.start);
-			var errorHtml = "<tr><td>Cannot change constant value<td></td><td>" + varName + "</td><td>Change constant to data type.</td></tr>";
-			consoleBox.innerHTML += errorHtml;
+
+			
 		} else {
 			height = s.height();
 			varHeight = s.getItsHeight(varName);
@@ -155,11 +156,13 @@ AssignmentListener.prototype.enterAssignment_statement = function(ctx) {
 				 			console.log("walking funcCall["+i+"]");
 				 			console.log(funcCalls[i]);
 				 			antlr4.tree.ParseTreeWalker.DEFAULT.walk(this, funcCalls[i]);
+				 			hasExecute = false;
 				 		}
 				 	else{
 			 			console.log("walking funcCalls");
 				 		//console.log(funcCalls.var_func_factor().funccall_statement());
 				 		antlr4.tree.ParseTreeWalker.DEFAULT.walk(this, funcCalls.var_func_factor().funccall_statement());
+				 		hasExecute = false;
 				 	}
 				 }
 			}
@@ -175,8 +178,8 @@ AssignmentListener.prototype.enterAssignment_statement = function(ctx) {
 			//varValue = rpn(yard(varValue));
 			/*if(!isValidAssignment(s.get(varName).getDataType(), varValue)) {
 				//console.log("Type Checking Error for variable " + varName);
-				var errorHtml = "<tr><td>Type Check Error<td></td><td>" + varName + "</td><td>Change var type or change value.</td></tr>";
-				consoleBox.innerHTML += errorHtml;
+
+				
 			} else {
 				s.get(varName).setValue(varValue);
 			}*/
@@ -264,8 +267,23 @@ function evaluateBoolean(input, ctx) {
 				}
 			}else {
 				var exp = arr[i].split("==");
-				exp[0] = parseInt(identifierHandler.convertVarToVal(exp[0], s, functionTable, ctx));
-			exp[1] = parseInt(identifierHandler.convertVarToVal(exp[1], s, functionTable, ctx));
+
+				console.log("COMPARING " + isNaN(exp[0]) + " AND " + isNaN(exp[1]));
+
+				if(!isNaN(exp[0])) {
+					exp[0] = parseInt(identifierHandler.convertVarToVal(exp[0], s, functionTable, ctx));
+				} else {
+					exp[0] = identifierHandler.convertVarToVal(exp[0], s, functionTable, ctx);
+				}
+
+				if(!isNaN(exp[1])) {
+					exp[1] = parseInt(identifierHandler.convertVarToVal(exp[1], s, functionTable, ctx));
+				} else {
+					exp[1] = identifierHandler.convertVarToVal(exp[1], s, functionTable, ctx);
+				}
+
+				console.log("COMPARING " + exp[0] + " AND " + exp[1]);
+
 			    if(exp[0] == exp[1]) {
 			     	if(hasOr) {
 		    			return true;
@@ -605,15 +623,15 @@ function compareParameters(param1, param2, ctx){
 	 		//console.log("execute");
 	 		return true;
 	 	}else{
-	 		parser.notifyErrorListeners("Number of parameters don't match! Add/subtract parameters", param2.start, ctx);
-	 		var errorHtml = "<tr><td>Number of parameters don't match!<td></td><td></td><td>Add/subtract parameters.</td></tr>";
-			consoleBox.innerHTML += errorHtml;
+	 		parser.notifyErrorListeners("Number of parameters don't match! Add/subtract parameters", param2.start);
+
+			
 			return false;
 	 	}			
 	 }else if(listParam1Variables.length != listParam2Arguments.length){
-	 		parser.notifyErrorListeners("Number of parameters don't match! Add/subtract parameters", param2.start, ctx);
-	 		var errorHtml = "<tr><td>Number of parameters don't match!<td></td><td></td><td>Add/subtract parameters.</td></tr>";
-			consoleBox.innerHTML += errorHtml;
+	 		parser.notifyErrorListeners("Number of parameters don't match! Add/subtract parameters", param2.start);
+
+			
 			return false;
 	 }else{
 		for(var i=0; i<listParam1Variables.length; i++){
@@ -632,7 +650,8 @@ function compareParameters(param1, param2, ctx){
 
 //Enter a parse tree produced by QwertyParser#funccall_statement.
 AssignmentListener.prototype.enterFunccall_statement = function(ctx) {
-	s.push();
+	if(hasExecute){
+		s.push();
 	console.log("enterfunccall")
 	
 	var functionName = ctx.FUNCTION_IDENTIFIER().getText();
@@ -641,7 +660,9 @@ AssignmentListener.prototype.enterFunccall_statement = function(ctx) {
 	var funcCallParams;
 	
 	if(ctx.actual_parameter_list()!=null){
-		funcCallParams = ctx.actual_parameter_list().actual_params();
+		console.log(ctx.actual_parameter_list());
+		funcCallParams = ctx.actual_parameter_list()[0].actual_params();
+		console.log(funcCallParams);
 	}
 	
 	if(calledFunction!=null){
@@ -662,6 +683,7 @@ AssignmentListener.prototype.enterFunccall_statement = function(ctx) {
 	}
 	
 	console.log("RETURN VALUE OF " + functionName + " is " + calledFunction.getReturnValue());
+	}
 };
 
 //Enter a parse tree produced by QwertyParser#parameters.
@@ -685,19 +707,18 @@ AssignmentListener.prototype.enterParameters = function(ctx) {
 };
 
 function getFunctionParent(ctx){
+	console.log(ctx);
 	while(ctx.constructor.name != "Function_returnContext"){
 		ctx = ctx.parentCtx;
-		if(ctx.constructor.name == "Function_returnContext"){
+		if(ctx.constructor.name == "Function_returnContext" || ctx.constructor.name == "Function_noreturnContext"){
 			//console.log("ey");
 			return ctx;
-
 		}
 	}
 }
 
 //Enter a parse tree produced by QwertyParser#return_statement.
 AssignmentListener.prototype.enterReturn_statement = function(ctx) {
-	//console.log(ctx);
 	var returnValue = ctx.getChild(1).getText();
 	
 	var functionParent = getFunctionParent(ctx);
@@ -709,8 +730,11 @@ AssignmentListener.prototype.enterReturn_statement = function(ctx) {
 	//returnValue = identifierHandler.convertVarToVal(returnValue, s);
 	if(functionDataType.includes("void")){
 		////console.log("ey");
-		//parser.notifyErrorListeners("Remove return statement!", ctx.start);
+		parser.notifyErrorListeners("Remove return statement!", ctx.start);
+
+			
 	}else{
+
 		if(s.has(returnValue)){
 			returnDataType = s.get(returnValue).getDataType();
 			returnValue = identifierHandler.convertVarToVal(returnValue, s, functionTable, ctx);
@@ -743,7 +767,10 @@ AssignmentListener.prototype.enterReturn_statement = function(ctx) {
 
 //Exit a parse tree produced by QwertyParser#funccall_statement.
 AssignmentListener.prototype.exitFunccall_statement = function(ctx) {
-	s.pop();
+	if(hasExecute)
+		s.pop();
+
+	hasExecute = true;
 };
 
 function checkIfHasReturn(functionCodeBlock){
@@ -797,18 +824,23 @@ AssignmentListener.prototype.enterArr_decl = function(ctx) {
 	var dataType = ctx.data_type().getText().concat("[]");
 	var varName
 	var size;
-	
+	var invalid = false;
 	if(ctx.INTEGER_LITERAL() != null) {
 		varName = ctx.VARIABLE_IDENTIFIER()[0].getText();
 		size = ctx.INTEGER_LITERAL().getText();
 	}
 	else {
-		varName = ctx.VARIABLE_IDENTIFIER()[1].getText();
-		var temp = s.get(ctx.VARIABLE_IDENTIFIER()[0].getText());
-		if(temp.getDataType() == "int")
-			size = temp.getValue();
-		else
-			parser.notifyErrorListeners("Error in array index! Invalid data type!", ctx.start);
+		if(ctx.FLOAT_LITERAL() != null){
+			parser.notifyErrorListeners("Error in array index! Expected int data type!", ctx.start);
+			invalid = true;
+		}else{
+			varName = ctx.VARIABLE_IDENTIFIER()[1].getText();
+			var temp = s.get(ctx.VARIABLE_IDENTIFIER()[0].getText());
+			if(temp.getDataType() == "int")
+				size = temp.getValue();
+			else
+				parser.notifyErrorListeners("Error in array index! Expected int data type!", ctx.start);
+		}
 	}
 
 	// create a new array of size -- 
@@ -850,7 +882,7 @@ AssignmentListener.prototype.enterArr_assignment = function(ctx) {
 
 	//console.log(s.get(varName));
 	if(parseInt(indexVal) >= s.get(varName).getValue().length) {
-		parser.notifyErrorListeners("Array index out of bounds!", ctx);
+		parser.notifyErrorListeners("Array index out of bounds!", ctx.start);
 	} else {
 		var getArr = s.get(varName).getValue();
 		getArr[parseInt(indexVal)] = toBeAssigned;
@@ -858,6 +890,10 @@ AssignmentListener.prototype.enterArr_assignment = function(ctx) {
 	}
 };
 
-// Enter a parse tree produced by QwertyParser#arr_expression.
-AssignmentListener.prototype.enterArr_expression = function(ctx) {
+//Enter a parse tree produced by QwertyParser#expression.
+QwertyListener.prototype.enterExpression = function(ctx) {
+	console.log(ctx);
+	//if(ctx.parentCtx.constructor.name == "Return_statementContext" || ctx.parentCtx.constructor.name == "Actual_paramsContext" || ctx.parentCtx.constructor.name == "Assignment_factorContext" || ctx.parentCtx.constructor.name == "Print_statementContext"){
+	if(ctx.parentCtx.constructor.name == "StatementContext")
+		parser.notifyErrorListeners("Missing assignment statement ", ctx.start);
 };
