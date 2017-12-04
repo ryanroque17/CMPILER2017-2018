@@ -97,6 +97,9 @@ color: #5F5A60\
 .ace-twilight .ace_variable {\
 color: #7587A6\
 }\
+.ace-twilight .ace_operators {\
+color: #5cb85c\
+}\
 .ace-twilight .ace_xml-pe {\
 color: #494949\
 }\

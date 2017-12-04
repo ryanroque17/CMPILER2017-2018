@@ -7,53 +7,25 @@
   <link rel="stylesheet" href="/styles/index.css">
   <link rel="stylesheet" href="/styles/bootstrap.min.css">
   
-  <!-- Scripts -->
-  <script src="/scripts/require.js"></script>
-  <script src="/scripts/jquery.js"></script>
-
-  <!-- ANTLR Editor -->
-  <script type="application/javascript">
-    var antlr4 = require('antlr4/index');
-    var antlr4_require = require;
-  </script>
-  <!-- ACE Editor -->
-  <script src="ace_components/ace-builds/src-noconflict/ace.js"></script>
-  <script>
-    ace.define('antlr4/index', function (require, exports, module) {
-      module.exports = antlr4;
-    });
-  </script>
-  <script src="/scripts/ace-config.js"></script>
-  <script src="ace_components/antlr4-ace-ext/src/token-type-map.js"></script>
-  <script src="ace_components/antlr4-ace-ext/src/tokenizer.js"></script>
+  
 </head>
 <body>
 <div class="container">
   <!-- Ace Editor -->
   <div class="row">
-          <div id="editor">int COUNT(int n) {
-  if (n < 1) {
-    return 0;
-  }
-  if (n % 10 == 7) {
-    return 1 + COUNT(n/10);
-  }
-  else {
-    return COUNT(n/10);
-  }
-  
-    return 0;
+          <div id="editor">int ADDONE(int k){
+    print("K IS" + k);
+    k++;
+    return k;
 }
 
 void main() {
-    int z;
-    int number;
-    scan("Enter number:", number);
-    
-    int result;
-    result = COUNT(number);
-    print(result);
+    int i; 
+    int j = 6;
+    i = 2 + ADDONE(j);
+    print(i);
 }
+
 </div>
   </div>
   
@@ -81,6 +53,41 @@ void main() {
 
 </div>
 
- <script src="/scripts/index.js"></script>
+<!-- Scripts -->
+ <script src="/scripts/require.js"></script>
+
+<!-- ANTLR Editor -->
+<script type="application/javascript">
+  var antlr4 = require('antlr4/index');
+  var antlr4_require = require;
+</script>
+
+<!-- ACE Editor -->
+<script src="ace_components/ace-builds/src-noconflict/ace.js"></script>
+<script>
+  ace.define('antlr4/index', function (require, exports, module) {
+    module.exports = antlr4;
+  });
+</script>
+<script src="/scripts/ace-config.js"></script>
+<script src="ace_components/antlr4-ace-ext/src/token-type-map.js"></script>
+<script src="ace_components/antlr4-ace-ext/src/tokenizer.js"></script>
+<script src="ace_components/ace-builds/src-noconflict/ext-language_tools.js"></script>
+
+<script>
+    // trigger extension
+    ace.require("ace/ext/language_tools");
+    var editor = ace.edit("editor");
+    editor.session.setMode("ace/mode/html");
+    editor.setTheme("ace/theme/tomorrow");
+    // enable autocompletion and snippets
+    editor.setOptions({
+        enableBasicAutocompletion: true,
+        enableSnippets: true,
+        enableLiveAutocompletion: false
+    });
+</script>
+
+<script src="/scripts/index.js"></script>
 </body>
 </html>
