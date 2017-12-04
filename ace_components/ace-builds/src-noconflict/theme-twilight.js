@@ -100,6 +100,12 @@ color: #7587A6\
 .ace-twilight .ace_operators {\
 color: #5cb85c\
 }\
+.ace-twilight .ace_num {\
+color: #0287d8\
+}\
+.ace-twilight .ace_compare {\
+color: #f0b84e\
+}\
 .ace-twilight .ace_xml-pe {\
 color: #494949\
 }\
