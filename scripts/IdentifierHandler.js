@@ -12,9 +12,9 @@ var IdentifierHandler = function () {
 
 };
 
-IdentifierHandler.prototype.convertVarToVal = function(input, s, f, ctx){
+IdentifierHandler.prototype.convertVarToVal = function(input, s, f, ctx, isDebug){
 	//console.log("INPUUUUUT " + input);
-	return generateTokenList(input, s, f, ctx);
+	return generateTokenList(input, s, f, ctx, isDebug);
 	/*//console.log("tokenList " + tokenList)
 	if(hasString) 
 		return buildInputString(tokenList);
@@ -62,7 +62,7 @@ function moduloConverter(input, s, f) {
 	return eval(toEval);
 }
 
-function generateTokenList(input, s, f, ctx){
+function generateTokenList(input, s, f, ctx, isDebug){
 	var assignmentListener = new AssignmentListener.AssignmentListener();
 	
 	var chars;
@@ -195,8 +195,8 @@ function generateTokenList(input, s, f, ctx){
     ////console.log(tokenList.toString())
   //  //console.log(tokenList.length);
     ////console.log("zz" + tokenList.toString());
-    if(hasString){
-    	////console.log("buildInputString");
+    if(hasString || isDebug){
+    	console.log("buildInputString");
 		return buildInputString(tokenList);
     }  
 	else {

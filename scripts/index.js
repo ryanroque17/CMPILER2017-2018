@@ -108,14 +108,26 @@ var Mergesort = (function() {
 
 })();
 
+/*document.getElementById("debug").addEventListener("click", function() {
+	selectionRange = editor.getSelectionRange();
+	console.log(selectionRange);
+	selectionMarkers = editor.session.getSelectionMarkers();
+	for(var i=0; i<selectionMarkers.length-1; i++){
+		console.log("i" + i);
+		console.log(selectionMarkers[i].start.row);
+	}
+
+	content = editor.session.getTextRange(selectionRange);
+	
+});*/
 
 document.getElementById("parse").addEventListener("click", function() {
-  var text = $("#editor").text();
+  var text = document.getElementById("editor").innerText;
 
-  console.log(text);
+ /* console.log(text);
   console.log(text[27]);
   console.log(text[58]);
-  console.log(text[45]);
+  console.log(text[45]);*/
 
   if(text[50] == 'n' && text[28] == '9' && text[27] == '1' && text[26] == '8') {
     var k = prompt("Enter Number: ");

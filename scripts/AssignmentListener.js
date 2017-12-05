@@ -892,8 +892,30 @@ AssignmentListener.prototype.enterArr_assignment = function(ctx) {
 
 //Enter a parse tree produced by QwertyParser#expression.
 QwertyListener.prototype.enterExpression = function(ctx) {
-	console.log(ctx);
+	//console.log(ctx);
 	//if(ctx.parentCtx.constructor.name == "Return_statementContext" || ctx.parentCtx.constructor.name == "Actual_paramsContext" || ctx.parentCtx.constructor.name == "Assignment_factorContext" || ctx.parentCtx.constructor.name == "Print_statementContext"){
 	if(ctx.parentCtx.constructor.name == "StatementContext")
 		parser.notifyErrorListeners("Missing assignment statement ", ctx.start);
+};
+//Exit a parse tree produced by QwertyParser#statement.
+QwertyListener.prototype.exitStatement = function(ctx) {
+	selectionRange = editor.getSelectionRange();
+	selectionMarkers = editor.session.getSelectionMarkers();
+	console.log(selectionRange.start.row + " = " + ctx.start.line + " : " +ctx.getText());
+
+	if(selectionMarkers.length>0){
+		console.log("ey" + selectionMarkers.length);
+		for(var i=0; i <selectionMarkers.length; i++){
+			if((ctx.start.line >= (selectionMarkers[i].start.row+1) && ctx.start.line <= (selectionMarkers[i].end.row+1)) || ctx.start.line == (selectionMarkers[i].start.row+1)){
+				alert("The current values are: " + identifierHandler.convertVarToVal(ctx.getText(), s, functionTable, ctx, true));
+			}
+		}
+	
+		
+	}else{
+		if(ctx.start.line >= (selectionRange.start.row+1) && ctx.start.line <= (selectionRange.end.row+1)){
+			alert("The current values are: " + identifierHandler.convertVarToVal(ctx.getText(), s, functionTable, ctx, true));
+		}
+	}
+	
 };

@@ -1,13 +1,16 @@
 #editor {
-    width: 100%;
+    width: 50%;
 	height: 500px;
 }
 
 #console {
+	position:absolute;
+	top: -510px;
+	left: 52%;
 	background-color: rgb(24, 24, 24);
 	color: white;
-	height: 400px;
-	width: 100%;
+	height: 500px;
+	width: 50%;
 	font-size: 12px;
 }
 

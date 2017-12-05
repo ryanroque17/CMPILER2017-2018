@@ -286,6 +286,8 @@ CONSTANT_KEYWORD			: 'constant';
 MAIN_FUNC					: 'main';
 RETURN						: 'return';
 VOID						: 'void';
+BREAK_POINT					: 'breakpoint';
+
 
 INTEGER_LITERAL				: [0-9]+;
 FLOAT_LITERAL				: INTEGER_LITERAL? '.' [0-9]+;
