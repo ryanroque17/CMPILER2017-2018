@@ -14,7 +14,7 @@ ace.define(
   function(require, exports, module) {
     var oop = require("ace/lib/oop");
     var TextMode = require("ace/mode/text").Mode;
-    var tokenTypeMapping = antlr4_require('./scripts/java-token-type-mapping');
+    var tokenTypeMapping = antlr4_require('scripts/java-token-type-mapping');
     var createTokenTypeMap = require('ace/ext/antlr4/token-type-map').createTokenTypeMap;
     var tokenTypeToNameMap = createTokenTypeMap(tokenTypeMapping);
     var QwertyLexer = antlr4_require('./generated-parser/QwertyLexer').QwertyLexer;
