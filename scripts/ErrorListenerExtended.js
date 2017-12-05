@@ -1,7 +1,7 @@
 var antlr4 = require('antlr4/error/index');
 var ErrorListener = require('antlr4/error/index').ErrorListener;
-var QwertyLexer = require('../generated-parser/QwertyLexer');
-var QwertyParser = require('../generated-parser/QwertyParser');
+var QwertyLexer = require('/generated-parser/QwertyLexer');
+var QwertyParser = require('/generated-parser/QwertyParser');
 var ConsoleErrorListener = require('antlr4/error/index').ConsoleErrorListener;
 
 ErrorListenerExtended = function() {

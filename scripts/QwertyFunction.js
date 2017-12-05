@@ -1,4 +1,4 @@
-var QwertyParser = require('../generated-parser/QwertyParser');
+var QwertyParser = require('/generated-parser/QwertyParser');
 
 
 var QwertyFunction = function (dataType, parameter, codeBlock) {

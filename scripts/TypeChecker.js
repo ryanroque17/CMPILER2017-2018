@@ -1,8 +1,8 @@
 var antlr4 = require('antlr4/index');
-var QwertyLexer = require('../generated-parser/QwertyLexer');
-var QwertyParser = require('../generated-parser/QwertyParser');
+var QwertyLexer = require('/generated-parser/QwertyLexer');
+var QwertyParser = require('/generated-parser/QwertyParser');
 var QwertyValue = require('/scripts/QwertyValue');
-var QwertyVisitor = require('../generated-parser/QwertyVisitor').QwertyVisitor;
+var QwertyVisitor = require('/generated-parser/QwertyVisitor').QwertyVisitor;
 var SymbolTable = require("/node_modules/symbol-table/stack");
 var s = new SymbolTable();
 var QwertyValue = require('/scripts/QwertyValue');

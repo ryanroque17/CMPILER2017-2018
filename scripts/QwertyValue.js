@@ -1,4 +1,4 @@
-var QwertyParser = require('../generated-parser/QwertyParser');
+var QwertyParser = require('/generated-parser/QwertyParser');
 
 var QwertyValue = function (dataType, value, ctx) {
 	this.setDataType(dataType);

@@ -3,8 +3,8 @@ editor.setTheme("ace/theme/twilight");
 editor.getSession().setMode('ace/mode/my-mode');
 
 var antlr4 = require('antlr4/index');
-var QwertyLexer = require('../generated-parser/QwertyLexer');
-var QwertyParser = require('../generated-parser/QwertyParser');
+var QwertyLexer = require('/generated-parser/QwertyLexer');
+var QwertyParser = require('/generated-parser/QwertyParser');
 
 // Parsing
 var AssignmentListener = require('/scripts/AssignmentListener').AssignmentListener;
