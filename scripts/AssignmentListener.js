@@ -907,14 +907,14 @@ QwertyListener.prototype.exitStatement = function(ctx) {
 		console.log("ey" + selectionMarkers.length);
 		for(var i=0; i <selectionMarkers.length; i++){
 			if((ctx.start.line >= (selectionMarkers[i].start.row+1) && ctx.start.line <= (selectionMarkers[i].end.row+1)) || ctx.start.line == (selectionMarkers[i].start.row+1)){
-				alert("The current values are: " + identifierHandler.convertVarToVal(ctx.getText(), s, functionTable, ctx, true));
+				alert("Equivalent value of " + ctx.getText() + " is: " + identifierHandler.convertVarToVal(ctx.getText(), s, functionTable, ctx, true));
 			}
 		}
 	
 		
 	}else{
 		if(ctx.start.line >= (selectionRange.start.row+1) && ctx.start.line <= (selectionRange.end.row+1)){
-			alert("The current values are: " + identifierHandler.convertVarToVal(ctx.getText(), s, functionTable, ctx, true));
+			alert("Equivalent value of " + ctx.getText() + " is: " + identifierHandler.convertVarToVal(ctx.getText(), s, functionTable, ctx, true));
 		}
 	}
 	

@@ -16,12 +16,17 @@
 		<!-- Ace Editor -->
 		<div class="row">
 			<div class="col">
-				<div id="editor">void main() { 
-	int i; 
-	int j = 6; 
-	i = j + 3;
-	i = 2 + j + i;
-	print(i); 
+				<div id="editor">int ADDONE(int k){
+    print("K IS" + k);
+    k++;
+    return k;
+}
+
+void main() {
+    int i; 
+    int j = 6;
+    i = 2 + ADDONE(j);
+    print(i);
 }</div>
 			</div>
 		</div>

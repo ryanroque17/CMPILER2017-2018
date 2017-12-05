@@ -69,6 +69,11 @@ function generateTokenList(input, s, f, ctx, isDebug){
 	var inputSplitted;
 	//console.log(input);
 	if(input != null){
+		if(input.toString().includes("return")){
+			input = input.toString().split("return");
+			input = input[1];
+			
+		}
 		chars = new antlr4.InputStream(input.toString());
 	}
 	else{
@@ -81,7 +86,9 @@ function generateTokenList(input, s, f, ctx, isDebug){
 	var parser = new QwertyParser.QwertyParser(tokens);
 	var symbolNames = parser.symbolicNames;
 	var test = tokens.getTokens(0, tokens.getNumberOfOnChannelTokens());
+	
 	inputSplitted = input.toString().split("");
+	console.log("inputsplitted	 is " +inputSplitted.toString());
 
 	var searchArray = false;
 	var tempArr = "";
@@ -93,7 +100,7 @@ function generateTokenList(input, s, f, ctx, isDebug){
 	var hasFunction = false;
     for(var i=0; i<tokens.getNumberOfOnChannelTokens() - 1; i++) {
     	token = inputSplitted.slice(test[i].start, test[i].stop + 1).join("");
-    	
+    	console.log(token);
     	type = symbolNames[test[i].type];
     	////console.log("CURRENT TYPE " + type);
     	////console.log("CURRENT TOKEN " + token);
