@@ -25,7 +25,8 @@ app.use('/node_modules/', express.static(__dirname + '/node_modules/'));
 //	files: ['**/**']
 //})
 
-app.listen(3000, function(){
-	console.log("Server started on port 3000");
-})
+var port = process.env.PORT || 3000;
 
+app.listen(port, function() {
+    console.log('Our app is running on http://localhost:' + port);
+});
